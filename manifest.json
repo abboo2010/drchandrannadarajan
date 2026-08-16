@@ -1,0 +1,45 @@
+{
+  "id": "/index.html",
+  "name": "MediTouch — Dr. Chandran Nadarajan",
+  "short_name": "MediTouch",
+  "description": "Interactive Patient Education by Dr. Chandran Nadarajan, Consultant Clinical & Interventional Radiologist",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a2647",
+  "theme_color": "#0a2647",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["medical", "health", "education"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-wide.png",
+      "sizes": "1280x800",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MediTouch home screen on a tablet"
+    },
+    {
+      "src": "screenshot-narrow.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MediTouch home screen on a phone"
+    }
+  ]
+}
