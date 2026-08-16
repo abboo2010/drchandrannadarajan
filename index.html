@@ -20,33 +20,18 @@
 
 <!-- ============ SPLASH / INTRO SCREEN ============ -->
 <div class="splash" id="splashScreen">
-  <div class="splash-glow"></div>
-
-  <!-- Decorative CT scanner + MRI machine line-art, blended into the background -->
-  <svg class="splash-equip splash-equip-ct" viewBox="0 0 220 220" aria-hidden="true">
-    <rect x="-30" y="98" width="280" height="20" rx="10"/>
-    <circle cx="110" cy="95" r="80"/>
-    <circle cx="110" cy="95" r="52"/>
-    <rect x="75" y="172" width="70" height="34" rx="6"/>
-  </svg>
-  <svg class="splash-equip splash-equip-mri" viewBox="0 0 220 220" aria-hidden="true">
-    <rect x="20" y="18" width="180" height="130" rx="65"/>
-    <circle cx="110" cy="83" r="44"/>
-    <rect x="-30" y="73" width="170" height="20" rx="10"/>
-    <rect x="65" y="172" width="90" height="26" rx="6"/>
-  </svg>
-
-  <div class="splash-content">
-    <div class="splash-logo">
-      <img data-img-src="logo" alt="Clinic logo">
+  <div class="splash-stage-wrapper">
+    <div class="splash-stage-spacer"></div>
+    <div class="splash-stage">
+      <img class="splash-bg-img" data-img-src="splashbg" alt="">
+      <div class="splash-content">
+        <img class="splash-logo-img" data-img-src="logo" alt="Clinic logo">
+        <div class="splash-wordmark"><span class="w">IR</span><span class="g">@SABAH</span></div>
+        <div class="splash-name" data-i18n="doctorNamePlain">Dr. Chandran Nadarajan</div>
+        <div class="splash-role">Consultant Clinical &amp; Interventional Radiologist</div>
+        <button class="splash-enter-btn" id="splashEnterBtn">Enter</button>
+      </div>
     </div>
-    <div class="splash-photo-wrap">
-      <img class="splash-photo" data-img-src="doctor" alt="Dr. Chandran Nadarajan">
-    </div>
-    <div class="splash-wordmark">Medi<span>Touch</span><sup>™</sup></div>
-    <div class="splash-name" data-i18n="doctorNamePlain">Dr. Chandran Nadarajan</div>
-    <div class="splash-role">Consultant Clinical &amp; Interventional Radiologist</div>
-    <button class="splash-enter-btn" id="splashEnterBtn">Enter</button>
   </div>
 </div>
 
