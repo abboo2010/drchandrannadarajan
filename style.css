@@ -519,33 +519,38 @@
     transform:translate(-50%, -50%) rotate(0deg);
     border-radius:50%;
     pointer-events:none;
-    background: conic-gradient(from 0deg,
-      transparent 0deg,
-      transparent 300deg,
-      rgba(255,229,166,0.95) 330deg,
-      rgba(255,244,214,1) 345deg,
-      rgba(255,229,166,0.95) 0deg,
-      transparent 15deg,
-      transparent 360deg);
-    -webkit-mask: radial-gradient(circle, transparent 89%, black 91%, black 98%, transparent 100%);
-            mask: radial-gradient(circle, transparent 89%, black 91%, black 98%, transparent 100%);
-    animation: splashRingSpin 4s linear infinite;
-    filter: blur(0.5px);
   }
-  .splash-ring::after{
+  .splash-ring::before{
+    /* crisp static gold ring outline, reinforcing the ring baked into the artwork */
     content:"";
     position:absolute; inset:0;
     border-radius:50%;
-    box-shadow: 0 0 24px 2px rgba(233,185,73,0.35);
-    animation: splashRingPulse 3s ease-in-out infinite;
+    border:2px solid rgba(243,211,135,0.55);
+    box-shadow:
+      0 0 14px 2px rgba(233,185,73,0.25),
+      inset 0 0 14px 2px rgba(233,185,73,0.15);
+  }
+  .splash-ring::after{
+    /* bright rotating highlight sweeping around the ring */
+    content:"";
+    position:absolute; inset:-3%;
+    border-radius:50%;
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      transparent 290deg,
+      rgba(255,231,175,0.5) 320deg,
+      rgba(255,248,224,1) 344deg,
+      rgba(255,255,255,1) 350deg,
+      rgba(255,248,224,1) 356deg,
+      rgba(255,231,175,0.5) 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 90%, black 92%, black 97%, transparent 99%);
+            mask: radial-gradient(circle, transparent 90%, black 92%, black 97%, transparent 99%);
+    animation: splashRingSpin 5s linear infinite;
+    filter: blur(0.3px);
   }
   @keyframes splashRingSpin{
-    from{ transform:translate(-50%, -50%) rotate(0deg); }
-    to{ transform:translate(-50%, -50%) rotate(360deg); }
-  }
-  @keyframes splashRingPulse{
-    0%,100%{ opacity:0.55; }
-    50%{ opacity:1; }
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
   }
   .splash-logo-img{
     position:absolute; left:45.7%; top:7.8%;
@@ -581,14 +586,6 @@
     opacity:0;
     animation: splashFadeUp2 1s ease-out 0.8s both;
   }
-  .splash-role{
-    position:absolute; left:46.7%; top:79.5%;
-    transform:translate(-50%, -50%);
-    font-size:clamp(9px, 1vw, 14px); color:#f3d387;
-    white-space:nowrap; text-align:center;
-    opacity:0;
-    animation: splashFadeUp2 1s ease-out 1s both;
-  }
   .splash-enter-btn{
     position:absolute; left:46.7%; top:85%;
     transform:translate(-50%, -50%);
@@ -616,7 +613,7 @@
   }
 
   @media (prefers-reduced-motion: reduce){
-    .splash-logo-img, .splash-wordmark, .splash-name, .splash-role, .splash-enter-btn{
+    .splash-logo-img, .splash-wordmark, .splash-name, .splash-enter-btn{
       animation:none !important; opacity:1 !important; transform:translate(-50%,-50%) !important;
     }
     .splash-wordmark .g{ animation:none !important; }
