@@ -526,8 +526,8 @@
     z-index:1;
   }
   .splash-ring{
-    position:absolute; left:46.53%; top:39.11%;
-    width:23.56%; height:41.87%;
+    position:absolute; left:46.53%; top:40.38%;
+    width:23.33%; height:41.45%;
     transform:translate(-50%, -50%) rotate(0deg);
     border-radius:50%;
     pointer-events:none;
