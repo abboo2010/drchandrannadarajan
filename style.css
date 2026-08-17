@@ -502,6 +502,8 @@
   .splash-stage-wrapper{
     position:relative;
     width:100vw;
+    width:min(100vw, 177.68vh);
+    width:min(100vw, 177.68dvh);
     margin:auto;
     top:50%; transform:translateY(-50%);
   }
