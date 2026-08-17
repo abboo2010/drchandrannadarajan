@@ -502,16 +502,8 @@
   .splash-stage-wrapper{
     position:relative;
     width:100vw;
-    width:min(1672px, 100vw, 177.72vh);
-    width:min(1672px, 100vw, 177.72dvh);
     margin:auto;
     top:50%; transform:translateY(-50%);
-  }
-  @media (max-width: 900px){
-    .splash-stage-wrapper{
-      width:96vw !important;
-      max-width:96vw !important;
-    }
   }
   .splash-stage-spacer{ width:100%; padding-top:56.281%; }
   .splash-stage{
@@ -526,7 +518,7 @@
     z-index:1;
   }
   .splash-ring{
-    position:absolute; left:46.53%; top:40.38%;
+    position:absolute; left:50%; top:40.38%;
     width:23.33%; height:41.45%;
     transform:translate(-50%, -50%) rotate(0deg);
     border-radius:50%;
@@ -543,7 +535,7 @@
       inset 0 0 14px 2px rgba(233,185,73,0.15);
   }
   .splash-logo-img{
-    position:absolute; left:45.7%; top:6.3%;
+    position:absolute; left:50%; top:6.3%;
     width:8.2%; height:14.6%;
     transform:translate(-50%, -50%);
     object-fit:contain;
@@ -552,7 +544,7 @@
     animation: splashLogoIn 1s ease-out both, splashLogoPulse 3s ease-in-out 1s infinite;
   }
   .splash-wordmark{
-    position:absolute; left:46.7%; top:64.5%;
+    position:absolute; left:50%; top:64.5%;
     transform:translate(-50%, -50%);
     font-weight:800; letter-spacing:0.5px; line-height:1;
     font-size:clamp(20px, 3vw, 46px);
@@ -568,7 +560,7 @@
     animation: splashShimmer 4s linear 1.4s infinite;
   }
   .splash-name{
-    position:absolute; left:46.7%; top:73.8%;
+    position:absolute; left:50%; top:73%;
     transform:translate(-50%, -50%);
     font-weight:700; color:#fff;
     font-size:clamp(11px, 1.6vw, 22px);
@@ -576,8 +568,23 @@
     opacity:0;
     animation: splashFadeUp2 1s ease-out 0.8s both;
   }
+  .splash-heartbeat{
+    position:absolute; left:50%; top:78.5%;
+    transform:translate(-50%, -50%);
+    width:16%; height:auto;
+    opacity:0;
+    animation: splashFadeUp2 1s ease-out 0.9s both;
+  }
+  .splash-role{
+    position:absolute; left:50%; top:82.5%;
+    transform:translate(-50%, -50%);
+    font-size:clamp(9px, 1vw, 14px); color:#f3d387;
+    white-space:nowrap;
+    opacity:0;
+    animation: splashFadeUp2 1s ease-out 1s both;
+  }
   .splash-enter-btn{
-    position:absolute; left:46.7%; top:87%;
+    position:absolute; left:50%; top:89.5%;
     transform:translate(-50%, -50%);
     padding:1.1% 3.2%; border:none; border-radius:999px;
     background:linear-gradient(135deg, #f3d387, #e9b949);
