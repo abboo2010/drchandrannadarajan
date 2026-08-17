@@ -541,14 +541,14 @@
     border-radius:50%;
     background: conic-gradient(from 0deg,
       transparent 0deg,
-      transparent 300deg,
-      rgba(255,231,175,0.55) 330deg,
-      rgba(255,250,230,1) 345deg,
-      rgba(255,255,255,1) 352deg,
-      rgba(255,250,230,1) 359deg,
+      transparent 285deg,
+      rgba(255,231,175,0.6) 320deg,
+      rgba(255,250,230,1) 340deg,
+      rgba(255,255,255,1) 350deg,
+      rgba(255,250,230,1) 358deg,
       transparent 360deg);
-    -webkit-mask: radial-gradient(circle, transparent 89%, black 91%, black 97%, transparent 99%);
-            mask: radial-gradient(circle, transparent 89%, black 91%, black 97%, transparent 99%);
+    -webkit-mask: radial-gradient(circle, transparent 93.5%, black 95.5%, black 100%);
+            mask: radial-gradient(circle, transparent 93.5%, black 95.5%, black 100%);
     animation: splashRingSpin 4.5s linear infinite;
   }
   @keyframes splashRingSpin{
