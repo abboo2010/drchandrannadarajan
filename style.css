@@ -532,30 +532,6 @@
       0 0 14px 2px rgba(233,185,73,0.25),
       inset 0 0 14px 2px rgba(233,185,73,0.15);
   }
-  .splash-ring-orbit{
-    position:absolute; inset:0;
-    border-radius:50%;
-    pointer-events:none;
-  }
-  .splash-glint{
-    position:absolute;
-    width:2.6%; height:4.6%;
-    transform:translate(-50%, -50%);
-    border-radius:50%;
-    background:radial-gradient(circle, #fffaf0 0%, #f8dfa0 45%, rgba(243,211,135,0) 75%);
-    box-shadow:0 0 10px 3px rgba(255,248,224,0.8), 0 0 20px 6px rgba(233,185,73,0.4);
-    opacity:0.15;
-    animation: splashGlintPulse 3.2s ease-in-out infinite;
-    pointer-events:none;
-  }
-  .splash-glint.g1{ left:54.82%; top:53.84%; animation-delay:0s; }
-  .splash-glint.g2{ left:38.24%; top:53.84%; animation-delay:0.8s; }
-  .splash-glint.g3{ left:38.24%; top:24.38%; animation-delay:1.6s; }
-  .splash-glint.g4{ left:54.82%; top:24.38%; animation-delay:2.4s; }
-  @keyframes splashGlintPulse{
-    0%, 100%{ opacity:0.15; transform:translate(-50%, -50%) scale(0.8); }
-    50%{ opacity:1; transform:translate(-50%, -50%) scale(1.15); }
-  }
   .splash-logo-img{
     position:absolute; left:45.7%; top:6.3%;
     width:8.2%; height:14.6%;
