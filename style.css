@@ -501,10 +501,17 @@
   .splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
   .splash-stage-wrapper{
     position:relative;
+    width:100vw;
     width:min(1672px, 100vw, 177.72vh);
     width:min(1672px, 100vw, 177.72dvh);
     margin:auto;
     top:50%; transform:translateY(-50%);
+  }
+  @media (max-width: 900px){
+    .splash-stage-wrapper{
+      width:96vw !important;
+      max-width:96vw !important;
+    }
   }
   .splash-stage-spacer{ width:100%; padding-top:56.281%; }
   .splash-stage{
