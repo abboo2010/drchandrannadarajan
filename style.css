@@ -536,6 +536,25 @@
       0 0 14px 2px rgba(233,185,73,0.25),
       inset 0 0 14px 2px rgba(233,185,73,0.15);
   }
+  .splash-ring-spin{
+    position:absolute; inset:0;
+    border-radius:50%;
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      transparent 300deg,
+      rgba(255,231,175,0.55) 330deg,
+      rgba(255,250,230,1) 345deg,
+      rgba(255,255,255,1) 352deg,
+      rgba(255,250,230,1) 359deg,
+      transparent 360deg);
+    -webkit-mask: radial-gradient(circle, transparent 89%, black 91%, black 97%, transparent 99%);
+            mask: radial-gradient(circle, transparent 89%, black 91%, black 97%, transparent 99%);
+    animation: splashRingSpin 4.5s linear infinite;
+  }
+  @keyframes splashRingSpin{
+    from{ transform:rotate(0deg); }
+    to{ transform:rotate(360deg); }
+  }
   .splash-logo-img{
     position:absolute; left:50%; top:10.5%;
     width:7.5%; height:13.4%;
