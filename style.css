@@ -532,31 +532,41 @@
       0 0 14px 2px rgba(233,185,73,0.25),
       inset 0 0 14px 2px rgba(233,185,73,0.15);
   }
-  .splash-ring::after{
-    /* bright rotating highlight sweeping around the ring */
-    content:"";
-    position:absolute; inset:-3%;
+  .splash-ring-orbit{
+    position:absolute; inset:0;
     border-radius:50%;
-    background: conic-gradient(from 0deg,
-      transparent 0deg,
-      transparent 290deg,
-      rgba(255,231,175,0.5) 320deg,
-      rgba(255,248,224,1) 344deg,
-      rgba(255,255,255,1) 350deg,
-      rgba(255,248,224,1) 356deg,
-      rgba(255,231,175,0.5) 360deg);
-    -webkit-mask: radial-gradient(circle, transparent 90%, black 92%, black 97%, transparent 99%);
-            mask: radial-gradient(circle, transparent 90%, black 92%, black 97%, transparent 99%);
-    animation: splashRingSpin 5s linear infinite;
-    filter: blur(0.3px);
+    animation: splashRingSpin 3.5s linear infinite;
+    pointer-events:none;
+  }
+  .splash-ring-orbit::before{
+    /* bright glowing dot that visibly orbits the ring */
+    content:"";
+    position:absolute; top:-3%; left:50%;
+    width:6.5%; height:6.5%;
+    transform:translate(-50%, -50%);
+    border-radius:50%;
+    background:radial-gradient(circle, #fffaf0 0%, #f8dfa0 45%, rgba(243,211,135,0) 75%);
+    box-shadow:
+      0 0 10px 3px rgba(255,248,224,0.95),
+      0 0 22px 8px rgba(233,185,73,0.55);
+  }
+  .splash-ring-orbit::after{
+    /* fainter second point, opposite side, for a livelier sweep */
+    content:"";
+    position:absolute; bottom:-3%; left:50%;
+    width:3.5%; height:3.5%;
+    transform:translate(-50%, 50%);
+    border-radius:50%;
+    background:radial-gradient(circle, #fffaf0 0%, #f8dfa0 50%, rgba(243,211,135,0) 75%);
+    box-shadow:0 0 8px 2px rgba(255,248,224,0.7);
   }
   @keyframes splashRingSpin{
     from{ transform:rotate(0deg); }
     to{ transform:rotate(360deg); }
   }
   .splash-logo-img{
-    position:absolute; left:45.7%; top:7.8%;
-    width:9%; height:16%;
+    position:absolute; left:45.7%; top:6.3%;
+    width:8.2%; height:14.6%;
     transform:translate(-50%, -50%);
     object-fit:contain;
     filter: drop-shadow(0 0 10px rgba(233,185,73,0.35));
