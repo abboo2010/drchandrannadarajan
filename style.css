@@ -498,7 +498,9 @@
   }
   .splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
   .splash-stage-wrapper{
-    position:relative; width:100%; max-width:1672px; margin:auto;
+    position:relative;
+    width:min(1672px, 100vw, 177.72vh);
+    margin:auto;
     top:50%; transform:translateY(-50%);
   }
   .splash-stage-spacer{ width:100%; padding-top:56.281%; }
