@@ -535,34 +535,26 @@
   .splash-ring-orbit{
     position:absolute; inset:0;
     border-radius:50%;
-    animation: splashRingSpin 3.5s linear infinite;
     pointer-events:none;
   }
-  .splash-ring-orbit::before{
-    /* bright glowing dot that visibly orbits the ring */
-    content:"";
-    position:absolute; top:-3%; left:50%;
-    width:6.5%; height:6.5%;
+  .splash-glint{
+    position:absolute;
+    width:2.6%; height:4.6%;
     transform:translate(-50%, -50%);
     border-radius:50%;
     background:radial-gradient(circle, #fffaf0 0%, #f8dfa0 45%, rgba(243,211,135,0) 75%);
-    box-shadow:
-      0 0 10px 3px rgba(255,248,224,0.95),
-      0 0 22px 8px rgba(233,185,73,0.55);
+    box-shadow:0 0 10px 3px rgba(255,248,224,0.8), 0 0 20px 6px rgba(233,185,73,0.4);
+    opacity:0.15;
+    animation: splashGlintPulse 3.2s ease-in-out infinite;
+    pointer-events:none;
   }
-  .splash-ring-orbit::after{
-    /* fainter second point, opposite side, for a livelier sweep */
-    content:"";
-    position:absolute; bottom:-3%; left:50%;
-    width:3.5%; height:3.5%;
-    transform:translate(-50%, 50%);
-    border-radius:50%;
-    background:radial-gradient(circle, #fffaf0 0%, #f8dfa0 50%, rgba(243,211,135,0) 75%);
-    box-shadow:0 0 8px 2px rgba(255,248,224,0.7);
-  }
-  @keyframes splashRingSpin{
-    from{ transform:rotate(0deg); }
-    to{ transform:rotate(360deg); }
+  .splash-glint.g1{ left:54.82%; top:53.84%; animation-delay:0s; }
+  .splash-glint.g2{ left:38.24%; top:53.84%; animation-delay:0.8s; }
+  .splash-glint.g3{ left:38.24%; top:24.38%; animation-delay:1.6s; }
+  .splash-glint.g4{ left:54.82%; top:24.38%; animation-delay:2.4s; }
+  @keyframes splashGlintPulse{
+    0%, 100%{ opacity:0.15; transform:translate(-50%, -50%) scale(0.8); }
+    50%{ opacity:1; transform:translate(-50%, -50%) scale(1.15); }
   }
   .splash-logo-img{
     position:absolute; left:45.7%; top:6.3%;
