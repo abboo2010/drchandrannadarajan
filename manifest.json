@@ -1,7 +1,7 @@
 {
   "id": "/index.html",
-  "name": "MediTouch — Dr. Chandran Nadarajan",
-  "short_name": "MediTouch",
+  "name": "IR@SABAH — Dr. Chandran Nadarajan",
+  "short_name": "IR@SABAH",
   "description": "Interactive Patient Education by Dr. Chandran Nadarajan, Consultant Clinical & Interventional Radiologist",
   "start_url": "./index.html",
   "scope": "./",
@@ -32,14 +32,14 @@
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "MediTouch home screen on a tablet"
+      "label": "IR@SABAH home screen on a tablet"
     },
     {
       "src": "screenshot-narrow.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "MediTouch home screen on a phone"
+      "label": "IR@SABAH home screen on a phone"
     }
   ]
 }
