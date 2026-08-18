@@ -59,7 +59,7 @@ const UI = {
   tagline: {en:'Interactive Patient Education', bm:'Pendidikan Interaktif Pesakit', zh:'互动病患教育'},
   brandSub: {en:'CONSULTANT CLINICAL &amp; INTERVENTIONAL RADIOLOGIST', bm:'PERUNDING KLINIKAL &amp; RADIOLOGI INTERVENSI', zh:'临床顾问兼介入放射科医生'},
   welcomeTo: {en:'Welcome to', bm:'Selamat Datang ke', zh:'欢迎使用'},
-  heroSub: {en:'Your trusted guide to better health', bm:'Panduan dipercayai anda ke arah kesihatan yang lebih baik', zh:'您值得信赖的健康指南'},
+  heroSub: {en:'Precision Care. Minimally Invasive.', bm:'Penjagaan Tepat. Invasif Minimal.', zh:'精准护理，微创治疗。'},
   doctorRole: {en:'Consultant Clinical &amp; Interventional Radiologist', bm:'Perunding Klinikal &amp; Radiologi Intervensi', zh:'临床顾问兼介入放射科医生'},
   yearsExperience: {en:'Years Experience', bm:'Tahun Pengalaman', zh:'年经验'},
   procedures: {en:'Procedures', bm:'Prosedur', zh:'手术例数'},
