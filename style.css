@@ -640,5 +640,39 @@
     .splash-wordmark .g{ animation:none !important; }
   }
 
-  /* Short viewports (phones in landscape, small laptops) — the aspect-locked
-     stage already scales down proportionally, so no extra overrides needed here. */
+  /* ============================================================
+     MOBILE / TABLET PORTRAIT — dedicated taller layout so the
+     splash actually fills a phone/tablet screen instead of
+     shrinking the wide desktop artwork into a tiny strip.
+     ============================================================ */
+  .splash-mobile-wrapper{ display:none; }
+
+  @media (max-width: 760px), (orientation: portrait) and (max-width: 1024px){
+    .splash-stage-wrapper{ display:none; }
+    .splash-mobile-wrapper{
+      display:block;
+      position:relative;
+      width:100vw;
+      height:100vh;
+      height:100dvh;
+      margin:auto;
+    }
+    .splash-mobile-spacer{ display:none; }
+    .splash-mobile-stage{
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      width:100%; height:100%;
+    }
+    .splash-mobile-stage .splash-bg-img{
+      position:absolute; top:0; left:0; right:0; bottom:0;
+      width:100%; height:100%; object-fit:cover; display:block;
+    }
+    .splash-mobile-stage .splash-content{
+      position:absolute; top:0; left:0; right:0; bottom:0; z-index:1;
+    }
+    .splash-logo-img.m{ top:15.6%; width:11%; height:9.9%; }
+    .splash-wordmark.m{ top:56.25%; font-size:clamp(26px, 8vw, 42px); }
+    .splash-name.m{ top:59.4%; font-size:clamp(14px, 4vw, 20px); }
+    .splash-heartbeat.m{ top:61.5%; width:38%; }
+    .splash-role.m{ top:63.6%; font-size:clamp(11px, 3vw, 14px); }
+    .splash-enter-btn.m{ top:66.3%; padding:2.2% 7%; font-size:clamp(14px, 4vw, 17px); }
+  }
