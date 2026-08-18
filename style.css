@@ -672,7 +672,7 @@
     .splash-logo-img.m{ top:15.6%; width:11%; height:9.9%; }
     .splash-wordmark.m{ top:56.25%; font-size:clamp(26px, 8vw, 42px); }
     .splash-name.m{ top:59.4%; font-size:clamp(14px, 4vw, 20px); }
-    .splash-heartbeat.m{ top:61.5%; width:38%; }
-    .splash-role.m{ top:63.6%; font-size:clamp(11px, 3vw, 14px); }
-    .splash-enter-btn.m{ top:66.3%; padding:2.2% 7%; font-size:clamp(14px, 4vw, 17px); }
+    .splash-heartbeat.m{ top:62.15%; width:38%; }
+    .splash-role.m{ top:64.76%; font-size:clamp(11px, 3vw, 14px); }
+    .splash-enter-btn.m{ top:69.2%; padding:2.2% 7%; font-size:clamp(14px, 4vw, 17px); }
   }
