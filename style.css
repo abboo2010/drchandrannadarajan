@@ -675,4 +675,5 @@
     .splash-heartbeat.m{ top:62.15%; width:38%; }
     .splash-role.m{ top:64.76%; font-size:clamp(11px, 3vw, 14px); }
     .splash-enter-btn.m{ top:69.2%; padding:2.2% 7%; font-size:clamp(14px, 4vw, 17px); }
+    .splash-orbit-wrap.m{ left:50%; top:40.625%; width:44.44%; height:25%; }
   }
