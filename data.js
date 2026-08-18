@@ -56,7 +56,7 @@ function L(field){
   return field;
 }
 const UI = {
-  tagline: {en:'Interactive Patient Education', bm:'Pendidikan Interaktif Pesakit', zh:'互动病患教育'},
+  tagline: {en:'Precision Care. Minimally Invasive.', bm:'Penjagaan Tepat. Invasif Minimal.', zh:'精准护理，微创治疗。'},
   brandSub: {en:'CONSULTANT CLINICAL &amp; INTERVENTIONAL RADIOLOGIST', bm:'PERUNDING KLINIKAL &amp; RADIOLOGI INTERVENSI', zh:'临床顾问兼介入放射科医生'},
   welcomeTo: {en:'Welcome to', bm:'Selamat Datang ke', zh:'欢迎使用'},
   heroSub: {en:'Precision Care. Minimally Invasive.', bm:'Penjagaan Tepat. Invasif Minimal.', zh:'精准护理，微创治疗。'},
