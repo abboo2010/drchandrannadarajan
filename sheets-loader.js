@@ -20,6 +20,7 @@ const SHEET_URLS = {
   videos:       "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPbm6DHSRK0MfstKlRfA9lICSbsNxW4Eaw7Jf9N4kUj1K2wWoyO5XJadlvsmkFFvD8HBG2Tkl1CqN/pub?gid=991388330&single=true&output=csv",
   testimonials: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPbm6DHSRK0MfstKlRfA9lICSbsNxW4Eaw7Jf9N4kUj1K2wWoyO5XJadlvsmkFFvD8HBG2Tkl1CqN/pub?gid=37369027&single=true&output=csv",
   reviews:      "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPbm6DHSRK0MfstKlRfA9lICSbsNxW4Eaw7Jf9N4kUj1K2wWoyO5XJadlvsmkFFvD8HBG2Tkl1CqN/pub?gid=2001278192&single=true&output=csv",
+  siteText:     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtPbm6DHSRK0MfstKlRfA9lICSbsNxW4Eaw7Jf9N4kUj1K2wWoyO5XJadlvsmkFFvD8HBG2Tkl1CqN/pub?gid=291625750&single=true&output=csv",
 };
 
 /* ---------------- CSV PARSING ---------------- */
@@ -225,6 +226,20 @@ async function loadReviews(){
   if (out.length) replaceArrayContents(REVIEWS, out);
 }
 
+// Editable short phrases used in the header, homepage hero, and splash
+// (name/role/tagline) — anything tied to a data-i18n key. One row per
+// phrase; the "Key" column must match the key already in data.js exactly.
+async function loadSiteText(){
+  const rows = await fetchSheet(SHEET_URLS.siteText);
+  rows.forEach(r => {
+    const key = r['Key (do not edit)'];
+    if (!key || !UI[key]) return; // unknown/renamed key — skip rather than create a broken one
+    if (r['English']) UI[key].en = r['English'];
+    if (r['Bahasa Melayu']) UI[key].bm = r['Bahasa Melayu'];
+    if (r['Chinese']) UI[key].zh = r['Chinese'];
+  });
+}
+
 /* ---------------- ORCHESTRATION ---------------- */
 async function loadLiveContent(){
   // allSettled: one tab failing (renamed, unpublished, offline) never
@@ -232,6 +247,7 @@ async function loadLiveContent(){
   await Promise.allSettled([
     loadConditions(), loadTreatments(), loadDoctorBio(),
     loadEducation(), loadVideos(), loadTestimonials(), loadReviews(),
+    loadSiteText(),
   ]);
 
   rebuildLookups();
@@ -240,6 +256,7 @@ async function loadLiveContent(){
   renderEducation(); renderVideos();
   renderTestimonials(); renderReviews();
   renderDoctorBio();
+  applyUI();
 
   // If a detail page happens to be open already, refresh it with the new data too
   const activePanel = document.querySelector('.panel.active');
