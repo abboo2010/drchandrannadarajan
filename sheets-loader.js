@@ -267,4 +267,30 @@ async function loadLiveContent(){
 
 // The page already rendered once from the baked-in fallback (content-data.js)
 // by the time this script runs — this just quietly upgrades it in place.
-loadLiveContent().catch(()=>{});
+let lastLiveContentLoad = Date.now();
+loadLiveContent().catch(()=>{}).finally(() => { lastLiveContentLoad = Date.now(); });
+
+// ---------------- REFRESH ON RETURN TO FOREGROUND ----------------
+// Installed/standalone apps (added to home screen) are usually frozen in
+// the background instead of being fully reloaded when reopened, so without
+// this, the sheet data would only ever reflect whatever was live at the
+// last real cold start. Re-run the same load whenever the app becomes
+// visible again, throttled so rapid app-switching doesn't refetch on every
+// glance.
+const LIVE_CONTENT_REFRESH_THROTTLE_MS = 60 * 1000;
+
+function refreshLiveContentIfDue(){
+  if (Date.now() - lastLiveContentLoad < LIVE_CONTENT_REFRESH_THROTTLE_MS) return;
+  lastLiveContentLoad = Date.now();
+  loadLiveContent().catch(()=>{});
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') refreshLiveContentIfDue();
+});
+
+// iOS/Android sometimes restore a page from the back-forward cache instead
+// of firing visibilitychange at all — this covers that case too.
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) refreshLiveContentIfDue();
+});
