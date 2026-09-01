@@ -1,3 +1,4 @@
+// build-marker: 2026-09-01-b
 // netlify/functions/image.js — POST (auth required): the admin panel
 // resizes/compresses the image client-side, base64-encodes it, and posts
 // { dataUrl, filename }. This stores it in the public Supabase Storage
