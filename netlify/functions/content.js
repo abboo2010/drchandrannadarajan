@@ -12,16 +12,21 @@
 const { fetchSectionRow, upsertSectionRow, getSupabaseConfig } = require('./_supabase');
 const { verifyToken } = require('./auth');
 
+// NOTE: this folder is named "seed-content", not "content" — a sibling
+// folder literally named "content" collided with this function's own name
+// (content.js) once bundled, and Netlify's function loader crashed trying
+// to resolve which one "content" meant (ERR_UNSUPPORTED_DIR_IMPORT). Do
+// not rename this back to "content" or the same crash comes back.
 const FALLBACKS = {
-  'conditions': () => require('../../content/conditions.json'),
-  'treatments': () => require('../../content/treatments.json'),
-  'doctor-bio': () => require('../../content/doctor-bio.json'),
-  'education': () => require('../../content/education.json'),
-  'videos': () => require('../../content/videos.json'),
-  'testimonials': () => require('../../content/testimonials.json'),
-  'reviews': () => require('../../content/reviews.json'),
-  'site-text': () => require('../../content/site-text.json'),
-  'site-images': () => require('../../content/site-images.json'),
+  'conditions': () => require('../../seed-content/conditions.json'),
+  'treatments': () => require('../../seed-content/treatments.json'),
+  'doctor-bio': () => require('../../seed-content/doctor-bio.json'),
+  'education': () => require('../../seed-content/education.json'),
+  'videos': () => require('../../seed-content/videos.json'),
+  'testimonials': () => require('../../seed-content/testimonials.json'),
+  'reviews': () => require('../../seed-content/reviews.json'),
+  'site-text': () => require('../../seed-content/site-text.json'),
+  'site-images': () => require('../../seed-content/site-images.json'),
 };
 
 function bearerToken(event) {
