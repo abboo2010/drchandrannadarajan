@@ -1,10 +1,11 @@
-// build-marker: 2026-09-01-b
+// build-marker: 2026-09-01-c
 // netlify/functions/image.js — POST (auth required): the admin panel
 // resizes/compresses the image client-side, base64-encodes it, and posts
 // { dataUrl, filename }. This stores it in the public Supabase Storage
 // bucket "site-images" under a fresh timestamped key (avoids stale
-// browser caching after a swap) and returns its public URL.
-const { getSupabase } = require('./_supabase');
+// browser caching after a swap) and returns its public URL. Uses plain
+// REST (see _supabase.js) — no @supabase/supabase-js dependency.
+const { uploadToStorage, getSupabaseConfig } = require('./_supabase');
 const { verifyToken } = require('./auth');
 
 function bearerToken(event) {
@@ -19,9 +20,7 @@ exports.handler = async (event) => {
   if (!verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '')) {
     return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
-
-  const supabase = getSupabase();
-  if (!supabase) {
+  if (!getSupabaseConfig()) {
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -44,14 +43,10 @@ exports.handler = async (event) => {
   const safeName = (filename || 'image').toString().replace(/[^a-zA-Z0-9-_]/g, '-').slice(0, 60);
   const key = `${safeName}-${Date.now()}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage.from('site-images').upload(key, buffer, {
-    contentType,
-    upsert: false,
-  });
-  if (uploadError) {
-    return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: uploadError.message }) };
+  try {
+    const url = await uploadToStorage('site-images', key, buffer, contentType);
+    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url }) };
+  } catch (e) {
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: e.message }) };
   }
-
-  const { data } = supabase.storage.from('site-images').getPublicUrl(key);
-  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: data.publicUrl }) };
 };
