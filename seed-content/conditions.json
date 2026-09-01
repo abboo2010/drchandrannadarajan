@@ -1,0 +1,365 @@
+[
+  {
+    "id": "liver-tumors",
+    "icon": "liver",
+    "color": "#2f6fed",
+    "title_en": "Liver Tumors",
+    "title_bm": "Ketumbuhan Hati",
+    "title_zh": "肝肿瘤",
+    "tag_en": "Oncology",
+    "tag_bm": "Onkologi",
+    "tag_zh": "肿瘤科",
+    "desc_en": "Primary and secondary liver tumors treated with image-guided ablation.",
+    "desc_bm": "Ketumbuhan hati primer dan sekunder dirawat dengan ablasi berpandukan imej.",
+    "desc_zh": "原发性及继发性肝肿瘤可通过影像引导消融术治疗。",
+    "overview_en": "Liver tumors can be primary (starting in the liver, such as hepatocellular carcinoma) or secondary (spread from cancer elsewhere in the body). Many small to medium tumors can now be treated without open surgery using image-guided techniques that target the tumor directly.",
+    "overview_bm": "Ketumbuhan hati boleh jadi primer (bermula di hati, seperti karsinoma hepatoselular) atau sekunder (merebak daripada kanser di bahagian lain badan). Kebanyakan ketumbuhan bersaiz kecil hingga sederhana kini boleh dirawat tanpa pembedahan terbuka menggunakan teknik berpandukan imej yang menyasar ketumbuhan secara terus.",
+    "overview_zh": "肝肿瘤可分为原发性（如肝细胞癌，起源于肝脏本身）或继发性（由身体其他部位的癌症扩散而来）。许多中小型肿瘤如今可透过影像引导技术直接消融，无需开刀手术。",
+    "diagnosis_en": "Diagnosis usually starts with an ultrasound or CT scan, followed by an MRI or biopsy to confirm the type of tumor and plan the safest treatment approach.",
+    "diagnosis_bm": "Diagnosis biasanya bermula dengan ultrabunyi atau imbasan CT, diikuti dengan MRI atau biopsi untuk mengesahkan jenis ketumbuhan dan merancang kaedah rawatan yang paling selamat.",
+    "diagnosis_zh": "诊断通常从超声波或CT扫描开始，接着进行磁共振（MRI）或活组织检查，以确认肿瘤类型并规划最安全的治疗方案。",
+    "related": "microwave-ablation, radiofrequency-ablation",
+    "symptoms_en": [
+      "Dull ache or fullness in the upper right abdomen",
+      "Unexplained weight loss",
+      "Loss of appetite",
+      "Fatigue",
+      "Yellowing of the skin or eyes (jaundice) in later stages"
+    ],
+    "symptoms_bm": [
+      "Sakit hendap atau rasa penuh di bahagian kanan atas abdomen",
+      "Penurunan berat badan tanpa sebab",
+      "Hilang selera makan",
+      "Keletihan",
+      "Kekuningan kulit atau mata (jaundis) pada peringkat lanjut"
+    ],
+    "symptoms_zh": [
+      "右上腹隐痛或胀满感",
+      "不明原因体重下降",
+      "食欲不振",
+      "疲倦",
+      "病情较后期可能出现皮肤或眼睛发黄（黄疸）"
+    ],
+    "causes_en": [
+      "Chronic hepatitis B or C infection",
+      "Long-term heavy alcohol use",
+      "Fatty liver disease",
+      "Cancer spreading from the bowel, breast, or lung"
+    ],
+    "causes_bm": [
+      "Jangkitan hepatitis B atau C kronik",
+      "Pengambilan alkohol berlebihan jangka panjang",
+      "Penyakit hati berlemak",
+      "Kanser yang merebak daripada usus, payudara, atau paru-paru"
+    ],
+    "causes_zh": [
+      "慢性乙型或丙型肝炎感染",
+      "长期大量饮酒",
+      "脂肪肝",
+      "大肠癌、乳癌或肺癌扩散"
+    ]
+  },
+  {
+    "id": "kidney-tumors",
+    "icon": "kidney",
+    "color": "#14b8a6",
+    "title_en": "Kidney Tumors",
+    "title_bm": "Ketumbuhan Buah Pinggang",
+    "title_zh": "肾肿瘤",
+    "tag_en": "Oncology",
+    "tag_bm": "Onkologi",
+    "tag_zh": "肿瘤科",
+    "desc_en": "Small renal masses managed without full surgical removal.",
+    "desc_bm": "Ketumbuhan buah pinggang kecil dirawat tanpa pembuangan pembedahan penuh.",
+    "desc_zh": "小型肾脏肿块无需完整手术切除即可治疗。",
+    "overview_en": "Small kidney tumors are increasingly found incidentally on scans done for other reasons. Many can be treated with a needle-based ablation technique that destroys the tumor while preserving healthy kidney tissue.",
+    "overview_bm": "Ketumbuhan buah pinggang kecil semakin kerap ditemui secara tidak sengaja melalui imbasan yang dilakukan atas sebab lain. Kebanyakannya boleh dirawat dengan teknik ablasi menggunakan jarum yang memusnahkan ketumbuhan sambil mengekalkan tisu buah pinggang yang sihat.",
+    "overview_zh": "越来越多小型肾肿瘤是在因其他原因进行扫描时意外发现的。许多此类肿瘤可通过针刺消融技术治疗，在摧毁肿瘤的同时保留健康的肾脏组织。",
+    "diagnosis_en": "A CT or MRI scan usually identifies the mass, with a biopsy sometimes used to confirm whether it is cancerous before deciding on treatment.",
+    "diagnosis_bm": "Imbasan CT atau MRI biasanya mengenal pasti ketumbuhan tersebut, dan biopsi kadangkala digunakan untuk mengesahkan sama ada ia bersifat kanser sebelum menentukan rawatan.",
+    "diagnosis_zh": "CT或MRI扫描通常可识别肿块，有时会进行活组织检查以确认是否为恶性肿瘤，再决定治疗方案。",
+    "related": "radiofrequency-ablation, microwave-ablation",
+    "symptoms_en": [
+      "Blood in the urine",
+      "Persistent lower back or side pain",
+      "A lump felt in the abdomen or side",
+      "Unexplained fatigue"
+    ],
+    "symptoms_bm": [
+      "Darah dalam air kencing",
+      "Sakit belakang bawah atau sisi badan yang berterusan",
+      "Ketulan yang dapat dirasa di abdomen atau sisi badan",
+      "Keletihan tanpa sebab"
+    ],
+    "symptoms_zh": [
+      "尿液带血",
+      "持续性下背或身体侧面疼痛",
+      "腹部或身体侧面可摸到肿块",
+      "不明原因疲倦"
+    ],
+    "causes_en": [
+      "Smoking",
+      "High blood pressure",
+      "Obesity",
+      "Family history of kidney cancer",
+      "Long-term dialysis"
+    ],
+    "causes_bm": [
+      "Merokok",
+      "Tekanan darah tinggi",
+      "Obesiti",
+      "Sejarah keluarga kanser buah pinggang",
+      "Dialisis jangka panjang"
+    ],
+    "causes_zh": [
+      "吸烟",
+      "高血压",
+      "肥胖",
+      "肾癌家族病史",
+      "长期洗肾"
+    ]
+  },
+  {
+    "id": "uterine-fibroids",
+    "icon": "uterus",
+    "color": "#ec4899",
+    "title_en": "Uterine Fibroids",
+    "title_bm": "Fibroid Rahim",
+    "title_zh": "子宫肌瘤",
+    "tag_en": "Women's Health",
+    "tag_bm": "Kesihatan Wanita",
+    "tag_zh": "妇科健康",
+    "desc_en": "Non-cancerous growths causing pain or heavy bleeding.",
+    "desc_bm": "Pertumbuhan bukan barah yang menyebabkan kesakitan atau pendarahan berlebihan.",
+    "desc_zh": "良性增生物，可能导致疼痛或大量出血。",
+    "overview_en": "Fibroids are non-cancerous growths in or around the womb that are very common, especially in women in their 30s and 40s. They can range from pea-sized to as large as a melon, and not all require treatment.",
+    "overview_bm": "Fibroid ialah pertumbuhan bukan barah di dalam atau sekitar rahim yang sangat biasa berlaku, terutamanya pada wanita berusia 30-an dan 40-an. Saiznya boleh sekecil kacang pea hingga sebesar tembikai, dan tidak semua fibroid memerlukan rawatan.",
+    "overview_zh": "子宫肌瘤是子宫内或周围常见的良性增生物，尤其常见于30至40多岁的女性。肌瘤大小可从豌豆般小到哈密瓜般大，并非所有肌瘤都需要治疗。",
+    "diagnosis_en": "An ultrasound or pelvic MRI is typically used to confirm the size, number, and location of fibroids before discussing treatment options.",
+    "diagnosis_bm": "Ultrabunyi atau MRI pelvis biasanya digunakan untuk mengesahkan saiz, bilangan, dan lokasi fibroid sebelum membincangkan pilihan rawatan.",
+    "diagnosis_zh": "通常使用超声波或骨盆磁共振（MRI）确认肌瘤的大小、数量及位置，再讨论治疗方案。",
+    "related": "uterine-fibroid-embolization",
+    "symptoms_en": [
+      "Heavy or prolonged menstrual bleeding",
+      "Pelvic pressure or pain",
+      "Frequent urination",
+      "Pain during intercourse",
+      "Lower back pain"
+    ],
+    "symptoms_bm": [
+      "Pendarahan haid yang berlebihan atau berpanjangan",
+      "Tekanan atau kesakitan pelvis",
+      "Kerap membuang air kecil",
+      "Kesakitan semasa persetubuhan",
+      "Sakit belakang bawah"
+    ],
+    "symptoms_zh": [
+      "月经量多或经期延长",
+      "骨盆压迫感或疼痛",
+      "频尿",
+      "性交疼痛",
+      "下背疼痛"
+    ],
+    "causes_en": [
+      "Hormonal changes (oestrogen and progesterone)",
+      "Family history of fibroids",
+      "Being overweight",
+      "Never having given birth"
+    ],
+    "causes_bm": [
+      "Perubahan hormon (estrogen dan progesteron)",
+      "Sejarah keluarga fibroid",
+      "Berat badan berlebihan",
+      "Tidak pernah melahirkan anak"
+    ],
+    "causes_zh": [
+      "荷尔蒙变化（雌激素与黄体素）",
+      "子宫肌瘤家族病史",
+      "体重过重",
+      "从未生育"
+    ]
+  },
+  {
+    "id": "varicose-veins",
+    "icon": "leg",
+    "color": "#8b5cf6",
+    "title_en": "Varicose Veins",
+    "title_bm": "Vena Varikos",
+    "title_zh": "静脉曲张",
+    "tag_en": "Vascular",
+    "tag_bm": "Vaskular",
+    "tag_zh": "血管科",
+    "desc_en": "Enlarged, twisted veins usually found in the legs.",
+    "desc_bm": "Vena yang membesar dan berpilin, biasanya ditemui pada kaki.",
+    "desc_zh": "通常出现在腿部的肿胀扭曲静脉。",
+    "overview_en": "Varicose veins occur when the valves inside leg veins weaken, causing blood to pool. While often a cosmetic concern, they can also cause discomfort and, if left untreated, lead to skin changes or ulcers.",
+    "overview_bm": "Vena varikos berlaku apabila injap di dalam vena kaki menjadi lemah, menyebabkan darah bertakung. Walaupun sering dianggap masalah kosmetik, ia juga boleh menyebabkan ketidakselesaan dan, jika tidak dirawat, membawa kepada perubahan kulit atau ulser.",
+    "overview_zh": "静脉曲张是腿部静脉内的瓣膜功能减弱，导致血液淤积所致。虽然常被视为外观问题，但也可能造成不适，若不治疗，可能导致皮肤病变或溃疡。",
+    "diagnosis_en": "A duplex ultrasound scan maps the affected veins and shows how well blood is flowing, guiding which vein-closure technique is best.",
+    "diagnosis_bm": "Imbasan ultrabunyi duplex memetakan vena yang terjejas dan menunjukkan aliran darah, membantu menentukan teknik penutupan vena yang paling sesuai.",
+    "diagnosis_zh": "双重超声波扫描可绘制患处静脉图并显示血流状况，有助于确定最适合的静脉闭合技术。",
+    "related": "varicose-vein-treatment",
+    "symptoms_en": [
+      "Bulging, twisted, blue or purple veins",
+      "Aching or heavy feeling in the legs",
+      "Swelling in the lower legs and ankles",
+      "Itching around the affected vein",
+      "Skin discoloration in advanced cases"
+    ],
+    "symptoms_bm": [
+      "Vena yang timbul, berpilin, berwarna biru atau ungu",
+      "Rasa sakit atau berat pada kaki",
+      "Bengkak pada betis dan buku lali",
+      "Gatal di sekitar vena yang terjejas",
+      "Perubahan warna kulit pada kes lanjut"
+    ],
+    "symptoms_zh": [
+      "凸起、扭曲、呈蓝色或紫色的静脉",
+      "腿部酸痛或沉重感",
+      "小腿及脚踝肿胀",
+      "患处静脉周围发痒",
+      "病情较严重时皮肤变色"
+    ],
+    "causes_en": [
+      "Prolonged standing or sitting",
+      "Pregnancy",
+      "Family history",
+      "Age-related valve weakening",
+      "Obesity"
+    ],
+    "causes_bm": [
+      "Berdiri atau duduk lama",
+      "Kehamilan",
+      "Sejarah keluarga",
+      "Kelemahan injap berkaitan usia",
+      "Obesiti"
+    ],
+    "causes_zh": [
+      "长时间站立或坐着",
+      "怀孕",
+      "家族病史",
+      "年龄导致瓣膜功能减弱",
+      "肥胖"
+    ]
+  },
+  {
+    "id": "thyroid-nodule",
+    "icon": "thyroid",
+    "color": "#0891b2",
+    "title_en": "Thyroid Nodule",
+    "title_bm": "Nodul Tiroid",
+    "title_zh": "甲状腺结节",
+    "tag_en": "Endocrine",
+    "tag_bm": "Endokrin",
+    "tag_zh": "内分泌科",
+    "desc_en": "Lumps in the thyroid gland, most often non-cancerous.",
+    "desc_bm": "Ketulan pada kelenjar tiroid, kebanyakannya bukan barah.",
+    "desc_zh": "甲状腺内的肿块，多数为良性。",
+    "overview_en": "Thyroid nodules are lumps that form within the thyroid gland in the neck. Most are non-cancerous and many cause no symptoms at all, often being found incidentally on a scan done for another reason.",
+    "overview_bm": "Nodul tiroid ialah ketulan yang terbentuk di dalam kelenjar tiroid pada leher. Kebanyakannya bukan barah dan tidak menunjukkan sebarang gejala, sering ditemui secara tidak sengaja melalui imbasan yang dilakukan atas sebab lain.",
+    "overview_zh": "甲状腺结节是在颈部甲状腺内形成的肿块。多数为良性，且往往完全没有症状，常在因其他原因进行扫描时意外发现。",
+    "diagnosis_en": "An ultrasound of the neck is the first step, sometimes followed by a fine-needle aspiration biopsy to check whether the nodule is benign before deciding whether treatment is needed.",
+    "diagnosis_bm": "Ultrabunyi leher adalah langkah pertama, kadangkala diikuti dengan biopsi aspirasi jarum halus untuk memeriksa sama ada nodul tersebut jinak sebelum menentukan keperluan rawatan.",
+    "diagnosis_zh": "颈部超声波检查是第一步，有时会进行细针穿刺活检，以确认结节是否为良性，再决定是否需要治疗。",
+    "related": "microwave-ablation",
+    "symptoms_en": [
+      "A visible or palpable lump in the neck",
+      "Difficulty swallowing or a feeling of pressure",
+      "Voice changes or hoarseness",
+      "Rarely, a rapid heartbeat or unexplained weight loss if the nodule affects thyroid hormone levels"
+    ],
+    "symptoms_bm": [
+      "Ketulan yang boleh dilihat atau dirasa di leher",
+      "Kesukaran menelan atau rasa tertekan",
+      "Perubahan suara atau suara serak",
+      "Jarang berlaku, degupan jantung laju atau penurunan berat badan jika nodul menjejaskan tahap hormon tiroid"
+    ],
+    "symptoms_zh": [
+      "颈部可见或可摸到的肿块",
+      "吞咽困难或有压迫感",
+      "声音改变或沙哑",
+      "若结节影响甲状腺激素水平，罕见情况下可能出现心跳加速或体重下降"
+    ],
+    "causes_en": [
+      "Iodine deficiency",
+      "Chronic thyroid inflammation (thyroiditis)",
+      "Overgrowth of normal thyroid tissue",
+      "Thyroid cysts",
+      "Rarely, thyroid cancer"
+    ],
+    "causes_bm": [
+      "Kekurangan iodin",
+      "Keradangan tiroid kronik (tiroiditis)",
+      "Pertumbuhan berlebihan tisu tiroid normal",
+      "Kista tiroid",
+      "Jarang berlaku, kanser tiroid"
+    ],
+    "causes_zh": [
+      "碘缺乏",
+      "慢性甲状腺炎",
+      "正常甲状腺组织过度增生",
+      "甲状腺囊肿",
+      "罕见情况为甲状腺癌"
+    ]
+  },
+  {
+    "id": "peripheral-artery-disease",
+    "icon": "heartpulse",
+    "color": "#ef4444",
+    "title_en": "Peripheral Artery Disease",
+    "title_bm": "Penyakit Arteri Periferal",
+    "title_zh": "周边动脉疾病",
+    "tag_en": "Vascular",
+    "tag_bm": "Vaskular",
+    "tag_zh": "血管科",
+    "desc_en": "Narrowed arteries reducing blood flow to the limbs.",
+    "desc_bm": "Arteri yang menyempit sehingga mengurangkan aliran darah ke anggota badan.",
+    "desc_zh": "动脉狭窄导致肢体血流减少。",
+    "overview_en": "Peripheral artery disease (PAD) happens when fatty deposits narrow the arteries supplying the legs, reducing blood flow. Left untreated, it can affect mobility and, in severe cases, wound healing.",
+    "overview_bm": "Penyakit arteri periferal (PAD) berlaku apabila enapan lemak menyempitkan arteri yang membekalkan kaki, sehingga mengurangkan aliran darah. Jika tidak dirawat, ia boleh menjejaskan pergerakan dan, dalam kes teruk, penyembuhan luka.",
+    "overview_zh": "周边动脉疾病是指脂肪沉积物使供应腿部的动脉变窄，导致血流减少。若不治疗，可能影响行动能力，严重时甚至影响伤口愈合。",
+    "diagnosis_en": "An ankle-brachial pressure test, followed by imaging such as a CT or catheter angiogram, is used to locate and grade the narrowed arteries.",
+    "diagnosis_bm": "Ujian tekanan buku lali-brakial, diikuti dengan pengimejan seperti CT atau angiogram kateter, digunakan untuk mengenal pasti dan menilai tahap penyempitan arteri.",
+    "diagnosis_zh": "踝肱指数检测，再配合CT或导管血管造影等影像检查，用以定位并评估动脉狭窄的程度。",
+    "related": "angioplasty-stenting",
+    "symptoms_en": [
+      "Leg pain or cramping when walking, relieved by rest",
+      "Cold feet compared to the rest of the body",
+      "Slow-healing wounds on the feet or legs",
+      "Numbness or weakness in the legs"
+    ],
+    "symptoms_bm": [
+      "Sakit atau kekejangan kaki semasa berjalan, reda apabila berehat",
+      "Kaki sejuk berbanding bahagian badan lain",
+      "Luka pada kaki yang lambat sembuh",
+      "Kebas atau kelemahan pada kaki"
+    ],
+    "symptoms_zh": [
+      "行走时腿部疼痛或抽筋，休息后缓解",
+      "脚部比身体其他部位冰冷",
+      "脚部或腿部伤口愈合缓慢",
+      "腿部麻木或无力"
+    ],
+    "causes_en": [
+      "Smoking",
+      "Diabetes",
+      "High cholesterol",
+      "High blood pressure",
+      "Family history of vascular disease"
+    ],
+    "causes_bm": [
+      "Merokok",
+      "Diabetes",
+      "Kolesterol tinggi",
+      "Tekanan darah tinggi",
+      "Sejarah keluarga penyakit vaskular"
+    ],
+    "causes_zh": [
+      "吸烟",
+      "糖尿病",
+      "高胆固醇",
+      "高血压",
+      "血管疾病家族病史"
+    ]
+  }
+]
