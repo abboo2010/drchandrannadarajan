@@ -1,3 +1,4 @@
+// build-marker: 2026-09-01-b
 // netlify/functions/content.js
 // GET  /api/content?section=X  — public. Reads the current value for one
 //      of 9 sections from Supabase (content_sections table); if nothing
