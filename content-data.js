@@ -1,8 +1,15 @@
 // ============================================================
-// AUTO-GENERATED FILE — do not edit by hand.
-// Produced by build.js from the /content/*.json files, which are
-// what the CMS at /admin actually edits. Every deploy regenerates
-// this file fresh from that content.
+// BUNDLED FALLBACK DATA — not the live source of truth.
+// The live source of truth is Supabase, edited via the CMS at
+// /admin (see content-loader.js, netlify/functions/content.js).
+// This file (plus data.js and image-data.js) only ships a static
+// snapshot so the app still renders correctly offline or before
+// the first live fetch resolves — content-loader.js overwrites
+// these values in place once /api/content responds. It is not
+// auto-regenerated; if you want the bundled snapshot to reflect
+// a recent CMS edit, update it by hand (or re-run the extraction
+// script against a fresh Supabase export) — the site works fine
+// either way since the live data always wins when reachable.
 // ============================================================
 
 const CONDITIONS = [

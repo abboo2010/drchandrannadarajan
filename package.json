@@ -1,0 +1,8 @@
+{
+  "name": "drchandrannadarajan-site",
+  "private": true,
+  "description": "IR@SABAH / Dr. Chandran Nadarajan clinic site — static PWA + Netlify Functions backing the /admin CMS.",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4"
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "credLine_en": "Consultant Clinical & Interventional Radiologist, MBBS, FRCR",
+  "credLine_bm": "Perunding Klinikal & Radiologi Intervensi, MBBS, FRCR",
+  "credLine_zh": "临床顾问兼介入放射科医生，MBBS，FRCR",
+  "bio_en": "Dr. Nadarajan has spent over two decades pioneering minimally invasive, image-guided treatments for tumors, vascular conditions, and fibroids — helping patients avoid open surgery wherever possible. (Dummy bio text — replace with the real profile.)",
+  "bio_bm": "Dr. Nadarajan telah menghabiskan lebih dua dekad merintis rawatan invasif minimum berpandukan imej untuk ketumbuhan, keadaan vaskular, dan fibroid — membantu pesakit mengelakkan pembedahan terbuka apabila boleh. (Teks bio contoh — gantikan dengan profil sebenar.)",
+  "bio_zh": "Nadarajan 医生二十多年来致力开创微创、影像引导的肿瘤、血管疾病及子宫肌瘤治疗方法，尽可能协助病患避免开刀手术。（示例简介文字——请以真实资料替换。）",
+  "credentials": [
+    {
+      "text_en": "Fellowship in Vascular & Interventional Radiology, Singapore General Hospital",
+      "text_bm": "Felowship dalam Radiologi Vaskular & Intervensi, Singapore General Hospital",
+      "text_zh": "新加坡中央医院血管与介入放射学专科培训"
+    },
+    {
+      "text_en": "Member, Cardiovascular and Interventional Radiological Society",
+      "text_bm": "Ahli, Cardiovascular and Interventional Radiological Society",
+      "text_zh": "心血管与介入放射学会会员"
+    },
+    {
+      "text_en": "5,000+ image-guided procedures performed",
+      "text_bm": "5,000+ prosedur berpandukan imej telah dijalankan",
+      "text_zh": "已完成5,000多例影像引导手术"
+    },
+    {
+      "text_en": "Regular speaker at regional radiology conferences",
+      "text_bm": "Penceramah tetap di persidangan radiologi serantau",
+      "text_zh": "区域放射学会议常任讲者"
+    }
+  ],
+  "specialties": [
+    {
+      "text_en": "Tumor Ablation",
+      "text_bm": "Ablasi Ketumbuhan",
+      "text_zh": "肿瘤消融术"
+    },
+    {
+      "text_en": "Fibroid Embolization",
+      "text_bm": "Embolisasi Fibroid",
+      "text_zh": "子宫肌瘤栓塞术"
+    },
+    {
+      "text_en": "Vascular Access",
+      "text_bm": "Akses Vaskular",
+      "text_zh": "血管通路"
+    },
+    {
+      "text_en": "Prostate Artery Embolization",
+      "text_bm": "Embolisasi Arteri Prostat",
+      "text_zh": "前列腺动脉栓塞术"
+    },
+    {
+      "text_en": "Varicose Vein Therapy",
+      "text_bm": "Terapi Vena Varikos",
+      "text_zh": "静脉曲张治疗"
+    }
+  ],
+  "social": {
+    "instagram": "https://www.instagram.com/drchandrannadarajan/",
+    "facebook": "https://www.facebook.com/drchandrannadarajan/",
+    "linkedin": "https://www.linkedin.com/in/chandran-nadarajan-5aa71911/"
+  }
+}

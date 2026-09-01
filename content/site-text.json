@@ -1,0 +1,382 @@
+{
+  "tagline": {
+    "en": "Precision Care. Minimally Invasive.",
+    "bm": "Penjagaan Tepat. Invasif Minimal.",
+    "zh": "精准护理，微创治疗。"
+  },
+  "brandSub": {
+    "en": "CONSULTANT CLINICAL &amp; INTERVENTIONAL RADIOLOGIST",
+    "bm": "PERUNDING KLINIKAL &amp; RADIOLOGI INTERVENSI",
+    "zh": "临床顾问兼介入放射科医生"
+  },
+  "welcomeTo": {
+    "en": "Welcome to",
+    "bm": "Selamat Datang ke",
+    "zh": "欢迎使用"
+  },
+  "heroSub": {
+    "en": "Precision Care. Minimally Invasive.",
+    "bm": "Penjagaan Tepat. Invasif Minimal.",
+    "zh": "精准护理，微创治疗。"
+  },
+  "doctorRole": {
+    "en": "Consultant Clinical &amp; Interventional Radiologist",
+    "bm": "Perunding Klinikal &amp; Radiologi Intervensi",
+    "zh": "临床顾问兼介入放射科医生"
+  },
+  "yearsExperience": {
+    "en": "Years Experience",
+    "bm": "Tahun Pengalaman",
+    "zh": "年经验"
+  },
+  "yearsExperienceNum": {
+    "en": "20+",
+    "bm": "20+",
+    "zh": "20+"
+  },
+  "proceduresNum": {
+    "en": "5000+",
+    "bm": "5000+",
+    "zh": "5000+"
+  },
+  "patientsTreatedNum": {
+    "en": "10000+",
+    "bm": "10000+",
+    "zh": "10000+"
+  },
+  "procedures": {
+    "en": "Procedures",
+    "bm": "Prosedur",
+    "zh": "手术例数"
+  },
+  "patientsTreated": {
+    "en": "Patients Treated",
+    "bm": "Pesakit Dirawat",
+    "zh": "诊治病患"
+  },
+  "featuredTag": {
+    "en": "FEATURED TREATMENT",
+    "bm": "RAWATAN PILIHAN",
+    "zh": "精选疗法"
+  },
+  "featTitle": {
+    "en": "Microwave Ablation for Thyroid Nodule",
+    "bm": "Ablasi Gelombang Mikro untuk Nodul Tiroid",
+    "zh": "甲状腺结节微波消融术"
+  },
+  "featDesc": {
+    "en": "Microwave Ablation (MWA) is a minimally invasive procedure that uses gentle heat from microwaves to shrink thyroid lumps.",
+    "bm": "Ablasi Gelombang Mikro (MWA) ialah prosedur invasif minimum yang menggunakan haba lembut daripada gelombang mikro untuk mengecutkan ketulan tiroid.",
+    "zh": "微波消融术（MWA）是一种微创手术，利用微波产生的温和热能使甲状腺肿块缩小。"
+  },
+  "watchVideoBtn": {
+    "en": "Watch Video",
+    "bm": "Tonton Video",
+    "zh": "观看视频"
+  },
+  "learnMoreBtn": {
+    "en": "Learn More ›",
+    "bm": "Ketahui Lebih Lanjut ›",
+    "zh": "了解更多 ›"
+  },
+  "doctorH1": {
+    "en": "Meet Your Doctor",
+    "bm": "Kenali Doktor Anda",
+    "zh": "认识您的医生"
+  },
+  "doctorSub": {
+    "en": "Board-certified expertise, patient-first care",
+    "bm": "Kepakaran bertauliah, keutamaan kepada pesakit",
+    "zh": "专业认证，以病患为先"
+  },
+  "doctorCredLine": {
+    "en": "Consultant Clinical &amp; Interventional Radiologist, MBBS, FRCR",
+    "bm": "Perunding Klinikal &amp; Radiologi Intervensi, MBBS, FRCR",
+    "zh": "临床顾问兼介入放射科医生，MBBS，FRCR"
+  },
+  "doctorBio": {
+    "en": "Dr. Nadarajan has spent over two decades pioneering minimally invasive, image-guided treatments for tumors, vascular conditions, and fibroids — helping patients avoid open surgery wherever possible. (Dummy bio text — replace with the real profile.)",
+    "bm": "Dr. Nadarajan telah menghabiskan lebih dua dekad merintis rawatan invasif minimum berpandukan imej untuk ketumbuhan, keadaan vaskular, dan fibroid — membantu pesakit mengelakkan pembedahan terbuka apabila boleh. (Teks bio contoh — gantikan dengan profil sebenar.)",
+    "zh": "Nadarajan 医生二十多年来致力开创微创、影像引导的肿瘤、血管疾病及子宫肌瘤治疗方法，尽可能协助病患避免开刀手术。（示例简介文字——请以真实资料替换。）"
+  },
+  "cred1": {
+    "en": "Fellowship in Vascular &amp; Interventional Radiology, Singapore General Hospital",
+    "bm": "Felowship dalam Radiologi Vaskular &amp; Intervensi, Singapore General Hospital",
+    "zh": "新加坡中央医院血管与介入放射学专科培训"
+  },
+  "cred2": {
+    "en": "Member, Cardiovascular and Interventional Radiological Society",
+    "bm": "Ahli, Cardiovascular and Interventional Radiological Society",
+    "zh": "心血管与介入放射学会会员"
+  },
+  "cred3": {
+    "en": "5,000+ image-guided procedures performed",
+    "bm": "5,000+ prosedur berpandukan imej telah dijalankan",
+    "zh": "已完成5,000多例影像引导手术"
+  },
+  "cred4": {
+    "en": "Regular speaker at regional radiology conferences",
+    "bm": "Penceramah tetap di persidangan radiologi serantau",
+    "zh": "区域放射学会议常任讲者"
+  },
+  "spec1": {
+    "en": "Tumor Ablation",
+    "bm": "Ablasi Ketumbuhan",
+    "zh": "肿瘤消融术"
+  },
+  "spec2": {
+    "en": "Fibroid Embolization",
+    "bm": "Embolisasi Fibroid",
+    "zh": "子宫肌瘤栓塞术"
+  },
+  "spec3": {
+    "en": "Vascular Access",
+    "bm": "Akses Vaskular",
+    "zh": "血管通路"
+  },
+  "spec4": {
+    "en": "Prostate Artery Embolization",
+    "bm": "Embolisasi Arteri Prostat",
+    "zh": "前列腺动脉栓塞术"
+  },
+  "spec5": {
+    "en": "Varicose Vein Therapy",
+    "bm": "Terapi Vena Varikos",
+    "zh": "静脉曲张治疗"
+  },
+  "followLabel": {
+    "en": "Follow Dr. Chandran",
+    "bm": "Ikuti Dr. Chandran",
+    "zh": "关注 Chandran 医生"
+  },
+  "doctorNamePlain": {
+    "en": "Dr. Chandran Nadarajan",
+    "bm": "Dr. Chandran Nadarajan",
+    "zh": "钱德兰·纳达拉扬医生"
+  },
+  "doctorNameSidebar": {
+    "en": "DR. CHANDRAN<br><span class=\"accent\">NADARAJAN</span>",
+    "bm": "DR. CHANDRAN<br><span class=\"accent\">NADARAJAN</span>",
+    "zh": "钱德兰·纳达拉扬<br><span class=\"accent\">医生</span>"
+  },
+  "conditionsH1": {
+    "en": "Conditions We Treat",
+    "bm": "Keadaan Yang Kami Rawat",
+    "zh": "我们治疗的疾病"
+  },
+  "conditionsSub": {
+    "en": "Tap a condition to learn more",
+    "bm": "Ketik satu keadaan untuk ketahui lebih lanjut",
+    "zh": "点击病症以了解更多"
+  },
+  "backToConditions": {
+    "en": "‹ Back to Conditions",
+    "bm": "‹ Kembali ke Keadaan",
+    "zh": "‹ 返回疾病列表"
+  },
+  "treatmentsH1": {
+    "en": "Treatments &amp; Procedures",
+    "bm": "Rawatan &amp; Prosedur",
+    "zh": "疗法与手术"
+  },
+  "treatmentsSub": {
+    "en": "Minimally invasive options explained simply",
+    "bm": "Pilihan invasif minimum diterangkan dengan mudah",
+    "zh": "简明介绍各种微创疗法"
+  },
+  "backToTreatments": {
+    "en": "‹ Back to Treatments",
+    "bm": "‹ Kembali ke Rawatan",
+    "zh": "‹ 返回疗法列表"
+  },
+  "videosH1": {
+    "en": "Patient Education Videos",
+    "bm": "Video Pendidikan Pesakit",
+    "zh": "病患教育视频"
+  },
+  "videosSub": {
+    "en": "Short, easy-to-understand explainers",
+    "bm": "Penerangan ringkas yang mudah difahami",
+    "zh": "简短易懂的讲解视频"
+  },
+  "educationH1": {
+    "en": "Education Library",
+    "bm": "Pustaka Pendidikan",
+    "zh": "教育资料库"
+  },
+  "educationSub": {
+    "en": "Guides and brochures to read at your own pace",
+    "bm": "Panduan dan risalah untuk dibaca mengikut masa anda",
+    "zh": "指南与手册，随时阅读"
+  },
+  "testimonialsH1": {
+    "en": "Patient Testimonials",
+    "bm": "Testimoni Pesakit",
+    "zh": "病患心声"
+  },
+  "testimonialsSub": {
+    "en": "Real stories, in patients' own words",
+    "bm": "Kisah benar, dalam kata-kata pesakit sendiri",
+    "zh": "病患真实经历分享"
+  },
+  "reviewsH1": {
+    "en": "Reviews",
+    "bm": "Ulasan",
+    "zh": "评价"
+  },
+  "reviewsSub": {
+    "en": "What patients are saying",
+    "bm": "Apa kata pesakit kami",
+    "zh": "病患怎么说"
+  },
+  "apptH1": {
+    "en": "Book an Appointment",
+    "bm": "Tempah Janji Temu",
+    "zh": "预约看诊"
+  },
+  "apptSub": {
+    "en": "Reach the clinic directly on WhatsApp",
+    "bm": "Hubungi klinik terus melalui WhatsApp",
+    "zh": "通过WhatsApp直接联系诊所"
+  },
+  "waH2": {
+    "en": "Book via WhatsApp",
+    "bm": "Tempah melalui WhatsApp",
+    "zh": "通过WhatsApp预约"
+  },
+  "waP": {
+    "en": "Scan the QR code with your phone camera to start a chat with the clinic and request your appointment directly — fastest way to reach us.",
+    "bm": "Imbas kod QR dengan kamera telefon anda untuk memulakan sembang dengan klinik dan mohon janji temu terus — cara terpantas untuk menghubungi kami.",
+    "zh": "用手机相机扫描二维码，即可与诊所开始对话并直接预约——是联系我们最快的方式。"
+  },
+  "clinicContactLabel": {
+    "en": "Clinic contact:",
+    "bm": "Hubungi klinik:",
+    "zh": "诊所联系方式："
+  },
+  "clinicContactLabel2": {
+    "en": "Clinic contact:",
+    "bm": "Hubungi klinik:",
+    "zh": "诊所联系方式："
+  },
+  "waOpenBtn": {
+    "en": "Open WhatsApp Chat",
+    "bm": "Buka Sembang WhatsApp",
+    "zh": "打开WhatsApp对话"
+  },
+  "qrH1": {
+    "en": "Scan to Chat on WhatsApp",
+    "bm": "Imbas untuk Sembang di WhatsApp",
+    "zh": "扫描以在WhatsApp上对话"
+  },
+  "qrSub": {
+    "en": "Message the clinic directly to book or ask a question",
+    "bm": "Hantar mesej terus kepada klinik untuk menempah atau bertanya soalan",
+    "zh": "直接发送信息给诊所以预约或咨询问题"
+  },
+  "qrScanH3": {
+    "en": "Scan with your phone camera",
+    "bm": "Imbas dengan kamera telefon anda",
+    "zh": "用手机相机扫描"
+  },
+  "qrScanP": {
+    "en": "This opens a WhatsApp chat with the clinic so you can book an appointment or ask a question directly.",
+    "bm": "Ini akan membuka sembang WhatsApp dengan klinik supaya anda boleh menempah janji temu atau bertanya soalan terus.",
+    "zh": "这将打开与诊所的WhatsApp对话，方便您直接预约或咨询问题。"
+  },
+  "patientEducationSeries": {
+    "en": "Patient Education Series",
+    "bm": "Siri Pendidikan Pesakit",
+    "zh": "病患教育系列"
+  },
+  "watchOnYoutube": {
+    "en": "Watch on YouTube instead",
+    "bm": "Tonton di YouTube sebaliknya",
+    "zh": "改为在YouTube观看"
+  },
+  "microwaveVideoTitle": {
+    "en": "Microwave Ablation for Thyroid Nodule",
+    "bm": "Ablasi Gelombang Mikro untuk Nodul Tiroid",
+    "zh": "甲状腺结节微波消融术"
+  },
+  "overview": {
+    "en": "Overview",
+    "bm": "Gambaran Keseluruhan",
+    "zh": "概述"
+  },
+  "commonSymptoms": {
+    "en": "Common Symptoms",
+    "bm": "Gejala Biasa",
+    "zh": "常见症状"
+  },
+  "commonCauses": {
+    "en": "Common Causes",
+    "bm": "Punca Biasa",
+    "zh": "常见病因"
+  },
+  "howDiagnosed": {
+    "en": "How It's Diagnosed",
+    "bm": "Cara Ia Didiagnosis",
+    "zh": "诊断方式"
+  },
+  "howItWorks": {
+    "en": "How It Works",
+    "bm": "Cara Ia Berfungsi",
+    "zh": "手术过程"
+  },
+  "benefits": {
+    "en": "Benefits",
+    "bm": "Faedah",
+    "zh": "优点"
+  },
+  "recovery": {
+    "en": "Recovery",
+    "bm": "Pemulihan",
+    "zh": "恢复情况"
+  },
+  "relatedTreatment": {
+    "en": "Related Treatment",
+    "bm": "Rawatan Berkaitan",
+    "zh": "相关疗法"
+  },
+  "relatedTreatments": {
+    "en": "Related Treatments",
+    "bm": "Rawatan Berkaitan",
+    "zh": "相关疗法"
+  },
+  "conditionsThisTreats": {
+    "en": "Condition This Treats",
+    "bm": "Keadaan Yang Dirawat",
+    "zh": "适用病症"
+  },
+  "conditionsThisTreatsPlural": {
+    "en": "Conditions This Treats",
+    "bm": "Keadaan Yang Dirawat",
+    "zh": "适用病症"
+  },
+  "treatmentOption": {
+    "en": "Treatment option",
+    "bm": "Pilihan rawatan",
+    "zh": "治疗选项"
+  },
+  "conditionTreated": {
+    "en": "Condition treated",
+    "bm": "Keadaan dirawat",
+    "zh": "相关病症"
+  },
+  "questionsAboutCondition": {
+    "en": "Have questions about this condition?",
+    "bm": "Ada soalan tentang keadaan ini?",
+    "zh": "对这个病症有疑问吗？"
+  },
+  "bookConsultation": {
+    "en": "Book a Consultation",
+    "bm": "Tempah Konsultasi",
+    "zh": "预约咨询"
+  },
+  "curiousAboutTreatment": {
+    "en": "Curious if this treatment is right for you?",
+    "bm": "Ingin tahu jika rawatan ini sesuai untuk anda?",
+    "zh": "想知道这个疗法是否适合您？"
+  }
+}

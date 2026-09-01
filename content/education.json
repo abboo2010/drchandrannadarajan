@@ -1,0 +1,80 @@
+[
+  {
+    "icon": "document",
+    "color": "#2f6fed",
+    "title_en": "Pre-Procedure Guide",
+    "title_bm": "Panduan Pra-Prosedur",
+    "title_zh": "术前指南",
+    "tag_en": "PDF Guide",
+    "tag_bm": "Panduan PDF",
+    "tag_zh": "PDF指南",
+    "desc_en": "What to do the night before and morning of your procedure.",
+    "desc_bm": "Apa yang perlu dilakukan pada malam sebelum dan pagi prosedur anda.",
+    "desc_zh": "手术前一晚及当天早上的注意事项。"
+  },
+  {
+    "icon": "checklist",
+    "color": "#14b8a6",
+    "title_en": "Recovery Checklist",
+    "title_bm": "Senarai Semak Pemulihan",
+    "title_zh": "恢复检查清单",
+    "tag_en": "Checklist",
+    "tag_bm": "Senarai Semak",
+    "tag_zh": "检查清单",
+    "desc_en": "Step-by-step aftercare for the first two weeks at home.",
+    "desc_bm": "Penjagaan susulan langkah demi langkah untuk dua minggu pertama di rumah.",
+    "desc_zh": "在家恢复首两周的逐步护理指引。"
+  },
+  {
+    "icon": "question",
+    "color": "#f97316",
+    "title_en": "Frequently Asked Questions",
+    "title_bm": "Soalan Lazim",
+    "title_zh": "常见问题",
+    "tag_en": "FAQ",
+    "tag_bm": "Soalan Lazim",
+    "tag_zh": "常见问题",
+    "desc_en": "Answers to the questions patients ask us most often.",
+    "desc_bm": "Jawapan kepada soalan yang paling kerap ditanya oleh pesakit.",
+    "desc_zh": "解答病患最常询问的问题。"
+  },
+  {
+    "icon": "apple",
+    "color": "#ec4899",
+    "title_en": "Diet &amp; Lifestyle Tips",
+    "title_bm": "Petua Diet &amp; Gaya Hidup",
+    "title_zh": "饮食与生活方式贴士",
+    "tag_en": "Wellness",
+    "tag_bm": "Kesejahteraan",
+    "tag_zh": "健康养生",
+    "desc_en": "Simple changes that support healing and long-term health.",
+    "desc_bm": "Perubahan mudah yang menyokong penyembuhan dan kesihatan jangka panjang.",
+    "desc_zh": "简单的改变有助于康复及长期健康。"
+  },
+  {
+    "icon": "pill",
+    "color": "#8b5cf6",
+    "title_en": "Managing Medications",
+    "title_bm": "Menguruskan Ubat-ubatan",
+    "title_zh": "药物管理",
+    "tag_en": "Guide",
+    "tag_bm": "Panduan",
+    "tag_zh": "指南",
+    "desc_en": "How to plan medications around your treatment schedule.",
+    "desc_bm": "Cara merancang ubat-ubatan mengikut jadual rawatan anda.",
+    "desc_zh": "如何根据治疗时间表安排用药。"
+  },
+  {
+    "icon": "phone",
+    "color": "#ef4444",
+    "title_en": "When to Call Us",
+    "title_bm": "Bila Perlu Hubungi Kami",
+    "title_zh": "何时应联系我们",
+    "tag_en": "Safety",
+    "tag_bm": "Keselamatan",
+    "tag_zh": "安全须知",
+    "desc_en": "Warning signs that need prompt attention after a procedure.",
+    "desc_bm": "Tanda amaran yang memerlukan perhatian segera selepas prosedur.",
+    "desc_zh": "术后需要立即注意的警示症状。"
+  }
+]
