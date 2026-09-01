@@ -1,3 +1,4 @@
+// build-marker: 2026-09-01-b
 // netlify/functions/auth.js — single shared admin password, no accounts,
 // no Netlify Identity. POST { password } -> { token }. The token is
 // "<expiry>.<hmac>", signed with ADMIN_SECRET, 12h expiry, Node's built-in
