@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Nurul H.",
+    "color": "#14b8a6",
+    "stars": 5,
+    "quote_en": "Extremely professional clinic. Short wait times and a very reassuring doctor.",
+    "quote_bm": "Klinik yang sangat profesional. Masa menunggu yang singkat dan doktor yang sangat meyakinkan.",
+    "quote_zh": "非常专业的诊所。等候时间短，医生也让人非常安心。"
+  },
+  {
+    "name": "David L.",
+    "color": "#ef4444",
+    "stars": 5,
+    "quote_en": "Clear explanations, modern equipment, and genuinely caring staff.",
+    "quote_bm": "Penerangan yang jelas, peralatan moden, dan kakitangan yang benar-benar prihatin.",
+    "quote_zh": "解释清楚，设备先进，工作人员也非常关心病患。"
+  },
+  {
+    "name": "Farah I.",
+    "color": "#eab308",
+    "stars": 4,
+    "quote_en": "Great experience overall — would have liked more parking options nearby.",
+    "quote_bm": "Pengalaman yang baik secara keseluruhan — harap ada lebih banyak pilihan tempat letak kereta berhampiran.",
+    "quote_zh": "整体体验很好——希望附近能有更多停车位。"
+  },
+  {
+    "name": "Hassan M.",
+    "color": "#2f6fed",
+    "stars": 5,
+    "quote_en": "Dr. Chandran took the time to answer every question my family had.",
+    "quote_bm": "Dr. Chandran meluangkan masa untuk menjawab setiap soalan yang keluarga saya ada.",
+    "quote_zh": "Chandran医生耐心解答了我们全家的每一个问题。"
+  }
+]

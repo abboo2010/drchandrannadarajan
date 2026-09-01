@@ -1,0 +1,5 @@
+{
+  "name": "drchandrannadarajan-site",
+  "private": true,
+  "description": "IR@SABAH / Dr. Chandran Nadarajan clinic site — static PWA + Netlify Functions backing the /admin CMS. Functions talk to Supabase over plain REST (fetch) — no runtime dependencies to install or bundle."
+}
