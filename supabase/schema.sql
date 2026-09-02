@@ -31,14 +31,19 @@ on conflict (id) do nothing;
 
 -- CMS login accounts (replaces the old single shared ADMIN_PASSWORD).
 -- password_hash is "<salt-hex>:<hash-hex>" from Node's scrypt — never a
--- plain password. Same lockdown as content_sections: RLS on, zero
--- policies, so only the Netlify Functions (service_role key) can touch
--- it. The very first account is created automatically the first time
--- anyone logs in with the old shared password while this table is
--- empty — no manual insert needed here.
+-- plain password. `sections` is which CMS sections this login may view
+-- and edit (e.g. ["conditions","treatments"]) — 'users' in that list means
+-- this login can also manage other logins from the "Manage Users" panel.
+-- See netlify/functions/_sections.js for the canonical list of valid
+-- values. Same lockdown as content_sections: RLS on, zero policies, so
+-- only the Netlify Functions (service_role key) can touch it. The very
+-- first account is created automatically (with every section granted)
+-- the first time anyone logs in with the old shared password while this
+-- table is empty — no manual insert needed here.
 create table if not exists admin_users (
   username text primary key,
   password_hash text not null,
+  sections jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
 );
 alter table admin_users enable row level security;
