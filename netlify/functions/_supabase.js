@@ -75,4 +75,78 @@ async function uploadToStorage(bucket, key, buffer, contentType) {
   return `${cfg.url}/storage/v1/object/public/${bucket}/${key}`;
 }
 
-module.exports = { getSupabaseConfig, fetchSectionRow, upsertSectionRow, uploadToStorage };
+// ---- admin_users (CMS login accounts) ----
+
+// One row (username + password_hash) or null if that username doesn't exist.
+async function fetchAdminUser(username) {
+  const cfg = getSupabaseConfig();
+  if (!cfg) return null;
+  const res = await fetch(
+    `${cfg.url}/rest/v1/admin_users?username=eq.${encodeURIComponent(username)}&select=username,password_hash`,
+    { headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` } }
+  );
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  const rows = await res.json();
+  return Array.isArray(rows) && rows.length ? rows[0] : null;
+}
+
+// How many accounts exist — used to gate the one-time legacy-password bootstrap.
+async function countAdminUsers() {
+  const cfg = getSupabaseConfig();
+  if (!cfg) return 0;
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users?select=username`, {
+    headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` },
+  });
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  const rows = await res.json();
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
+// All accounts (username + created_at only — password_hash never leaves here).
+async function listAdminUsers() {
+  const cfg = getSupabaseConfig();
+  if (!cfg) throw new Error('Supabase not configured');
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users?select=username,created_at&order=created_at.asc`, {
+    headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` },
+  });
+  if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
+  return res.json();
+}
+
+// Create or update one account's password (upsert on the username primary key).
+async function upsertAdminUser(username, passwordHash) {
+  const cfg = getSupabaseConfig();
+  if (!cfg) throw new Error('Supabase not configured');
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users`, {
+    method: 'POST',
+    headers: {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'resolution=merge-duplicates,return=minimal',
+    },
+    body: JSON.stringify([{ username, password_hash: passwordHash }]),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase write failed (${res.status})${text ? ': ' + text : ''}`);
+  }
+}
+
+async function deleteAdminUser(username) {
+  const cfg = getSupabaseConfig();
+  if (!cfg) throw new Error('Supabase not configured');
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users?username=eq.${encodeURIComponent(username)}`, {
+    method: 'DELETE',
+    headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase delete failed (${res.status})${text ? ': ' + text : ''}`);
+  }
+}
+
+module.exports = {
+  getSupabaseConfig, fetchSectionRow, upsertSectionRow, uploadToStorage,
+  fetchAdminUser, countAdminUsers, listAdminUsers, upsertAdminUser, deleteAdminUser,
+};
