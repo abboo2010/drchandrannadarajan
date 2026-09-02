@@ -5,7 +5,7 @@
 // bucket "site-images" under a fresh timestamped key (avoids stale
 // browser caching after a swap) and returns its public URL. Uses plain
 // REST (see _supabase.js) — no @supabase/supabase-js dependency.
-const { uploadToStorage, getSupabaseConfig } = require('./_supabase');
+const { uploadToStorage, getSupabaseConfig, fetchAdminUser } = require('./_supabase');
 const { verifyToken } = require('./auth');
 
 function bearerToken(event) {
@@ -17,8 +17,18 @@ exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Method not allowed' }) };
   }
-  if (!verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '')) {
+  const username = verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '');
+  if (!username) {
     return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
+  }
+  // All uploads land in the "Photos & Logo" section, so that's the one
+  // permission that gates this endpoint. Checked fresh every request.
+  let user;
+  try { user = await fetchAdminUser(username); } catch (e) {
+    return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Could not verify your permissions right now.' }) };
+  }
+  if (!user || !Array.isArray(user.sections) || !user.sections.includes('site-images')) {
+    return { statusCode: 403, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: "You don't have permission to upload images." }) };
   }
   if (!getSupabaseConfig()) {
     return {
