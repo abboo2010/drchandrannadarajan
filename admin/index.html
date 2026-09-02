@@ -15,7 +15,10 @@
   /* ---------- Login screen ---------- */
   #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--navy),var(--navy2));}
   #loginBox{background:var(--card);border-radius:14px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  #loginBox{text-align:center;}
+  #loginBox img{width:72px;height:72px;margin:0 auto 14px;display:block;}
   #loginBox h1{font-size:19px;margin:0 0 4px;}
+  #loginBox input,#loginBox button{text-align:left;}
   #loginBox p{color:var(--muted);font-size:13px;margin:0 0 22px;}
   #loginBox input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-size:15px;margin-bottom:12px;}
   #loginBox button{width:100%;padding:12px;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
@@ -25,7 +28,8 @@
   #app{display:none;min-height:100vh;}
   #app.show{display:flex;}
   #sidebar{width:230px;flex:none;background:var(--navy);color:#dbe6f5;padding:20px 0;display:flex;flex-direction:column;}
-  #sidebar h2{font-size:14px;color:#fff;padding:0 20px 16px;margin:0 0 8px;border-bottom:1px solid rgba(255,255,255,.12);}
+  #sidebar h2{font-size:14px;color:#fff;padding:0 20px 16px;margin:0 0 8px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center;}
+  #sidebar h2 img{display:block;width:56px;height:56px;margin:0 auto 10px;}
   .navbtn{display:block;width:100%;text-align:left;background:none;border:0;color:#c4d3e8;padding:11px 20px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;}
   .navbtn:hover{background:rgba(255,255,255,.06);}
   .navbtn.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--teal);font-weight:600;}
@@ -70,6 +74,7 @@
 
 <div id="loginScreen">
   <div id="loginBox">
+    <img src="../images/logo.png" alt="IR@SABAH logo">
     <h1>Content Admin</h1>
     <p>Dr. Chandran Nadarajan &mdash; IR@SABAH site</p>
     <div id="loginError"></div>
@@ -80,7 +85,7 @@
 
 <div id="app">
   <aside id="sidebar">
-    <h2>IR@SABAH CMS</h2>
+    <h2><img src="../images/logo.png" alt="IR@SABAH logo">IR@SABAH CMS</h2>
     <nav id="sideNav"></nav>
     <div style="flex:1;"></div>
     <button id="logoutBtn">Log out</button>
@@ -129,6 +134,7 @@ const state = {
   token: sessionStorage.getItem('cms_token') || null,
   data: {},      // section key -> current (possibly edited) value
   dirty: {},     // section key -> bool
+  loadError: {}, // section key -> error message, or null once loaded OK
   active: null,
 };
 
@@ -162,8 +168,17 @@ function markDirty(key) { state.dirty[key] = true; updateToolbar(); }
 
 /* ---------------- API ---------------- */
 async function apiGet(section) {
-  const res = await fetch('/api/content?section=' + encodeURIComponent(section), { cache: 'no-store' });
-  if (!res.ok) throw new Error('Failed to load ' + section);
+  let res;
+  try {
+    res = await fetch('/api/content?section=' + encodeURIComponent(section), { cache: 'no-store' });
+  } catch (e) {
+    throw new Error('Could not reach the server at all (network error). Check your connection and try again.');
+  }
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); if (j.error) detail = ' — ' + j.error; } catch {}
+    throw new Error('Server error (HTTP ' + res.status + ')' + detail + '. This is NOT the same as an empty section — do not save over it.');
+  }
   return res.json();
 }
 async function apiSave(section, data) {
@@ -218,13 +233,28 @@ async function login(password) {
 }
 
 /* ---------------- boot / sidebar ---------------- */
+async function loadSectionData(key) {
+  const def = SECTIONS.find(s => s.key === key);
+  try {
+    state.data[key] = await apiGet(key);
+    state.loadError[key] = null;
+  } catch (e) {
+    // Keep any previously-loaded good data if this is a retry; only default
+    // to empty on the very first load. Either way, loadError is what the
+    // panel actually checks before showing an empty-state message, so a
+    // failed fetch is never confused with "there's genuinely nothing here."
+    if (!(key in state.data)) state.data[key] = def.kind === 'array' ? [] : {};
+    state.loadError[key] = e.message || 'Failed to load this section.';
+  }
+}
 async function boot() {
   buildSidebar();
-  await Promise.all(SECTIONS.map(async s => {
-    try { state.data[s.key] = await apiGet(s.key); }
-    catch (e) { state.data[s.key] = s.kind === 'array' ? [] : {}; }
-  }));
+  await Promise.all(SECTIONS.map(s => loadSectionData(s.key)));
   selectSection(SECTIONS[0].key);
+}
+async function retrySection(key) {
+  await loadSectionData(key);
+  if (state.active === key) renderPanel(SECTIONS.find(s => s.key === key));
 }
 function buildSidebar() {
   const nav = document.getElementById('sideNav');
@@ -256,6 +286,22 @@ function renderPanel(def) {
   const toolbar = document.getElementById('panelToolbar');
   const body = document.getElementById('panelBody');
   toolbar.innerHTML = ''; body.innerHTML = '';
+
+  // If the last fetch for this section failed, show that plainly instead of
+  // rendering an empty-looking section — and don't offer Save/Add, since
+  // saving right now would overwrite whatever's actually stored with an
+  // empty placeholder.
+  if (state.loadError[def.key]) {
+    const retryBtn = el('button', { class: 'btn primary', text: 'Retry', onclick: () => retrySection(def.key) });
+    toolbar.appendChild(retryBtn);
+    body.appendChild(el('div', {
+      style: 'background:#fde8e8;border:1px solid #f3b4b4;border-radius:10px;padding:16px 18px;color:#7a1f1f;',
+    },
+      el('strong', { text: "Couldn't load this section — this is a server error, not empty content." }),
+      el('p', { text: state.loadError[def.key], style: 'margin:8px 0 0;font-size:13px;' })
+    ));
+    return;
+  }
 
   if (def.kind === 'siteimages') { renderSiteImages(body); return; }
 
