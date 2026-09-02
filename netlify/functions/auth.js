@@ -81,6 +81,10 @@ exports.handler = async (event) => {
   try {
     user = await fetchAdminUser(username);
   } catch (e) {
+    // Logged (not returned to the browser) so the real cause — missing
+    // table, wrong Supabase key, etc. — shows up in Netlify's function
+    // log instead of just a generic message on the login screen.
+    console.error('auth.js: fetchAdminUser failed:', e.message);
     return { statusCode: 500, body: JSON.stringify({ error: 'Could not verify credentials right now.' }) };
   }
 
@@ -92,7 +96,10 @@ exports.handler = async (event) => {
   } else {
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
     let existingCount = 1; // fail safe: assume accounts exist unless proven otherwise
-    try { existingCount = await countAdminUsers(); } catch (e) { existingCount = 1; }
+    try { existingCount = await countAdminUsers(); } catch (e) {
+      console.error('auth.js: countAdminUsers failed:', e.message);
+      existingCount = 1;
+    }
     if (existingCount === 0 && ADMIN_PASSWORD && password === ADMIN_PASSWORD) {
       try {
         // Bootstrap account gets every section, including 'users' — it's
