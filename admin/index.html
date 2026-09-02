@@ -78,6 +78,7 @@
     <h1>Content Admin</h1>
     <p>Dr. Chandran Nadarajan &mdash; IR@SABAH site</p>
     <div id="loginError"></div>
+    <input type="text" id="usernameInput" placeholder="Username" autocomplete="username">
     <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
     <button id="loginBtn">Log in</button>
   </div>
@@ -88,6 +89,7 @@
     <h2><img src="../images/logo.png" alt="IR@SABAH logo">IR@SABAH CMS</h2>
     <nav id="sideNav"></nav>
     <div style="flex:1;"></div>
+    <div id="loggedInAs" class="hint" style="padding:0 4px 8px;"></div>
     <button id="logoutBtn">Log out</button>
   </aside>
   <main id="main">
@@ -119,6 +121,7 @@ const SECTIONS = [
   { key: 'reviews',       label: 'Reviews',         kind: 'array' },
   { key: 'site-text',     label: 'Site Text',       kind: 'sitetext' },
   { key: 'site-images',   label: 'Photos & Logo',   kind: 'siteimages' },
+  { key: 'users',         label: 'Manage Users',    kind: 'users' },
 ];
 
 const TITLE_FIELD_CANDIDATES = ['title_en', 'name', 'label'];
@@ -132,6 +135,7 @@ const TEXTAREA_BASE_RE = /desc|overview|bio|note|diagnosis|recovery|quote/i;
 
 const state = {
   token: sessionStorage.getItem('cms_token') || null,
+  username: sessionStorage.getItem('cms_username') || null,
   data: {},      // section key -> current (possibly edited) value
   dirty: {},     // section key -> bool
   loadError: {}, // section key -> error message, or null once loaded OK
@@ -203,33 +207,70 @@ async function apiUploadImage(dataUrl, filename) {
   if (!res.ok) throw new Error(json.error || 'Upload failed');
   return json.url;
 }
+async function apiListUsers() {
+  const res = await fetch('/api/users', { headers: { 'Authorization': 'Bearer ' + state.token } });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Could not load users');
+  return json;
+}
+async function apiCreateUser(username, password) {
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
+    body: JSON.stringify({ username, password }),
+  });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Could not save user');
+  return json;
+}
+async function apiDeleteUser(username) {
+  const res = await fetch('/api/users?username=' + encodeURIComponent(username), {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + state.token },
+  });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Could not delete user');
+  return json;
+}
 
 /* ---------------- auth ---------------- */
 function forceLogout(message) {
   state.token = null;
+  state.username = null;
   sessionStorage.removeItem('cms_token');
+  sessionStorage.removeItem('cms_username');
   document.getElementById('app').classList.remove('show');
   document.getElementById('loginScreen').style.display = 'flex';
   if (message) document.getElementById('loginError').textContent = message;
 }
-async function login(password) {
+async function login(username, password) {
   const errEl = document.getElementById('loginError');
   errEl.textContent = '';
   try {
     const res = await fetch('/api/auth', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     });
     const json = await res.json().catch(() => ({}));
-    if (!res.ok) { errEl.textContent = json.error || 'Incorrect password'; return; }
+    if (!res.ok) { errEl.textContent = json.error || 'Incorrect username or password'; return; }
     state.token = json.token;
+    state.username = json.username;
     sessionStorage.setItem('cms_token', json.token);
+    sessionStorage.setItem('cms_username', json.username);
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').classList.add('show');
+    updateLoggedInAs();
     await boot();
   } catch (e) {
     errEl.textContent = 'Could not reach the server. Try again.';
   }
+}
+function updateLoggedInAs() {
+  const el = document.getElementById('loggedInAs');
+  if (el) el.textContent = state.username ? 'Logged in as ' + state.username : '';
 }
 
 /* ---------------- boot / sidebar ---------------- */
@@ -249,7 +290,9 @@ async function loadSectionData(key) {
 }
 async function boot() {
   buildSidebar();
-  await Promise.all(SECTIONS.map(s => loadSectionData(s.key)));
+  // "users" isn't a content section — it's fetched from /api/users on
+  // demand by renderUsersPanel, not from /api/content.
+  await Promise.all(SECTIONS.filter(s => s.kind !== 'users').map(s => loadSectionData(s.key)));
   selectSection(SECTIONS[0].key);
 }
 async function retrySection(key) {
@@ -304,8 +347,9 @@ function renderPanel(def) {
   }
 
   if (def.kind === 'siteimages') { renderSiteImages(body); return; }
+  if (def.kind === 'users') { renderUsersPanel(body); return; }
 
-  if (def.kind !== 'siteimages') {
+  if (def.kind !== 'siteimages' && def.kind !== 'users') {
     const saveBtn = el('button', {
       class: 'btn primary', id: 'saveBtn-' + def.key, text: 'Save changes',
       disabled: state.dirty[def.key] ? null : 'disabled',
@@ -694,6 +738,91 @@ function renderSiteImages(body) {
   body.appendChild(grid);
 }
 
+/* ---------------- Manage Users ---------------- */
+async function renderUsersPanel(body) {
+  body.appendChild(el('p', { class: 'hint', text: 'Loading…' }));
+  let data;
+  try {
+    data = await apiListUsers();
+  } catch (e) {
+    body.innerHTML = '';
+    body.appendChild(el('div', {
+      style: 'background:#fde8e8;border:1px solid #f3b4b4;border-radius:10px;padding:16px 18px;color:#7a1f1f;',
+    },
+      el('strong', { text: "Couldn't load users." }),
+      el('p', { text: e.message, style: 'margin:8px 0 0;font-size:13px;' })
+    ));
+    return;
+  }
+  body.innerHTML = '';
+
+  const list = el('div', { style: 'margin-bottom:28px;max-width:480px;' });
+  data.users.forEach(u => {
+    const isMe = u.username === data.me;
+    const isLast = data.users.length <= 1;
+    const row = el('div', {
+      style: 'display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;',
+    });
+    row.appendChild(el('span', { text: u.username + (isMe ? '  (you)' : '') }));
+    const delBtn = el('button', {
+      class: 'btn', text: 'Delete',
+      style: (isMe || isLast) ? 'opacity:.4;cursor:not-allowed;' : '',
+      onclick: async () => {
+        if (isMe || isLast) return;
+        if (!confirm('Remove login access for "' + u.username + '"?')) return;
+        try {
+          await apiDeleteUser(u.username);
+          showToast('User removed.');
+          renderUsersPanel(body);
+        } catch (e) { showToast(e.message, true); }
+      },
+    });
+    row.appendChild(delBtn);
+    list.appendChild(row);
+  });
+  body.appendChild(list);
+
+  const form = el('div', { style: 'max-width:360px;border-top:1px solid var(--line);padding-top:20px;' });
+  form.appendChild(el('h3', { text: 'Add a new login', style: 'margin:0 0 12px;font-size:15px;' }));
+  const uInput = el('input', {
+    type: 'text', placeholder: 'Username', autocomplete: 'off',
+    style: 'width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;',
+  });
+  const pInput = el('input', {
+    type: 'password', placeholder: 'Password (min 8 characters)', autocomplete: 'new-password',
+    style: 'width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;',
+  });
+  const addStatus = el('div', { class: 'hint', style: 'margin-bottom:10px;' });
+  const submit = async () => {
+    const username = uInput.value.trim().toLowerCase();
+    const password = pInput.value;
+    addStatus.textContent = '';
+    if (!/^[a-z0-9._-]{3,40}$/.test(username)) {
+      addStatus.textContent = 'Username must be 3-40 characters: letters, numbers, dot, underscore, hyphen only.';
+      return;
+    }
+    if (password.length < 8) {
+      addStatus.textContent = 'Password must be at least 8 characters.';
+      return;
+    }
+    try {
+      await apiCreateUser(username, password);
+      showToast('User added.');
+      renderUsersPanel(body);
+    } catch (e) {
+      addStatus.textContent = e.message;
+    }
+  };
+  uInput.addEventListener('keydown', e => { if (e.key === 'Enter') pInput.focus(); });
+  pInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+  const addBtn = el('button', { class: 'btn primary', text: 'Add user', onclick: submit });
+  form.appendChild(uInput);
+  form.appendChild(pInput);
+  form.appendChild(addStatus);
+  form.appendChild(addBtn);
+  body.appendChild(form);
+}
+
 /* ---------------- login screen background (public, no auth needed) ----------------
    Loads the "CMS Login Background" image set in Photos & Logo and applies it behind
    the login card. Falls back to the bundled splash-bg.png (already set in the CSS
@@ -712,13 +841,18 @@ function renderSiteImages(body) {
 })();
 
 /* ---------------- wire up login ---------------- */
-document.getElementById('loginBtn').addEventListener('click', () => login(document.getElementById('passwordInput').value));
-document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(e.target.value); });
+function doLogin() {
+  login(document.getElementById('usernameInput').value.trim(), document.getElementById('passwordInput').value);
+}
+document.getElementById('loginBtn').addEventListener('click', doLogin);
+document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
+document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 document.getElementById('logoutBtn').addEventListener('click', () => forceLogout());
 
 if (state.token) {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('app').classList.add('show');
+  updateLoggedInAs();
   boot().catch(() => forceLogout('Please log in again.'));
 }
 </script>
