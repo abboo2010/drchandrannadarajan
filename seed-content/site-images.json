@@ -2,5 +2,6 @@
   "doctor": "/images/doctor.jpg",
   "logo": "/images/logo.png",
   "splashbg": "/images/splash-bg.png",
-  "splashbgmobile": "/images/splash-bg-mobile.png"
+  "splashbgmobile": "/images/splash-bg-mobile.png",
+  "adminBg": "/images/splash-bg.png"
 }
