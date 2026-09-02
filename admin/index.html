@@ -136,11 +136,13 @@ const TEXTAREA_BASE_RE = /desc|overview|bio|note|diagnosis|recovery|quote/i;
 const state = {
   token: sessionStorage.getItem('cms_token') || null,
   username: sessionStorage.getItem('cms_username') || null,
+  sections: JSON.parse(sessionStorage.getItem('cms_sections') || 'null') || [], // which SECTIONS keys this login can access
   data: {},      // section key -> current (possibly edited) value
   dirty: {},     // section key -> bool
   loadError: {}, // section key -> error message, or null once loaded OK
   active: null,
 };
+function visibleSections() { return SECTIONS.filter(s => state.sections.includes(s.key)); }
 
 /* ---------------- helpers ---------------- */
 function humanize(base) {
@@ -214,15 +216,26 @@ async function apiListUsers() {
   if (!res.ok) throw new Error(json.error || 'Could not load users');
   return json;
 }
-async function apiCreateUser(username, password) {
+async function apiCreateUser(username, password, sections) {
   const res = await fetch('/api/users', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, sections }),
   });
   if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
   const json = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(json.error || 'Could not save user');
+  return json;
+}
+async function apiUpdateUserSections(username, sections) {
+  const res = await fetch('/api/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
+    body: JSON.stringify({ username, sections }),
+  });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Could not update permissions');
   return json;
 }
 async function apiDeleteUser(username) {
@@ -240,8 +253,10 @@ async function apiDeleteUser(username) {
 function forceLogout(message) {
   state.token = null;
   state.username = null;
+  state.sections = [];
   sessionStorage.removeItem('cms_token');
   sessionStorage.removeItem('cms_username');
+  sessionStorage.removeItem('cms_sections');
   document.getElementById('app').classList.remove('show');
   document.getElementById('loginScreen').style.display = 'flex';
   if (message) document.getElementById('loginError').textContent = message;
@@ -258,8 +273,10 @@ async function login(username, password) {
     if (!res.ok) { errEl.textContent = json.error || 'Incorrect username or password'; return; }
     state.token = json.token;
     state.username = json.username;
+    state.sections = Array.isArray(json.sections) ? json.sections : [];
     sessionStorage.setItem('cms_token', json.token);
     sessionStorage.setItem('cms_username', json.username);
+    sessionStorage.setItem('cms_sections', JSON.stringify(state.sections));
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('app').classList.add('show');
     updateLoggedInAs();
@@ -290,10 +307,12 @@ async function loadSectionData(key) {
 }
 async function boot() {
   buildSidebar();
+  const visible = visibleSections();
   // "users" isn't a content section — it's fetched from /api/users on
   // demand by renderUsersPanel, not from /api/content.
-  await Promise.all(SECTIONS.filter(s => s.kind !== 'users').map(s => loadSectionData(s.key)));
-  selectSection(SECTIONS[0].key);
+  await Promise.all(visible.filter(s => s.kind !== 'users').map(s => loadSectionData(s.key)));
+  if (visible.length) selectSection(visible[0].key);
+  else showNoAccess();
 }
 async function retrySection(key) {
   await loadSectionData(key);
@@ -302,13 +321,23 @@ async function retrySection(key) {
 function buildSidebar() {
   const nav = document.getElementById('sideNav');
   nav.innerHTML = '';
-  SECTIONS.forEach(s => {
+  visibleSections().forEach(s => {
     const btn = el('button', {
       class: 'navbtn', id: 'nav-' + s.key, text: s.label,
       onclick: () => selectSection(s.key),
     });
     nav.appendChild(btn);
   });
+}
+function showNoAccess() {
+  state.active = null;
+  document.getElementById('panelTitle').textContent = 'No sections available';
+  document.getElementById('panelToolbar').innerHTML = '';
+  document.getElementById('panelBody').innerHTML = '';
+  document.getElementById('panelBody').appendChild(el('p', {
+    class: 'hint',
+    text: 'Your login has no sections assigned yet. Ask an administrator to grant access from Manage Users.',
+  }));
 }
 function selectSection(key) {
   state.active = key;
@@ -739,6 +768,21 @@ function renderSiteImages(body) {
 }
 
 /* ---------------- Manage Users ---------------- */
+function renderSectionCheckboxGrid(checkedKeys, onToggle) {
+  // checkedKeys: a Set of currently-checked SECTIONS keys (mutated in place
+  // as boxes are toggled). onToggle(key, checked, checkboxEl) fires after.
+  const grid = el('div', { style: 'display:flex;flex-wrap:wrap;gap:8px 18px;' });
+  SECTIONS.forEach(s => {
+    const label = el('label', { style: 'display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;white-space:nowrap;' });
+    const cb = el('input', { type: 'checkbox' });
+    cb.checked = checkedKeys.has(s.key);
+    cb.addEventListener('change', () => onToggle(s.key, cb.checked, cb));
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(s.label));
+    grid.appendChild(label);
+  });
+  return grid;
+}
 async function renderUsersPanel(body) {
   body.appendChild(el('p', { class: 'hint', text: 'Loading…' }));
   let data;
@@ -756,16 +800,17 @@ async function renderUsersPanel(body) {
   }
   body.innerHTML = '';
 
-  const list = el('div', { style: 'margin-bottom:28px;max-width:480px;' });
+  const managerCount = data.users.filter(u => Array.isArray(u.sections) && u.sections.includes('users')).length;
+
+  const list = el('div', { style: 'margin-bottom:28px;max-width:640px;' });
   data.users.forEach(u => {
     const isMe = u.username === data.me;
     const isLast = data.users.length <= 1;
-    const row = el('div', {
-      style: 'display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;',
-    });
-    row.appendChild(el('span', { text: u.username + (isMe ? '  (you)' : '') }));
+    const card = el('div', { class: 'card' });
+    const head = el('div', { class: 'card-head' });
+    head.appendChild(el('span', { class: 'card-title', text: u.username + (isMe ? '  (you)' : '') }));
     const delBtn = el('button', {
-      class: 'btn', text: 'Delete',
+      class: 'smallbtn', text: 'Delete',
       style: (isMe || isLast) ? 'opacity:.4;cursor:not-allowed;' : '',
       onclick: async () => {
         if (isMe || isLast) return;
@@ -777,12 +822,46 @@ async function renderUsersPanel(body) {
         } catch (e) { showToast(e.message, true); }
       },
     });
-    row.appendChild(delBtn);
-    list.appendChild(row);
+    head.appendChild(delBtn);
+    card.appendChild(head);
+
+    card.appendChild(el('div', { class: 'hint', text: 'Sections this login can access:', style: 'margin-bottom:8px;' }));
+    const currentSections = new Set(Array.isArray(u.sections) ? u.sections : []);
+    const status = el('span', { class: 'hint' });
+    const wouldOrphanUsers = isMe && managerCount <= 1;
+    const grid = renderSectionCheckboxGrid(currentSections, async (key, checked, cb) => {
+      const next = new Set(currentSections);
+      if (checked) next.add(key); else next.delete(key);
+      if (!next.size) {
+        cb.checked = true;
+        showToast('A login needs at least one section.', true);
+        return;
+      }
+      if (wouldOrphanUsers && key === 'users' && !checked) {
+        cb.checked = true;
+        showToast("You can't remove your own Manage Users access — no other login has it.", true);
+        return;
+      }
+      status.textContent = 'Saving…';
+      try {
+        await apiUpdateUserSections(u.username, [...next]);
+        currentSections.clear();
+        next.forEach(k => currentSections.add(k));
+        status.textContent = 'Saved.';
+        setTimeout(() => { if (status.isConnected) status.textContent = ''; }, 1500);
+      } catch (e) {
+        cb.checked = !checked; // revert the checkbox to reflect the failed save
+        status.textContent = '';
+        showToast(e.message, true);
+      }
+    });
+    card.appendChild(grid);
+    card.appendChild(status);
+    list.appendChild(card);
   });
   body.appendChild(list);
 
-  const form = el('div', { style: 'max-width:360px;border-top:1px solid var(--line);padding-top:20px;' });
+  const form = el('div', { style: 'max-width:480px;border-top:1px solid var(--line);padding-top:20px;' });
   form.appendChild(el('h3', { text: 'Add a new login', style: 'margin:0 0 12px;font-size:15px;' }));
   const uInput = el('input', {
     type: 'text', placeholder: 'Username', autocomplete: 'off',
@@ -792,7 +871,11 @@ async function renderUsersPanel(body) {
     type: 'password', placeholder: 'Password (min 8 characters)', autocomplete: 'new-password',
     style: 'width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;',
   });
-  const addStatus = el('div', { class: 'hint', style: 'margin-bottom:10px;' });
+  const newUserSections = new Set();
+  const permGrid = renderSectionCheckboxGrid(newUserSections, (key, checked) => {
+    if (checked) newUserSections.add(key); else newUserSections.delete(key);
+  });
+  const addStatus = el('div', { class: 'hint', style: 'margin:10px 0;' });
   const submit = async () => {
     const username = uInput.value.trim().toLowerCase();
     const password = pInput.value;
@@ -805,8 +888,12 @@ async function renderUsersPanel(body) {
       addStatus.textContent = 'Password must be at least 8 characters.';
       return;
     }
+    if (!newUserSections.size) {
+      addStatus.textContent = 'Tick at least one section for this login.';
+      return;
+    }
     try {
-      await apiCreateUser(username, password);
+      await apiCreateUser(username, password, [...newUserSections]);
       showToast('User added.');
       renderUsersPanel(body);
     } catch (e) {
@@ -818,6 +905,8 @@ async function renderUsersPanel(body) {
   const addBtn = el('button', { class: 'btn primary', text: 'Add user', onclick: submit });
   form.appendChild(uInput);
   form.appendChild(pInput);
+  form.appendChild(el('div', { class: 'hint', text: 'Sections this login can access:', style: 'margin-bottom:8px;' }));
+  form.appendChild(permGrid);
   form.appendChild(addStatus);
   form.appendChild(addBtn);
   body.appendChild(form);
