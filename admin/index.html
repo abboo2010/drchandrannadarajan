@@ -13,10 +13,10 @@
   *{box-sizing:border-box;}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
   /* ---------- Login screen ---------- */
-  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(10,38,71,.6),rgba(18,58,104,.8)),url('../images/splash-bg.png') center/cover no-repeat;}
-  #loginBox{background:var(--card);border-radius:14px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(10,38,71,.25),rgba(18,58,104,.4)),url('../images/splash-bg.png') center/cover no-repeat;}
+  #loginBox{background:var(--card);border-radius:14px;padding:100px 40px 44px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.35);margin-top:-90px;}
   #loginBox{text-align:center;}
-  #loginBox img{width:72px;height:72px;margin:0 auto 14px;display:block;}
+  #loginBox img{width:130px;height:130px;margin:0 auto 16px;display:block;}
   #loginBox h1{font-size:19px;margin:0 0 4px;}
   #loginBox input,#loginBox button{text-align:left;}
   #loginBox p{color:var(--muted);font-size:13px;margin:0 0 22px;}
@@ -704,7 +704,7 @@ function renderSiteImages(body) {
     const url = data && data.adminBg;
     if (url) {
       document.getElementById('loginScreen').style.backgroundImage =
-        "linear-gradient(160deg,rgba(10,38,71,.6),rgba(18,58,104,.8)), url('" + url + "')";
+        "linear-gradient(160deg,rgba(10,38,71,.25),rgba(18,58,104,.4)), url('" + url + "')";
     }
   } catch (e) {
     // keep the CSS fallback background — this is best-effort, never blocks login.
