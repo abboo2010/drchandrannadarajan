@@ -501,13 +501,13 @@
   .splash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
   /* Ambient full-viewport backdrop: a heavily blurred, darkened copy of the
      same background image, filling every pixel of the screen behind the
-     sharp aspect-locked artwork below. On wide windows the sharp artwork
-     doesn't reach the edges (it's kept at its exact native ratio so the
-     doctor photo / logo / text never stretch or misalign), so without
-     this the sides would show a flat color instead of the photo. Blurring
-     it hides the fact that it's a second, differently-cropped copy of the
-     image (a sharp second copy caused visible double edges) while still
-     making the background read as edge-to-edge. */
+     sharp aspect-locked artwork below. The artwork itself is kept at its
+     exact native aspect ratio (letterboxed) because the gold ring / logo /
+     text are positioned as percentages that only stay circular and aligned
+     with the doctor's photo when the frame keeps that exact ratio — on a
+     wide screen, dropping the aspect lock stretches the ring into an oval
+     and misaligns everything. This blurred copy fills the leftover strip
+     on the sides with more of the same image instead of a flat color. */
   .splash-bg-fill{
     position:absolute; inset:0;
     width:100%; height:100%;
@@ -532,6 +532,12 @@
   .splash-bg-img{
     position:absolute; top:0; left:0; right:0; bottom:0;
     width:100%; height:100%; object-fit:cover; display:block;
+    /* Feather the left/right edges of the sharp image into the blurred
+       backdrop behind it, instead of a hard cut where the two meet —
+       a clean edge there reads as a visible line even though the color
+       difference is small. */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, #000 80px, #000 calc(100% - 80px), transparent 100%);
   }
   .splash-content{
     position:absolute; top:0; left:0; right:0; bottom:0;
