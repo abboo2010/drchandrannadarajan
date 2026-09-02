@@ -15,6 +15,7 @@
 // no manual SQL beyond creating the admin_users table itself.
 const crypto = require('crypto');
 const { fetchAdminUser, countAdminUsers, upsertAdminUser } = require('./_supabase');
+const { ALL_SECTIONS } = require('./_sections');
 
 function sign(payload, secret) {
   return crypto.createHmac('sha256', secret).update(payload).digest('hex');
@@ -84,15 +85,21 @@ exports.handler = async (event) => {
   }
 
   let ok = false;
+  let sections = [];
   if (user) {
     ok = verifyPassword(password, user.password_hash);
+    sections = Array.isArray(user.sections) ? user.sections : [];
   } else {
     const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
     let existingCount = 1; // fail safe: assume accounts exist unless proven otherwise
     try { existingCount = await countAdminUsers(); } catch (e) { existingCount = 1; }
     if (existingCount === 0 && ADMIN_PASSWORD && password === ADMIN_PASSWORD) {
       try {
-        await upsertAdminUser(username, hashPassword(password));
+        // Bootstrap account gets every section, including 'users' — it's
+        // the only login that exists yet, so it has to be able to reach
+        // Manage Users to grant anyone else anything.
+        sections = ALL_SECTIONS;
+        await upsertAdminUser(username, hashPassword(password), sections);
         ok = true;
       } catch (e) {
         return { statusCode: 500, body: JSON.stringify({ error: 'Could not create the first account: ' + e.message }) };
@@ -106,5 +113,5 @@ exports.handler = async (event) => {
 
   const expiry = Date.now() + 12 * 60 * 60 * 1000; // 12h
   const token = `${expiry}.${username}.${sign(`${expiry}.${username}`, ADMIN_SECRET)}`;
-  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, username }) };
+  return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token, username, sections }) };
 };
