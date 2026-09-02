@@ -28,3 +28,17 @@ alter table content_sections enable row level security;
 insert into storage.buckets (id, name, public)
 values ('site-images', 'site-images', true)
 on conflict (id) do nothing;
+
+-- CMS login accounts (replaces the old single shared ADMIN_PASSWORD).
+-- password_hash is "<salt-hex>:<hash-hex>" from Node's scrypt — never a
+-- plain password. Same lockdown as content_sections: RLS on, zero
+-- policies, so only the Netlify Functions (service_role key) can touch
+-- it. The very first account is created automatically the first time
+-- anyone logs in with the old shared password while this table is
+-- empty — no manual insert needed here.
+create table if not exists admin_users (
+  username text primary key,
+  password_hash text not null,
+  created_at timestamptz not null default now()
+);
+alter table admin_users enable row level security;
