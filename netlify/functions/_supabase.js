@@ -77,12 +77,13 @@ async function uploadToStorage(bucket, key, buffer, contentType) {
 
 // ---- admin_users (CMS login accounts) ----
 
-// One row (username + password_hash) or null if that username doesn't exist.
+// One row (username + password_hash + sections) or null if that username
+// doesn't exist.
 async function fetchAdminUser(username) {
   const cfg = getSupabaseConfig();
   if (!cfg) return null;
   const res = await fetch(
-    `${cfg.url}/rest/v1/admin_users?username=eq.${encodeURIComponent(username)}&select=username,password_hash`,
+    `${cfg.url}/rest/v1/admin_users?username=eq.${encodeURIComponent(username)}&select=username,password_hash,sections`,
     { headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` } }
   );
   if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
@@ -102,19 +103,22 @@ async function countAdminUsers() {
   return Array.isArray(rows) ? rows.length : 0;
 }
 
-// All accounts (username + created_at only — password_hash never leaves here).
+// All accounts (username + sections + created_at — password_hash never leaves here).
 async function listAdminUsers() {
   const cfg = getSupabaseConfig();
   if (!cfg) throw new Error('Supabase not configured');
-  const res = await fetch(`${cfg.url}/rest/v1/admin_users?select=username,created_at&order=created_at.asc`, {
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users?select=username,sections,created_at&order=created_at.asc`, {
     headers: { apikey: cfg.key, Authorization: `Bearer ${cfg.key}` },
   });
   if (!res.ok) throw new Error(`Supabase read failed (${res.status})`);
   return res.json();
 }
 
-// Create or update one account's password (upsert on the username primary key).
-async function upsertAdminUser(username, passwordHash) {
+// Create a new account, or fully replace an existing one's password AND
+// permissions together (upsert on the username primary key). Use
+// updateAdminUserSections instead when only permissions are changing —
+// this always overwrites password_hash too.
+async function upsertAdminUser(username, passwordHash, sections) {
   const cfg = getSupabaseConfig();
   if (!cfg) throw new Error('Supabase not configured');
   const res = await fetch(`${cfg.url}/rest/v1/admin_users`, {
@@ -125,7 +129,29 @@ async function upsertAdminUser(username, passwordHash) {
       'Content-Type': 'application/json',
       Prefer: 'resolution=merge-duplicates,return=minimal',
     },
-    body: JSON.stringify([{ username, password_hash: passwordHash }]),
+    body: JSON.stringify([{ username, password_hash: passwordHash, sections: sections || [] }]),
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`Supabase write failed (${res.status})${text ? ': ' + text : ''}`);
+  }
+}
+
+// Change only which sections an existing account can access — leaves its
+// password untouched (a plain PATCH, not an upsert, so there's no need to
+// know or re-send the password hash just to tick a checkbox).
+async function updateAdminUserSections(username, sections) {
+  const cfg = getSupabaseConfig();
+  if (!cfg) throw new Error('Supabase not configured');
+  const res = await fetch(`${cfg.url}/rest/v1/admin_users?username=eq.${encodeURIComponent(username)}`, {
+    method: 'PATCH',
+    headers: {
+      apikey: cfg.key,
+      Authorization: `Bearer ${cfg.key}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({ sections: sections || [] }),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
@@ -148,5 +174,6 @@ async function deleteAdminUser(username) {
 
 module.exports = {
   getSupabaseConfig, fetchSectionRow, upsertSectionRow, uploadToStorage,
-  fetchAdminUser, countAdminUsers, listAdminUsers, upsertAdminUser, deleteAdminUser,
+  fetchAdminUser, countAdminUsers, listAdminUsers, upsertAdminUser,
+  updateAdminUserSections, deleteAdminUser,
 };
