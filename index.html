@@ -14,6 +14,10 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="IR@SABAH">
+<!-- Inline critical background so the page paints dark immediately, even
+     before style.css and the splash background image finish downloading
+     on a slow connection — avoids a flash of plain white. -->
+<style>html,body{background:#0a1530;margin:0;}</style>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
