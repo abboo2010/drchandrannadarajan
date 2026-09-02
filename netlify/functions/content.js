@@ -9,7 +9,7 @@
 // POST /api/content?section=X  — auth required (Bearer session token from
 //      /api/auth). Upserts the new value straight into Supabase — visible
 //      on the very next GET, no rebuild/redeploy.
-const { fetchSectionRow, upsertSectionRow, getSupabaseConfig } = require('./_supabase');
+const { fetchSectionRow, upsertSectionRow, getSupabaseConfig, fetchAdminUser } = require('./_supabase');
 const { verifyToken } = require('./auth');
 
 // NOTE: this folder is named "seed-content", not "content" — a sibling
@@ -55,8 +55,19 @@ exports.handler = async (event) => {
   }
 
   if (event.httpMethod === 'POST') {
-    if (!verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '')) {
+    const username = verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '');
+    if (!username) {
       return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
+    }
+    // Re-checked fresh against the database on every save (not baked into
+    // the token) so a permission change takes effect immediately instead
+    // of waiting out the token's 12h life.
+    let user;
+    try { user = await fetchAdminUser(username); } catch (e) {
+      return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Could not verify your permissions right now.' }) };
+    }
+    if (!user || !Array.isArray(user.sections) || !user.sections.includes(section)) {
+      return { statusCode: 403, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: "You don't have permission to edit this section." }) };
     }
     if (!getSupabaseConfig()) {
       return {
