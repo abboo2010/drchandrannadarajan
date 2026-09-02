@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content Admin — Dr. Chandran Nadarajan</title>
+<link rel="icon" href="../icon-192.png">
+<style>
+  :root{
+    --navy:#0a2647; --navy2:#123a68; --line:#e7ebf1; --bg:#eef1f5; --card:#ffffff;
+    --blue:#2f6fed; --teal:#14b8a6; --red:#ef4444; --text:#1b2532; --muted:#6b7688;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+  /* ---------- Login screen ---------- */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(10,38,71,.6),rgba(18,58,104,.8)),url('../images/splash-bg.png') center/cover no-repeat;}
+  #loginBox{background:var(--card);border-radius:14px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+  #loginBox{text-align:center;}
+  #loginBox img{width:72px;height:72px;margin:0 auto 14px;display:block;}
+  #loginBox h1{font-size:19px;margin:0 0 4px;}
+  #loginBox input,#loginBox button{text-align:left;}
+  #loginBox p{color:var(--muted);font-size:13px;margin:0 0 22px;}
+  #loginBox input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-size:15px;margin-bottom:12px;}
+  #loginBox button{width:100%;padding:12px;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
+  #loginBox button:active{transform:translateY(1px);}
+  #loginError{color:var(--red);font-size:13px;min-height:18px;margin-bottom:8px;}
+  /* ---------- App shell ---------- */
+  #app{display:none;min-height:100vh;}
+  #app.show{display:flex;}
+  #sidebar{width:230px;flex:none;background:var(--navy);color:#dbe6f5;padding:20px 0;display:flex;flex-direction:column;}
+  #sidebar h2{font-size:14px;color:#fff;padding:0 20px 16px;margin:0 0 8px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center;}
+  #sidebar h2 img{display:block;width:56px;height:56px;margin:0 auto 10px;}
+  .navbtn{display:block;width:100%;text-align:left;background:none;border:0;color:#c4d3e8;padding:11px 20px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;}
+  .navbtn:hover{background:rgba(255,255,255,.06);}
+  .navbtn.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--teal);font-weight:600;}
+  #logoutBtn{margin:16px 20px 0;padding:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:6px;cursor:pointer;font-size:12.5px;}
+  #main{flex:1;padding:26px 34px;overflow-y:auto;max-height:100vh;}
+  #panelHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  #panelHeader h1{font-size:20px;margin:0;}
+  .toolbar{display:flex;gap:10px;align-items:center;}
+  .btn{padding:9px 16px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;font-weight:600;}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .btn.danger{background:var(--red);border-color:var(--red);color:#fff;}
+  .btn:disabled{opacity:.5;cursor:default;}
+  #toast{position:fixed;bottom:22px;right:22px;background:#1b2532;color:#fff;padding:12px 18px;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:none;z-index:50;}
+  #toast.error{background:var(--red);}
+  /* ---------- Cards / fields ---------- */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .card-title{font-weight:700;font-size:14px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+  .field input[type=text],.field input[type=number],.field textarea,.field select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;font-family:inherit;background:#fbfcfe;}
+  .field textarea{min-height:70px;resize:vertical;}
+  .triplet{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:#fafcff;}
+  .triplet > .tlabel{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;}
+  .tlang{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;}
+  .tlang .tag{flex:none;width:34px;font-size:11px;font-weight:700;color:var(--muted);padding-top:9px;}
+  .tlang .field{flex:1;margin-bottom:0;}
+  .colorrow{display:flex;gap:8px;align-items:center;}
+  .colorrow input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:6px;padding:2px;}
+  .subcard{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;background:#fbfcfe;position:relative;}
+  .smallbtn{padding:5px 10px;font-size:11.5px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;}
+  .idbadge{display:inline-block;font-size:11px;color:var(--muted);font-family:monospace;margin-left:8px;}
+  #searchBox{padding:9px 12px;border:1px solid var(--line);border-radius:7px;width:280px;font-size:13px;}
+  .imgslots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
+  .imgslot{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;}
+  .imgslot img{max-width:100%;max-height:140px;border-radius:6px;background:#f4f6f9;margin-bottom:10px;object-fit:contain;}
+  .imgslot h3{font-size:13px;margin:0 0 10px;}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div id="loginBox">
+    <img src="../images/logo.png" alt="IR@SABAH logo">
+    <h1>Content Admin</h1>
+    <p>Dr. Chandran Nadarajan &mdash; IR@SABAH site</p>
+    <div id="loginError"></div>
+    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+    <button id="loginBtn">Log in</button>
+  </div>
+</div>
+
+<div id="app">
+  <aside id="sidebar">
+    <h2><img src="../images/logo.png" alt="IR@SABAH logo">IR@SABAH CMS</h2>
+    <nav id="sideNav"></nav>
+    <div style="flex:1;"></div>
+    <button id="logoutBtn">Log out</button>
+  </aside>
+  <main id="main">
+    <div id="panelHeader">
+      <h1 id="panelTitle">&nbsp;</h1>
+      <div class="toolbar" id="panelToolbar"></div>
+    </div>
+    <div id="panelBody"></div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script src="../data.js"></script>
+<script>
+/* ============================================================
+   Content Admin — generic JSON-driven form renderer.
+   Talks to /api/auth, /api/content?section=X, /api/image.
+   ============================================================ */
+'use strict';
+
+const SECTIONS = [
+  { key: 'conditions',    label: 'Conditions',      kind: 'array' },
+  { key: 'treatments',    label: 'Treatments',      kind: 'array' },
+  { key: 'doctor-bio',    label: 'Doctor Bio',      kind: 'object' },
+  { key: 'education',     label: 'Education',       kind: 'array' },
+  { key: 'videos',        label: 'Videos',          kind: 'array' },
+  { key: 'testimonials',  label: 'Testimonials',    kind: 'array' },
+  { key: 'reviews',       label: 'Reviews',         kind: 'array' },
+  { key: 'site-text',     label: 'Site Text',       kind: 'sitetext' },
+  { key: 'site-images',   label: 'Photos & Logo',   kind: 'siteimages' },
+];
+
+const TITLE_FIELD_CANDIDATES = ['title_en', 'name', 'label'];
+const LABELS = {
+  title:'Title', desc:'Description', overview:'Overview', diagnosis:'Diagnosis',
+  symptoms:'Symptoms', causes:'Causes', steps:'Steps', benefits:'Benefits',
+  recovery:'Recovery', tag:'Tag', bio:'Bio', credline:'Credential Line',
+  meta:'Meta', quote:'Quote', text:'Text', name:'Name',
+};
+const TEXTAREA_BASE_RE = /desc|overview|bio|note|diagnosis|recovery|quote/i;
+
+const state = {
+  token: sessionStorage.getItem('cms_token') || null,
+  data: {},      // section key -> current (possibly edited) value
+  dirty: {},     // section key -> bool
+  loadError: {}, // section key -> error message, or null once loaded OK
+  active: null,
+};
+
+/* ---------------- helpers ---------------- */
+function humanize(base) {
+  const lower = base.toLowerCase();
+  if (LABELS[lower]) return LABELS[lower];
+  const spaced = base.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ');
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+function el(tag, attrs, ...children) {
+  const e = document.createElement(tag);
+  Object.entries(attrs || {}).forEach(([k, v]) => {
+    if (k === 'text') e.textContent = v;
+    else if (k === 'html') e.innerHTML = v;
+    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v);
+  });
+  children.flat().forEach(c => { if (c) e.appendChild(c); });
+  return e;
+}
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = isError ? 'error' : '';
+  t.style.display = 'block';
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { t.style.display = 'none'; }, 3200);
+}
+function markDirty(key) { state.dirty[key] = true; updateToolbar(); }
+
+/* ---------------- API ---------------- */
+async function apiGet(section) {
+  let res;
+  try {
+    res = await fetch('/api/content?section=' + encodeURIComponent(section), { cache: 'no-store' });
+  } catch (e) {
+    throw new Error('Could not reach the server at all (network error). Check your connection and try again.');
+  }
+  if (!res.ok) {
+    let detail = '';
+    try { const j = await res.json(); if (j.error) detail = ' — ' + j.error; } catch {}
+    throw new Error('Server error (HTTP ' + res.status + ')' + detail + '. This is NOT the same as an empty section — do not save over it.');
+  }
+  return res.json();
+}
+async function apiSave(section, data) {
+  const res = await fetch('/api/content?section=' + encodeURIComponent(section), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
+    body: JSON.stringify(data),
+  });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Save failed');
+  return json;
+}
+async function apiUploadImage(dataUrl, filename) {
+  const res = await fetch('/api/image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
+    body: JSON.stringify({ dataUrl, filename }),
+  });
+  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(json.error || 'Upload failed');
+  return json.url;
+}
+
+/* ---------------- auth ---------------- */
+function forceLogout(message) {
+  state.token = null;
+  sessionStorage.removeItem('cms_token');
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('loginScreen').style.display = 'flex';
+  if (message) document.getElementById('loginError').textContent = message;
+}
+async function login(password) {
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  try {
+    const res = await fetch('/api/auth', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) { errEl.textContent = json.error || 'Incorrect password'; return; }
+    state.token = json.token;
+    sessionStorage.setItem('cms_token', json.token);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('show');
+    await boot();
+  } catch (e) {
+    errEl.textContent = 'Could not reach the server. Try again.';
+  }
+}
+
+/* ---------------- boot / sidebar ---------------- */
+async function loadSectionData(key) {
+  const def = SECTIONS.find(s => s.key === key);
+  try {
+    state.data[key] = await apiGet(key);
+    state.loadError[key] = null;
+  } catch (e) {
+    // Keep any previously-loaded good data if this is a retry; only default
+    // to empty on the very first load. Either way, loadError is what the
+    // panel actually checks before showing an empty-state message, so a
+    // failed fetch is never confused with "there's genuinely nothing here."
+    if (!(key in state.data)) state.data[key] = def.kind === 'array' ? [] : {};
+    state.loadError[key] = e.message || 'Failed to load this section.';
+  }
+}
+async function boot() {
+  buildSidebar();
+  await Promise.all(SECTIONS.map(s => loadSectionData(s.key)));
+  selectSection(SECTIONS[0].key);
+}
+async function retrySection(key) {
+  await loadSectionData(key);
+  if (state.active === key) renderPanel(SECTIONS.find(s => s.key === key));
+}
+function buildSidebar() {
+  const nav = document.getElementById('sideNav');
+  nav.innerHTML = '';
+  SECTIONS.forEach(s => {
+    const btn = el('button', {
+      class: 'navbtn', id: 'nav-' + s.key, text: s.label,
+      onclick: () => selectSection(s.key),
+    });
+    nav.appendChild(btn);
+  });
+}
+function selectSection(key) {
+  state.active = key;
+  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.id === 'nav-' + key));
+  const def = SECTIONS.find(s => s.key === key);
+  document.getElementById('panelTitle').textContent = def.label;
+  renderPanel(def);
+}
+function updateToolbar() {
+  const def = SECTIONS.find(s => s.key === state.active);
+  if (!def) return;
+  const saveBtn = document.getElementById('saveBtn-' + def.key);
+  if (saveBtn) saveBtn.disabled = !state.dirty[def.key];
+}
+
+/* ---------------- panel dispatch ---------------- */
+function renderPanel(def) {
+  const toolbar = document.getElementById('panelToolbar');
+  const body = document.getElementById('panelBody');
+  toolbar.innerHTML = ''; body.innerHTML = '';
+
+  // If the last fetch for this section failed, show that plainly instead of
+  // rendering an empty-looking section — and don't offer Save/Add, since
+  // saving right now would overwrite whatever's actually stored with an
+  // empty placeholder.
+  if (state.loadError[def.key]) {
+    const retryBtn = el('button', { class: 'btn primary', text: 'Retry', onclick: () => retrySection(def.key) });
+    toolbar.appendChild(retryBtn);
+    body.appendChild(el('div', {
+      style: 'background:#fde8e8;border:1px solid #f3b4b4;border-radius:10px;padding:16px 18px;color:#7a1f1f;',
+    },
+      el('strong', { text: "Couldn't load this section — this is a server error, not empty content." }),
+      el('p', { text: state.loadError[def.key], style: 'margin:8px 0 0;font-size:13px;' })
+    ));
+    return;
+  }
+
+  if (def.kind === 'siteimages') { renderSiteImages(body); return; }
+
+  if (def.kind !== 'siteimages') {
+    const saveBtn = el('button', {
+      class: 'btn primary', id: 'saveBtn-' + def.key, text: 'Save changes',
+      disabled: state.dirty[def.key] ? null : 'disabled',
+      onclick: () => doSave(def.key),
+    });
+    if (!state.dirty[def.key]) saveBtn.disabled = true;
+    toolbar.appendChild(saveBtn);
+  }
+
+  if (def.kind === 'array') {
+    const addBtn = el('button', { class: 'btn', text: '+ Add new', onclick: () => addArrayItem(def.key) });
+    toolbar.appendChild(addBtn);
+    renderArraySection(def.key, body);
+  } else if (def.kind === 'object') {
+    renderObjectFields(state.data[def.key], body, [def.key]);
+  } else if (def.kind === 'sitetext') {
+    renderSiteText(body, toolbar);
+  }
+}
+async function doSave(key) {
+  const btn = document.getElementById('saveBtn-' + key);
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  try {
+    await apiSave(key, state.data[key]);
+    state.dirty[key] = false;
+    showToast('Saved — live on the site now.');
+  } catch (e) {
+    showToast(e.message, true);
+  } finally {
+    if (btn) btn.textContent = 'Save changes';
+    updateToolbar();
+  }
+}
+
+/* ---------------- array sections (cards + add/remove) ---------------- */
+function itemTitle(item, index) {
+  for (const f of TITLE_FIELD_CANDIDATES) if (item[f]) return item[f];
+  return 'Item ' + (index + 1);
+}
+function blankLike(value) {
+  if (Array.isArray(value)) return value.length && typeof value[0] === 'object' ? [] : [];
+  if (typeof value === 'object' && value !== null) {
+    const out = {}; Object.keys(value).forEach(k => out[k] = blankLike(value[k])); return out;
+  }
+  if (typeof value === 'number') return 0;
+  return '';
+}
+function newArrayItem(key) {
+  const arr = state.data[key];
+  if (arr.length) {
+    const tmpl = blankLike(arr[0]);
+    // keep sensible defaults for icon/color so the new card doesn't look broken
+    if ('icon' in arr[0]) tmpl.icon = arr[0].icon;
+    if ('color' in arr[0]) tmpl.color = arr[0].color;
+    if ('stars' in arr[0]) tmpl.stars = 5;
+    return tmpl;
+  }
+  return { title_en: '', title_bm: '', title_zh: '' };
+}
+function addArrayItem(key) {
+  state.data[key].push(newArrayItem(key));
+  markDirty(key);
+  renderArraySection(key, document.getElementById('panelBody'));
+}
+function renderArraySection(key, container) {
+  container.innerHTML = '';
+  const arr = state.data[key];
+  arr.forEach((item, i) => {
+    const card = el('div', { class: 'card' });
+    const delBtn = el('button', { class: 'smallbtn', text: 'Delete' });
+    let confirming = false;
+    delBtn.addEventListener('click', () => {
+      if (!confirming) {
+        confirming = true; delBtn.textContent = 'Click again to confirm';
+        delBtn.style.background = '#fde8e8'; delBtn.style.borderColor = '#f3b4b4';
+        setTimeout(() => { confirming = false; delBtn.textContent = 'Delete'; delBtn.style.background=''; delBtn.style.borderColor=''; }, 3000);
+        return;
+      }
+      arr.splice(i, 1);
+      markDirty(key);
+      renderArraySection(key, container);
+    });
+    card.appendChild(el('div', { class: 'card-head' },
+      el('span', { class: 'card-title', text: itemTitle(item, i) },
+        item.id ? el('span', { class: 'idbadge', text: item.id }) : null),
+      delBtn));
+    const body = el('div', {});
+    renderObjectFields(item, body, [key, i], () => markDirty(key));
+    card.appendChild(body);
+    container.appendChild(card);
+  });
+  if (!arr.length) container.appendChild(el('p', { text: 'Nothing here yet — click "Add new" to create the first entry.', class:'hint' }));
+}
+
+/* ---------------- generic object field renderer ---------------- */
+function collectTriplets(obj) {
+  const consumed = new Set();
+  const groups = [];
+  Object.keys(obj).forEach(k => {
+    const m = /^(.+)_(en|bm|zh)$/.exec(k);
+    if (!m) return;
+    const [, base, lang] = m;
+    let group = groups.find(g => g.base === base);
+    if (!group) { group = { base, langs: {} }; groups.push(group); }
+    group.langs[lang] = k;
+    consumed.add(k);
+  });
+  return { groups, consumed };
+}
+function onChangeMarker(key, notify) {
+  return () => { if (notify) notify(); else markDirty(key); };
+}
+function renderObjectFields(obj, container, path, notify) {
+  const key = path[0];
+  const { groups, consumed } = collectTriplets(obj);
+  const renderedBases = new Set();
+  Object.keys(obj).forEach(k => {
+    if (k === 'id') { container.appendChild(renderIdField(obj, k, notify, key)); return; }
+    if (k === 'icon') { container.appendChild(renderIconField(obj, k, notify, key)); return; }
+    if (k === 'color') { container.appendChild(renderColorField(obj, k, notify, key)); return; }
+    if (k === 'related') { container.appendChild(renderRelatedField(obj, k, notify, key)); return; }
+    if (consumed.has(k)) {
+      const base = /^(.+)_(en|bm|zh)$/.exec(k)[1];
+      if (renderedBases.has(base)) return;
+      renderedBases.add(base);
+      container.appendChild(renderTripletGroup(obj, groups.find(g => g.base === base), notify, key));
+      return;
+    }
+    const val = obj[k];
+    if (Array.isArray(val)) {
+      if (!val.length || typeof val[0] !== 'object') container.appendChild(renderStringArrayField(obj, k, notify, key));
+      else container.appendChild(renderObjectArrayField(obj, k, notify, key));
+      return;
+    }
+    if (val && typeof val === 'object') { container.appendChild(renderNestedFlatObject(obj, k, notify, key)); return; }
+    if (typeof val === 'number') { container.appendChild(renderNumberField(obj, k, notify, key)); return; }
+    container.appendChild(renderPlainStringField(obj, k, notify, key));
+  });
+}
+function renderIdField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: 'ID' }));
+  const input = el('input', { type: 'text', value: obj[k] || '' });
+  input.value = obj[k] || '';
+  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
+  wrap.appendChild(input);
+  wrap.appendChild(el('div', { class: 'hint', text: 'Used by "Related" fields elsewhere — avoid changing once other entries reference it.' }));
+  return wrap;
+}
+function renderIconField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: 'Icon' }));
+  const select = el('select', {});
+  const names = (typeof ICONS !== 'undefined') ? Object.keys(ICONS) : [obj[k]];
+  names.forEach(name => {
+    const opt = el('option', { value: name, text: name });
+    if (name === obj[k]) opt.setAttribute('selected', 'selected');
+    select.appendChild(opt);
+  });
+  select.addEventListener('change', () => { obj[k] = select.value; onChangeMarker(key, notify)(); });
+  wrap.appendChild(select);
+  return wrap;
+}
+function renderColorField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: 'Color' }));
+  const row = el('div', { class: 'colorrow' });
+  const swatch = el('input', { type: 'color', value: /^#([0-9a-f]{6})$/i.test(obj[k]) ? obj[k] : '#2f6fed' });
+  const text = el('input', { type: 'text', value: obj[k] || '' });
+  swatch.addEventListener('input', () => { text.value = swatch.value; obj[k] = swatch.value; onChangeMarker(key, notify)(); });
+  text.addEventListener('input', () => { obj[k] = text.value; if (/^#([0-9a-f]{6})$/i.test(text.value)) swatch.value = text.value; onChangeMarker(key, notify)(); });
+  row.appendChild(swatch); row.appendChild(text);
+  wrap.appendChild(row);
+  return wrap;
+}
+function renderRelatedField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: 'Related (comma-separated IDs)' }));
+  const input = el('input', { type: 'text', value: obj[k] || '' });
+  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
+  wrap.appendChild(input);
+  return wrap;
+}
+function renderNumberField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: humanize(k) }));
+  const input = el('input', { type: 'number', value: obj[k] });
+  input.addEventListener('input', () => { obj[k] = Number(input.value); onChangeMarker(key, notify)(); });
+  wrap.appendChild(input);
+  return wrap;
+}
+function renderPlainStringField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: humanize(k) }));
+  const long = TEXTAREA_BASE_RE.test(k) || (obj[k] || '').length > 60;
+  const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
+  input.value = obj[k] || '';
+  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
+  wrap.appendChild(input);
+  return wrap;
+}
+function renderStringArrayField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  wrap.appendChild(el('label', { text: humanize(k) + ' (one per line)' }));
+  const textarea = el('textarea', {});
+  textarea.value = (obj[k] || []).join('\n');
+  textarea.addEventListener('input', () => {
+    obj[k] = textarea.value.split('\n').map(s => s.trim()).filter(Boolean);
+    onChangeMarker(key, notify)();
+  });
+  wrap.appendChild(textarea);
+  return wrap;
+}
+function renderTripletGroup(obj, group, notify, key) {
+  const wrap = el('div', { class: 'triplet' });
+  wrap.appendChild(el('div', { class: 'tlabel', text: humanize(group.base) }));
+  [['en', 'EN'], ['bm', 'BM'], ['zh', 'ZH']].forEach(([lang, tag]) => {
+    const fkey = group.langs[lang];
+    if (!fkey) return;
+    const row = el('div', { class: 'tlang' });
+    row.appendChild(el('div', { class: 'tag', text: tag }));
+    const fieldWrap = el('div', { class: 'field' });
+    if (Array.isArray(obj[fkey])) {
+      const ta = el('textarea', {});
+      ta.value = (obj[fkey] || []).join('\n');
+      ta.addEventListener('input', () => { obj[fkey] = ta.value.split('\n').map(s => s.trim()).filter(Boolean); onChangeMarker(key, notify)(); });
+      fieldWrap.appendChild(ta);
+    } else {
+      const long = TEXTAREA_BASE_RE.test(group.base) || (obj[fkey] || '').length > 60;
+      const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
+      input.value = obj[fkey] || '';
+      input.addEventListener('input', () => { obj[fkey] = input.value; onChangeMarker(key, notify)(); });
+      fieldWrap.appendChild(input);
+    }
+    row.appendChild(fieldWrap);
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+function renderNestedFlatObject(obj, k, notify, key) {
+  const wrap = el('div', { class: 'triplet' });
+  wrap.appendChild(el('div', { class: 'tlabel', text: humanize(k) }));
+  Object.keys(obj[k]).forEach(subKey => {
+    const row = el('div', { class: 'field' });
+    row.appendChild(el('label', { text: humanize(subKey) }));
+    const input = el('input', { type: 'text', value: obj[k][subKey] || '' });
+    input.addEventListener('input', () => { obj[k][subKey] = input.value; onChangeMarker(key, notify)(); });
+    row.appendChild(input);
+    wrap.appendChild(row);
+  });
+  return wrap;
+}
+function renderObjectArrayField(obj, k, notify, key) {
+  const wrap = el('div', { class: 'field' });
+  const header = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;' });
+  header.appendChild(el('label', { text: humanize(k), style: 'margin:0;' }));
+  const addBtn = el('button', { class: 'smallbtn', text: '+ Add' });
+  header.appendChild(addBtn);
+  wrap.appendChild(header);
+  const listEl = el('div', {});
+  wrap.appendChild(listEl);
+
+  function renderList() {
+    listEl.innerHTML = '';
+    obj[k].forEach((item, i) => {
+      const sub = el('div', { class: 'subcard' });
+      const delBtn = el('button', { class: 'smallbtn', text: 'Remove', style: 'position:absolute;top:10px;right:10px;' });
+      delBtn.addEventListener('click', () => { obj[k].splice(i, 1); onChangeMarker(key, notify)(); renderList(); });
+      sub.appendChild(delBtn);
+      const body = el('div', {});
+      renderObjectFields(item, body, [key], () => onChangeMarker(key, notify)());
+      sub.appendChild(body);
+      listEl.appendChild(sub);
+    });
+  }
+  addBtn.addEventListener('click', () => {
+    const tmpl = obj[k].length ? blankLike(obj[k][0]) : { text_en: '', text_bm: '', text_zh: '' };
+    obj[k].push(tmpl);
+    onChangeMarker(key, notify)();
+    renderList();
+  });
+  renderList();
+  return wrap;
+}
+
+/* ---------------- Site Text (search + EN/BM/ZH map) ---------------- */
+function renderSiteText(body, toolbar) {
+  const search = el('input', { id: 'searchBox', type: 'text', placeholder: 'Search keys or text…' });
+  toolbar.insertBefore(search, toolbar.firstChild);
+  const list = el('div', {});
+  body.appendChild(list);
+
+  function draw(filter) {
+    list.innerHTML = '';
+    const data = state.data['site-text'];
+    const q = (filter || '').toLowerCase();
+    Object.keys(data).forEach(k => {
+      const entry = data[k] || {};
+      const hay = (k + ' ' + (entry.en||'') + ' ' + (entry.bm||'') + ' ' + (entry.zh||'')).toLowerCase();
+      if (q && !hay.includes(q)) return;
+      const card = el('div', { class: 'card' });
+      card.appendChild(el('div', { class: 'card-title', text: k, style: 'margin-bottom:10px;font-family:monospace;font-size:12.5px;color:#6b7688;' }));
+      ['en','bm','zh'].forEach(lang => {
+        const row = el('div', { class: 'tlang' });
+        row.appendChild(el('div', { class: 'tag', text: lang.toUpperCase() }));
+        const fieldWrap = el('div', { class: 'field' });
+        const long = (entry[lang] || '').length > 60;
+        const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
+        input.value = entry[lang] || '';
+        input.addEventListener('input', () => { entry[lang] = input.value; data[k] = entry; markDirty('site-text'); });
+        fieldWrap.appendChild(input);
+        row.appendChild(fieldWrap);
+        card.appendChild(row);
+      });
+      list.appendChild(card);
+    });
+    if (!list.children.length) list.appendChild(el('p', { class: 'hint', text: 'No matches.' }));
+  }
+  search.addEventListener('input', () => draw(search.value));
+  draw('');
+}
+
+/* ---------------- Photos & Logo (auto-save on upload) ---------------- */
+const IMAGE_SLOTS = [
+  { key: 'doctor', label: 'Doctor Photo' },
+  { key: 'logo', label: 'Clinic Logo' },
+  { key: 'splashbg', label: 'Splash Background (desktop)' },
+  { key: 'splashbgmobile', label: 'Splash Background (mobile)' },
+];
+function resizeImageToDataUrl(file, maxDim, quality) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = () => { img.onload = () => {
+      let { width, height } = img;
+      if (width > maxDim || height > maxDim) {
+        const scale = maxDim / Math.max(width, height);
+        width = Math.round(width * scale); height = Math.round(height * scale);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    }; img.onerror = reject; img.src = reader.result; };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function renderSiteImages(body) {
+  const grid = el('div', { class: 'imgslots' });
+  const data = state.data['site-images'] || {};
+  IMAGE_SLOTS.forEach(slot => {
+    const box = el('div', { class: 'imgslot' });
+    box.appendChild(el('h3', { text: slot.label }));
+    const img = el('img', { src: data[slot.key] || '' });
+    box.appendChild(img);
+    const fileInput = el('input', { type: 'file', accept: 'image/*', style: 'display:none;' });
+    const chooseBtn = el('button', { class: 'btn', text: 'Upload new photo', onclick: () => fileInput.click() });
+    const status = el('div', { class: 'hint' });
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files[0];
+      if (!file) return;
+      status.textContent = 'Resizing…';
+      try {
+        const dataUrl = await resizeImageToDataUrl(file, 1600, 0.85);
+        status.textContent = 'Uploading…';
+        const url = await apiUploadImage(dataUrl, slot.key);
+        data[slot.key] = url;
+        state.data['site-images'] = data;
+        status.textContent = 'Saving…';
+        await apiSave('site-images', data);
+        img.src = url;
+        status.textContent = 'Saved.';
+        showToast(slot.label + ' updated — live on the site now.');
+      } catch (e) {
+        status.textContent = '';
+        showToast(e.message, true);
+      }
+    });
+    box.appendChild(chooseBtn);
+    box.appendChild(fileInput);
+    box.appendChild(status);
+    grid.appendChild(box);
+  });
+  body.appendChild(grid);
+}
+
+/* ---------------- wire up login ---------------- */
+document.getElementById('loginBtn').addEventListener('click', () => login(document.getElementById('passwordInput').value));
+document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') login(e.target.value); });
+document.getElementById('logoutBtn').addEventListener('click', () => forceLogout());
+
+if (state.token) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').classList.add('show');
+  boot().catch(() => forceLogout('Please log in again.'));
+}
+</script>
+</body>
+</html>
