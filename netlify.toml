@@ -15,3 +15,8 @@
   from = "/api/image"
   to = "/.netlify/functions/image"
   status = 200
+
+[[redirects]]
+  from = "/api/users"
+  to = "/.netlify/functions/users"
+  status = 200
