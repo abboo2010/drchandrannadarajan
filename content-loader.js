@@ -1,92 +1,107 @@
 // ============================================================
-// content-loader.js — fetches live content from /api/content
-// (Netlify Functions backed by Supabase) and merges it into the
-// app on every load. Replaces the old sheets-loader.js (Google
-// Sheets CSV) now that content is edited through the /admin CMS.
+// content-loader.js — fetches the CMS-edited content from the live
+// admin API (/api/content?section=X, backed by Netlify Blobs and
+// edited via the custom admin panel at /admin) and merges it into
+// the app on every load. An edit saved in the admin panel is written
+// straight to the blob store, so it shows up here on the very next
+// load — no git commit, no rebuild.
 //
-// Same resilience pattern as before: the page already rendered
-// once from the baked-in fallback (content-data.js/data.js/
-// image-data.js) by the time this runs — this just quietly
-// upgrades it in place. One section failing (offline, Supabase
-// not configured yet) never blocks the others via Promise.allSettled,
-// and content.js itself falls back to the bundled content/*.json
-// server-side too, so a fresh section with nothing saved yet still
-// renders correctly.
+// Kept as a separate "upgrade over the baked-in fallback" step
+// (rather than making the API the only source) for the same reason
+// as before: if a request ever fails (network hiccup, offline PWA
+// use before the service worker has this exact version cached), the
+// page still renders from whatever shipped in content-data.js
+// instead of breaking.
 // ============================================================
 
-async function fetchSection(section) {
-  const res = await fetch('/api/content?section=' + encodeURIComponent(section), { cache: 'no-store' });
-  if (!res.ok) throw new Error('content fetch failed: ' + section + ' ' + res.status);
+const CONTENT_URLS = {
+  conditions:   "/api/content?section=conditions",
+  treatments:   "/api/content?section=treatments",
+  doctorBio:    "/api/content?section=doctor-bio",
+  education:    "/api/content?section=education",
+  videos:       "/api/content?section=videos",
+  testimonials: "/api/content?section=testimonials",
+  reviews:      "/api/content?section=reviews",
+  siteText:     "/api/content?section=site-text",
+  siteImages:   "/api/content?section=site-images",
+};
+
+async function fetchJSON(url){
+  const res = await fetch(url, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Content fetch failed: ' + url + ' (' + res.status + ')');
   return res.json();
 }
 
 // Mutates an array in place so existing `const CONDITIONS` etc. bindings
 // (and anything already holding a reference to them) see the update,
 // without needing to reassign the const itself.
-function replaceArrayContents(arr, newItems) {
+function replaceArrayContents(arr, newItems){
   arr.length = 0;
   newItems.forEach(it => arr.push(it));
 }
 
-function rebuildLookups() {
+function rebuildLookups(){
   Object.keys(conditionsById).forEach(k => delete conditionsById[k]);
   CONDITIONS.forEach(c => { if (c.id) conditionsById[c.id] = c; });
   Object.keys(treatmentsById).forEach(k => delete treatmentsById[k]);
   TREATMENTS.forEach(t => { if (t.id) treatmentsById[t.id] = t; });
 }
 
-async function loadConditions() {
-  const data = await fetchSection('conditions');
-  if (Array.isArray(data) && data.length) replaceArrayContents(CONDITIONS, data);
+/* ---------------- PER-FILE LOADERS ---------------- */
+
+async function loadConditions(){
+  const data = await fetchJSON(CONTENT_URLS.conditions);
+  if (data.items && data.items.length) replaceArrayContents(CONDITIONS, data.items);
 }
-async function loadTreatments() {
-  const data = await fetchSection('treatments');
-  if (Array.isArray(data) && data.length) replaceArrayContents(TREATMENTS, data);
+async function loadTreatments(){
+  const data = await fetchJSON(CONTENT_URLS.treatments);
+  if (data.items && data.items.length) replaceArrayContents(TREATMENTS, data.items);
 }
-async function loadEducation() {
-  const data = await fetchSection('education');
-  if (Array.isArray(data) && data.length) replaceArrayContents(EDUCATION, data);
+async function loadDoctorBio(){
+  const data = await fetchJSON(CONTENT_URLS.doctorBio);
+  Object.assign(DOCTOR_BIO, data);
 }
-async function loadVideos() {
-  const data = await fetchSection('videos');
-  if (Array.isArray(data) && data.length) replaceArrayContents(VIDEOS, data);
+async function loadEducation(){
+  const data = await fetchJSON(CONTENT_URLS.education);
+  if (data.items && data.items.length) replaceArrayContents(EDUCATION, data.items);
 }
-async function loadTestimonials() {
-  const data = await fetchSection('testimonials');
-  if (Array.isArray(data) && data.length) replaceArrayContents(TESTIMONIALS, data);
+async function loadVideos(){
+  const data = await fetchJSON(CONTENT_URLS.videos);
+  if (data.items && data.items.length) replaceArrayContents(VIDEOS, data.items);
 }
-async function loadReviews() {
-  const data = await fetchSection('reviews');
-  if (Array.isArray(data) && data.length) replaceArrayContents(REVIEWS, data);
+async function loadTestimonials(){
+  const data = await fetchJSON(CONTENT_URLS.testimonials);
+  if (data.items && data.items.length) replaceArrayContents(TESTIMONIALS, data.items);
 }
-async function loadDoctorBio() {
-  const data = await fetchSection('doctor-bio');
-  if (data && typeof data === 'object') Object.assign(DOCTOR_BIO, data);
+async function loadReviews(){
+  const data = await fetchJSON(CONTENT_URLS.reviews);
+  if (data.items && data.items.length) replaceArrayContents(REVIEWS, data.items);
 }
-async function loadSiteText() {
-  const data = await fetchSection('site-text');
-  if (!data) return;
+// Editable short phrases used in the header, homepage hero, and splash
+// (name/role/tagline) — anything tied to a data-i18n key.
+async function loadSiteText(){
+  const data = await fetchJSON(CONTENT_URLS.siteText);
   Object.keys(data).forEach(key => {
-    if (UI[key] && data[key]) Object.assign(UI[key], data[key]);
+    if (!UI[key]) return; // unknown/renamed key — skip rather than create a broken one
+    UI[key] = data[key];
   });
 }
-async function loadSiteImages() {
-  const data = await fetchSection('site-images');
-  if (!data) return;
-  const apply = (slot, url) => {
-    if (!url) return;
-    document.querySelectorAll('img[data-img-src="' + slot + '"]').forEach(img => { img.src = url; });
-  };
-  apply('doctor', data.doctor);
-  apply('logo', data.logo);
-  apply('splashbg', data.splashbg);
-  apply('splashbgmobile', data.splashbgmobile);
+// Doctor photo, clinic logo, and the two splash backgrounds — every
+// <img data-img-src="X"> on the page gets pointed at whatever path this
+// file currently holds for X, so uploading a replacement in the CMS
+// (which saves to a new file and updates this JSON) takes effect without
+// touching any markup.
+async function loadSiteImages(){
+  const data = await fetchJSON(CONTENT_URLS.siteImages);
+  Object.keys(data).forEach(key => {
+    document.querySelectorAll('img[data-img-src="' + key + '"]').forEach(img => { img.src = data[key]; });
+  });
 }
 
 /* ---------------- ORCHESTRATION ---------------- */
-async function loadLiveContent() {
-  // allSettled: one section failing never blocks the others — each just
-  // keeps its fallback content.
+async function loadLiveContent(){
+  // allSettled: one file failing (missing, malformed, offline) never
+  // blocks the others — each section just keeps its fallback content.
   await Promise.allSettled([
     loadConditions(), loadTreatments(), loadDoctorBio(),
     loadEducation(), loadVideos(), loadTestimonials(), loadReviews(),
@@ -108,21 +123,23 @@ async function loadLiveContent() {
   if (activeId === 'treatment-detail' && lastDetail.type === 'treatment') showTreatmentDetail(lastDetail.id);
 }
 
+// The page already rendered once from the baked-in fallback (content-data.js)
+// by the time this script runs — this just quietly upgrades it in place.
 let lastLiveContentLoad = Date.now();
-loadLiveContent().catch(() => {}).finally(() => { lastLiveContentLoad = Date.now(); });
+loadLiveContent().catch(()=>{}).finally(() => { lastLiveContentLoad = Date.now(); });
 
 // ---------------- REFRESH ON RETURN TO FOREGROUND ----------------
 // Installed/standalone apps (added to home screen) are usually frozen in
 // the background instead of being fully reloaded when reopened, so without
-// this, an admin edit would only show up at the next real cold start.
-// Re-run the same load whenever the app becomes visible again, throttled
-// so rapid app-switching doesn't refetch on every glance.
+// this, the content would only ever reflect whatever was live at the last
+// real cold start. Re-run the same load whenever the app becomes visible
+// again, throttled so rapid app-switching doesn't refetch on every glance.
 const LIVE_CONTENT_REFRESH_THROTTLE_MS = 60 * 1000;
 
-function refreshLiveContentIfDue() {
+function refreshLiveContentIfDue(){
   if (Date.now() - lastLiveContentLoad < LIVE_CONTENT_REFRESH_THROTTLE_MS) return;
   lastLiveContentLoad = Date.now();
-  loadLiveContent().catch(() => {});
+  loadLiveContent().catch(()=>{});
 }
 
 document.addEventListener('visibilitychange', () => {

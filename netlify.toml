@@ -1,6 +1,13 @@
 [build]
   functions = "netlify/functions"
+  publish = "."
+  command = "npm install"
 
+[functions]
+  node_bundler = "esbuild"
+
+# Friendly URLs for the admin API, so the frontend code never has to
+# know about the underlying /.netlify/functions/ path.
 [[redirects]]
   from = "/api/auth"
   to = "/.netlify/functions/auth"
@@ -14,9 +21,4 @@
 [[redirects]]
   from = "/api/image"
   to = "/.netlify/functions/image"
-  status = 200
-
-[[redirects]]
-  from = "/api/users"
-  to = "/.netlify/functions/users"
   status = 200

@@ -11,6 +11,19 @@ function tf(obj, field){
   return obj[field + '_' + currentLang] || obj[field + '_en'] || '';
 }
 
+// Cards are rendered as tappable <div role="button" onclick=...> rather than
+// real <button> elements (they hold mixed inline markup), so browsers won't
+// activate them from a keyboard on their own. This makes Enter/Space behave
+// the same as a click for anything marked role="button", covering every
+// info/video/related card in one place instead of a handler per card.
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('[role="button"]');
+  if(!el) return;
+  e.preventDefault();
+  el.click();
+});
+
 const navList = document.getElementById('navList');
 function renderNav(){
   navList.innerHTML = '';
@@ -70,7 +83,7 @@ function renderConditions(){
   conditionsGrid.innerHTML = '';
   CONDITIONS.forEach(c=>{
     conditionsGrid.innerHTML += `
-      <div class="info-card" onclick="showConditionDetail('${c.id}')">
+      <div class="info-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
         <div class="info-ico" style="background:${c.color};color:#fff;">${svgIcon(c.icon,24)}</div>
         <span class="pill">${tf(c,'tag')}</span>
         <h3>${tf(c,'title')}</h3>
@@ -86,7 +99,7 @@ function renderTreatments(){
   treatmentsGrid.innerHTML = '';
   TREATMENTS.forEach(t=>{
     treatmentsGrid.innerHTML += `
-      <div class="info-card" onclick="showTreatmentDetail('${t.id}')">
+      <div class="info-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
         <div class="info-ico" style="background:${t.color};color:#fff;">${svgIcon(t.icon,24)}</div>
         <span class="pill">${tf(t,'tag')}</span>
         <h3>${tf(t,'title')}</h3>
@@ -122,7 +135,7 @@ function showConditionDetail(id){
   const relatedHtml = (c.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(tid=>{
     const t = treatmentsById[tid];
     if(!t) return '';
-    return `<div class="related-card" onclick="showTreatmentDetail('${t.id}')">
+    return `<div class="related-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
       <div class="related-ico" style="background:${t.color};">${svgIcon(t.icon,20)}</div>
       <div><h4>${tf(t,'title')}</h4><span>${L(UI.treatmentOption)}</span></div>
     </div>`;
@@ -159,7 +172,7 @@ function showTreatmentDetail(id){
   const relatedHtml = (t.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(cid=>{
     const c = conditionsById[cid];
     if(!c) return '';
-    return `<div class="related-card" onclick="showConditionDetail('${c.id}')">
+    return `<div class="related-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
       <div class="related-ico" style="background:${c.color};">${svgIcon(c.icon,20)}</div>
       <div><h4>${tf(c,'title')}</h4><span>${L(UI.conditionTreated)}</span></div>
     </div>`;
@@ -197,7 +210,7 @@ function renderVideos(){
   VIDEOS.forEach(v=>{
     const title = tf(v,'title');
     videoGrid.innerHTML += `
-      <div class="video-card" onclick="openVideo('${v.file}', '${title.replace(/'/g,"\\'")}')">
+      <div class="video-card" tabindex="0" role="button" onclick="openVideo('${v.file}', '${title.replace(/'/g,"\\'")}')">
         <div class="video-thumb"><div class="play-circle" style="color:var(--navy-900);">${svgIcon('play',22)}</div><span class="duration">${v.length}</span></div>
         <div class="video-info"><h4>${title}</h4><span>${L(UI.patientEducationSeries)}</span></div>
       </div>`;
@@ -385,38 +398,50 @@ document.querySelectorAll('.lang-btn').forEach(b=>{
   b.onclick = ()=> setLanguage(b.dataset.lang);
 });
 /* ---------------- SPLASH SCREEN ---------------- */
+const splash = document.getElementById('splashScreen');
 (function(){
-  const splash = document.getElementById('splashScreen');
   const enterBtn = document.getElementById('splashEnterBtn');
-  let dismissed = false;
   function dismissSplash(){
-    if(dismissed) return;
-    dismissed = true;
+    // The splash is reused as the idle/attract screen (see below), so its
+    // own 'hide' class — not a one-shot flag — has to be the source of
+    // truth for "already dismissed", otherwise it can only ever be
+    // dismissed once per page load and stays stuck after the first
+    // idle-reset brings it back.
+    if(splash.classList.contains('hide')) return;
     splash.classList.add('hide');
-    setTimeout(()=>{ splash.remove(); }, 550);
+    armIdleReset();
   }
   // Waits for an explicit tap — either the Enter button or anywhere on the splash.
   enterBtn.addEventListener('click', dismissSplash);
   splash.addEventListener('click', dismissSplash);
 })();
 
-/* ---------------- PWA SERVICE WORKER REGISTRATION ---------------- */
-
-/* ---------------- SPLASH SCREEN ---------------- */
-(function(){
-  const splash = document.getElementById('splashScreen');
-  const enterBtn = document.getElementById('splashEnterBtn');
-  let dismissed = false;
-  function dismissSplash(){
-    if(dismissed) return;
-    dismissed = true;
-    splash.classList.add('hide');
-    setTimeout(()=>{ splash.remove(); }, 550);
+/* ---------------- IDLE AUTO-RESET (kiosk attract screen) ----------------
+   This runs on a shared clinic touchscreen, not a personal device — if it's
+   left on whatever page the last patient was reading, the next patient
+   walks up to a stranger's browsing instead of a fresh start. After a
+   stretch of no taps, quietly return to Home and bring the splash back as
+   an idle/attract screen, the way kiosk software normally behaves. A video
+   held open in the lightbox postpones the reset instead of cutting it off. */
+const IDLE_RESET_MS = 90 * 1000;
+let idleResetTimer = null;
+function armIdleReset(){
+  clearTimeout(idleResetTimer);
+  if(splash.classList.contains('hide')){
+    idleResetTimer = setTimeout(triggerIdleReset, IDLE_RESET_MS);
   }
-  // Waits for an explicit tap — either the Enter button or anywhere on the splash.
-  enterBtn.addEventListener('click', dismissSplash);
-  splash.addEventListener('click', dismissSplash);
-})();
+}
+function triggerIdleReset(){
+  const videoOpen = document.getElementById('videoModal').classList.contains('show');
+  if(videoOpen){ armIdleReset(); return; }
+  closeVideoModal();
+  closeSidebarDrawer();
+  showPanel('home');
+  splash.classList.remove('hide');
+}
+['touchstart','mousedown','keydown'].forEach(evt=>{
+  document.addEventListener(evt, armIdleReset, {passive:true});
+});
 
 /* ---------------- PWA SERVICE WORKER REGISTRATION ---------------- */
 /* Only registers over https (or localhost) — browsers block service workers
