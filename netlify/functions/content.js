@@ -1,95 +1,82 @@
-// build-marker: 2026-09-01-c
-// netlify/functions/content.js
-// GET  /api/content?section=X  — public. Reads the current value for one
-//      of 9 sections from Supabase (content_sections table, over plain
-//      REST — see _supabase.js); if nothing has ever been saved for that
-//      section (or Supabase isn't configured yet), falls back to the
-//      bundled content/*.json file, so the site behaves identically
-//      before and after the CMS goes live.
-// POST /api/content?section=X  — auth required (Bearer session token from
-//      /api/auth). Upserts the new value straight into Supabase — visible
-//      on the very next GET, no rebuild/redeploy.
-const { fetchSectionRow, upsertSectionRow, getSupabaseConfig, fetchAdminUser } = require('./_supabase');
-const { verifyToken } = require('./auth');
+// GET  /api/content?section=conditions   -> public, no auth
+// POST /api/content?section=conditions   -> requires Authorization: Bearer <token>
+//
+// Backed by Netlify Blobs. On first GET for a section (before any admin
+// edit has ever been saved), the value is seeded from the JSON file that
+// shipped with the site, so the live site works identically before and
+// after this CMS goes live. After the first admin Save, the blob store
+// is the source of truth and updates are visible immediately — no git
+// commit, no rebuild.
 
-// NOTE: this folder is named "seed-content", not "content" — a sibling
-// folder literally named "content" collided with this function's own name
-// (content.js) once bundled, and Netlify's function loader crashed trying
-// to resolve which one "content" meant (ERR_UNSUPPORTED_DIR_IMPORT). Do
-// not rename this back to "content" or the same crash comes back.
-const FALLBACKS = {
-  'conditions': () => require('../../seed-content/conditions.json'),
-  'treatments': () => require('../../seed-content/treatments.json'),
-  'doctor-bio': () => require('../../seed-content/doctor-bio.json'),
-  'education': () => require('../../seed-content/education.json'),
-  'videos': () => require('../../seed-content/videos.json'),
-  'testimonials': () => require('../../seed-content/testimonials.json'),
-  'reviews': () => require('../../seed-content/reviews.json'),
-  'site-text': () => require('../../seed-content/site-text.json'),
-  'site-images': () => require('../../seed-content/site-images.json'),
+const { getStore } = require('@netlify/blobs');
+const { isAuthorized, json, CORS_HEADERS } = require('./_auth-helper');
+
+// Whitelist of editable sections and their seed (baked-in default) data.
+// Requiring the JSON directly lets Netlify's bundler inline it into the
+// function, so there's no separate file-read step at runtime.
+const SEEDS = {
+  conditions: require('../../content/conditions.json'),
+  treatments: require('../../content/treatments.json'),
+  'doctor-bio': require('../../content/doctor-bio.json'),
+  education: require('../../content/education.json'),
+  videos: require('../../content/videos.json'),
+  testimonials: require('../../content/testimonials.json'),
+  reviews: require('../../content/reviews.json'),
+  'site-text': require('../../content/site-text.json'),
+  'site-images': require('../../content/site-images.json'),
 };
 
-function bearerToken(event) {
-  const h = event.headers.authorization || event.headers.Authorization || '';
-  return h.replace(/^Bearer\s+/i, '').trim();
-}
+const SECTIONS = Object.keys(SEEDS);
 
 exports.handler = async (event) => {
-  const section = (event.queryStringParameters || {}).section;
-  if (!section || !FALLBACKS[section]) {
-    return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unknown or missing section' }) };
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
+  const section = (event.queryStringParameters || {}).section;
+  if (!section || !SECTIONS.includes(section)) {
+    return json(400, { error: `Unknown or missing section. Valid sections: ${SECTIONS.join(', ')}` });
+  }
+
+  const store = getStore('content');
+
   if (event.httpMethod === 'GET') {
-    if (getSupabaseConfig()) {
-      try {
-        const data = await fetchSectionRow(section);
-        if (data !== null && data !== undefined) {
-          return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) };
-        }
-      } catch (e) {
-        // Supabase unreachable/misconfigured — fall through to bundled fallback below.
-      }
+    let data;
+    try {
+      data = await store.get(section, { type: 'json' });
+    } catch (e) {
+      return json(500, { error: 'Could not read content store: ' + e.message });
     }
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(FALLBACKS[section]()) };
+    if (data === null) {
+      // Never saved via the admin panel yet — serve the shipped default.
+      data = SEEDS[section];
+    }
+    return json(200, data, { 'Cache-Control': 'no-store' });
   }
 
   if (event.httpMethod === 'POST') {
-    const username = verifyToken(bearerToken(event), process.env.ADMIN_SECRET || '');
-    if (!username) {
-      return { statusCode: 401, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Unauthorized' }) };
+    if (!isAuthorized(event.headers)) {
+      return json(401, { error: 'Not logged in, or session expired. Please log in again.' });
     }
-    // Re-checked fresh against the database on every save (not baked into
-    // the token) so a permission change takes effect immediately instead
-    // of waiting out the token's 12h life.
-    let user;
-    try { user = await fetchAdminUser(username); } catch (e) {
-      return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Could not verify your permissions right now.' }) };
-    }
-    if (!user || !Array.isArray(user.sections) || !user.sections.includes(section)) {
-      return { statusCode: 403, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: "You don't have permission to edit this section." }) };
-    }
-    if (!getSupabaseConfig()) {
-      return {
-        statusCode: 500,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ error: 'Server not configured: set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in Netlify environment variables.' }),
-      };
-    }
+
     let payload;
-    try { payload = JSON.parse(event.body || 'null'); } catch {
-      return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Invalid JSON body' }) };
-    }
-    if (payload === null) {
-      return { statusCode: 400, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Empty body' }) };
-    }
     try {
-      await upsertSectionRow(section, payload);
+      payload = JSON.parse(event.body || 'null');
     } catch (e) {
-      return { statusCode: 500, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: e.message }) };
+      return json(400, { error: 'Request body is not valid JSON' });
     }
-    return { statusCode: 200, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ok: true }) };
+    if (payload === null || typeof payload !== 'object') {
+      return json(400, { error: 'Request body must be a JSON object' });
+    }
+
+    try {
+      await store.setJSON(section, payload);
+    } catch (e) {
+      return json(500, { error: 'Could not save: ' + e.message });
+    }
+
+    return json(200, { ok: true });
   }
 
-  return { statusCode: 405, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ error: 'Method not allowed' }) };
+  return json(405, { error: 'Method not allowed' });
 };
