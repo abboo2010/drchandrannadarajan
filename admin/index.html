@@ -1,949 +1,736 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Content Admin — Dr. Chandran Nadarajan</title>
-<link rel="icon" href="../icon-192.png">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Site CMS — IR@SABAH</title>
 <style>
   :root{
-    --navy:#0a2647; --navy2:#123a68; --line:#e7ebf1; --bg:#eef1f5; --card:#ffffff;
-    --blue:#2f6fed; --teal:#14b8a6; --red:#ef4444; --text:#1b2532; --muted:#6b7688;
+    --gold:#d4a94a; --blue:#2f6fed; --ink:#1c2333; --sub:#5b6478;
+    --bg:#f4f5f8; --panel:#ffffff; --line:#e4e7ee; --danger:#d64545; --ok:#1a9c5a;
   }
   *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
-  /* ---------- Login screen ---------- */
-  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,rgba(10,38,71,.25),rgba(18,58,104,.4)),url('../images/splash-bg.png') center/cover no-repeat;}
-  #loginBox{background:var(--card);border-radius:14px;padding:60px 40px 44px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.35);margin-top:-70px;}
-  #loginBox{text-align:center;}
-  #loginBox img{width:130px;height:130px;margin:0 auto 16px;display:block;}
-  #loginBox h1{font-size:19px;margin:0 0 4px;}
-  #loginBox input,#loginBox button{text-align:left;}
-  #loginBox p{color:var(--muted);font-size:13px;margin:0 0 22px;}
-  #loginBox input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:8px;font-size:15px;margin-bottom:12px;}
-  #loginBox button{width:100%;padding:12px;border:0;border-radius:8px;background:var(--blue);color:#fff;font-size:15px;font-weight:600;cursor:pointer;}
-  #loginBox button:active{transform:translateY(1px);}
-  #loginError{color:var(--red);font-size:13px;min-height:18px;margin-bottom:8px;}
-  /* ---------- App shell ---------- */
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  button{font:inherit;cursor:pointer;}
+  input,textarea,select{font:inherit;}
+
+  /* ---------- LOGIN ---------- */
+  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{background:var(--panel);border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 8px 30px rgba(20,20,40,.08);text-align:center;}
+  .login-card h1{font-size:1.25rem;margin:0 0 4px;}
+  .login-card p.sub{color:var(--sub);font-size:.9rem;margin:0 0 22px;}
+  .login-card input[type=password]{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:1rem;margin-bottom:12px;}
+  .login-card input[type=password]:focus{outline:2px solid var(--gold);border-color:var(--gold);}
+  .login-card button{width:100%;padding:12px;border:none;border-radius:10px;background:var(--gold);color:#2a2308;font-weight:700;font-size:1rem;}
+  .login-card button:disabled{opacity:.6;cursor:default;}
+  .login-error{color:var(--danger);font-size:.85rem;margin:0 0 12px;min-height:1.1em;}
+
+  /* ---------- APP SHELL ---------- */
   #app{display:none;min-height:100vh;}
-  #app.show{display:flex;}
-  #sidebar{width:230px;flex:none;background:var(--navy);color:#dbe6f5;padding:20px 0;display:flex;flex-direction:column;}
-  #sidebar h2{font-size:14px;color:#fff;padding:0 20px 16px;margin:0 0 8px;border-bottom:1px solid rgba(255,255,255,.12);text-align:center;}
-  #sidebar h2 img{display:block;width:56px;height:56px;margin:0 auto 10px;}
-  .navbtn{display:block;width:100%;text-align:left;background:none;border:0;color:#c4d3e8;padding:11px 20px;font-size:13.5px;cursor:pointer;border-left:3px solid transparent;}
-  .navbtn:hover{background:rgba(255,255,255,.06);}
-  .navbtn.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--teal);font-weight:600;}
-  #logoutBtn{margin:16px 20px 0;padding:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;border-radius:6px;cursor:pointer;font-size:12.5px;}
-  #main{flex:1;padding:26px 34px;overflow-y:auto;max-height:100vh;}
-  #panelHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
-  #panelHeader h1{font-size:20px;margin:0;}
-  .toolbar{display:flex;gap:10px;align-items:center;}
-  .btn{padding:9px 16px;border-radius:7px;border:1px solid var(--line);background:#fff;font-size:13px;cursor:pointer;font-weight:600;}
-  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff;}
-  .btn.danger{background:var(--red);border-color:var(--red);color:#fff;}
-  .btn:disabled{opacity:.5;cursor:default;}
-  #toast{position:fixed;bottom:22px;right:22px;background:#1b2532;color:#fff;padding:12px 18px;border-radius:8px;font-size:13.5px;box-shadow:0 8px 24px rgba(0,0,0,.25);display:none;z-index:50;}
-  #toast.error{background:var(--red);}
-  /* ---------- Cards / fields ---------- */
-  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:14px;}
-  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-  .card-title{font-weight:700;font-size:14px;}
-  .field{margin-bottom:12px;}
-  .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:4px;}
-  .field input[type=text],.field input[type=number],.field textarea,.field select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-size:13.5px;font-family:inherit;background:#fbfcfe;}
-  .field textarea{min-height:70px;resize:vertical;}
-  .triplet{border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin-bottom:12px;background:#fafcff;}
-  .triplet > .tlabel{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;}
-  .tlang{display:flex;gap:8px;align-items:flex-start;margin-bottom:6px;}
-  .tlang .tag{flex:none;width:34px;font-size:11px;font-weight:700;color:var(--muted);padding-top:9px;}
-  .tlang .field{flex:1;margin-bottom:0;}
-  .colorrow{display:flex;gap:8px;align-items:center;}
-  .colorrow input[type=color]{width:44px;height:36px;border:1px solid var(--line);border-radius:6px;padding:2px;}
-  .subcard{border:1px solid var(--line);border-radius:8px;padding:12px;margin-bottom:10px;background:#fbfcfe;position:relative;}
-  .smallbtn{padding:5px 10px;font-size:11.5px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;}
-  .idbadge{display:inline-block;font-size:11px;color:var(--muted);font-family:monospace;margin-left:8px;}
-  #searchBox{padding:9px 12px;border:1px solid var(--line);border-radius:7px;width:280px;font-size:13px;}
-  .imgslots{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;}
-  .imgslot{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;text-align:center;}
-  .imgslot img{max-width:100%;max-height:140px;border-radius:6px;background:#f4f6f9;margin-bottom:10px;object-fit:contain;}
-  .imgslot h3{font-size:13px;margin:0 0 10px;}
-  .hint{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  #app.visible{display:flex;}
+  .sidebar{width:230px;flex:0 0 230px;background:#1c2333;color:#e9ebf3;padding:18px 0;display:flex;flex-direction:column;}
+  .sidebar .brand{padding:0 20px 18px;font-weight:800;font-size:1.05rem;border-bottom:1px solid #303a52;margin-bottom:10px;}
+  .sidebar .brand small{display:block;font-weight:400;color:#8b93ab;font-size:.72rem;margin-top:2px;}
+  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#c4c9db;text-decoration:none;font-size:.92rem;border-left:3px solid transparent;cursor:pointer;}
+  .nav-item:hover{background:#252d44;color:#fff;}
+  .nav-item.active{background:#252d44;color:#fff;border-left-color:var(--gold);}
+  .sidebar-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid #303a52;}
+  .sidebar-footer a, .sidebar-footer button{display:block;width:100%;text-align:left;background:none;border:none;color:#c4c9db;padding:9px 0;font-size:.85rem;}
+  .sidebar-footer button:hover, .sidebar-footer a:hover{color:#fff;}
+
+  .main{flex:1;min-width:0;padding:28px 32px;max-width:920px;}
+  .main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
+  .main-header h2{margin:0;font-size:1.4rem;}
+  .main-header .actions{display:flex;gap:8px;}
+  .btn{padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.88rem;font-weight:600;color:var(--ink);}
+  .btn:hover{background:#f0f1f5;}
+  .btn-primary{background:var(--blue);border-color:var(--blue);color:#fff;}
+  .btn-primary:hover{background:#2559c9;}
+  .btn-primary:disabled{opacity:.55;cursor:default;}
+  .btn-add{background:var(--ok);border-color:var(--ok);color:#fff;}
+  .btn-add:hover{background:#158049;}
+  .btn-danger{color:var(--danger);border-color:#f0c7c7;}
+  .btn-danger:hover{background:#fdeeee;}
+  .helptext{color:var(--sub);font-size:.85rem;margin:0 0 20px;}
+  #banner{display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:.88rem;font-weight:600;}
+  #banner.show{display:block;}
+  #banner.ok{background:#e4f7ec;color:var(--ok);}
+  #banner.err{background:#fdeaea;color:var(--danger);}
+
+  #searchBox{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px;font-size:.9rem;}
+
+  .field-group{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+  .field-group > label.group-label{display:block;font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px;}
+  .field-hint{color:var(--sub);font-size:.76rem;font-weight:400;margin-left:6px;}
+  .lang-row{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start;margin-bottom:6px;}
+  .lang-row:last-child{margin-bottom:0;}
+  .lang-tag{font-size:.72rem;font-weight:700;color:#fff;background:#9098ad;border-radius:5px;text-align:center;padding:3px 0;margin-top:4px;}
+  .lang-tag.en{background:var(--blue);} .lang-tag.bm{background:#c98a1f;} .lang-tag.zh{background:#c0392b;}
+  input[type=text], input[type=number], input[type=url], textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:.9rem;}
+  textarea{resize:vertical;min-height:56px;line-height:1.4;}
+  input[type=color]{width:44px;height:34px;border:1px solid var(--line);border-radius:7px;padding:2px;}
+  select{padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;}
+  .field-group input[type=text], .field-group select{max-width:100%;}
+
+  .item-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;}
+  .item-card summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-weight:700;font-size:.94rem;background:#fafbfd;}
+  .item-card summary::-webkit-details-marker{display:none;}
+  .item-card summary .chev{color:var(--sub);font-weight:400;font-size:.8rem;}
+  .item-card .item-body{padding:14px 16px 16px;border-top:1px solid var(--line);}
+  .item-card .remove-btn{background:none;border:1px solid #f0c7c7;color:var(--danger);border-radius:7px;padding:4px 10px;font-size:.78rem;font-weight:600;}
+  .item-card .remove-btn:hover{background:#fdeeee;}
+
+  .nested-group{border:1px dashed var(--line);border-radius:9px;padding:10px 12px;margin-top:6px;}
+  .add-row{margin-top:6px;}
+
+  .images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .image-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;}
+  .image-card h3{margin:0 0 10px;font-size:.92rem;}
+  .image-card .preview{width:100%;height:130px;object-fit:cover;border-radius:8px;background:#eee;display:block;margin-bottom:10px;}
+  .image-card input[type=file]{font-size:.78rem;width:100%;}
+  .image-card .upload-status{font-size:.78rem;margin-top:6px;color:var(--sub);}
+
+  @media (max-width: 720px){
+    #app.visible{flex-direction:column;}
+    .sidebar{width:100%;flex:none;flex-direction:row;overflow-x:auto;padding:10px 6px;}
+    .sidebar .brand,.sidebar-footer{display:none;}
+    .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:9px 14px;}
+    .nav-item.active{border-bottom-color:var(--gold);}
+    .main{padding:18px 16px;}
+  }
 </style>
 </head>
 <body>
 
 <div id="loginScreen">
-  <div id="loginBox">
-    <img src="../images/logo.png" alt="IR@SABAH logo">
-    <h1>Content Admin</h1>
-    <p>Dr. Chandran Nadarajan &mdash; IR@SABAH site</p>
-    <div id="loginError"></div>
-    <input type="text" id="usernameInput" placeholder="Username" autocomplete="username">
-    <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
-    <button id="loginBtn">Log in</button>
-  </div>
+  <form class="login-card" id="loginForm">
+    <h1>Site CMS</h1>
+    <p class="sub">IR@SABAH — Dr. Chandran Nadarajan</p>
+    <p class="login-error" id="loginError"></p>
+    <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password" autofocus />
+    <button type="submit" id="loginBtn">Log in</button>
+  </form>
 </div>
 
 <div id="app">
-  <aside id="sidebar">
-    <h2><img src="../images/logo.png" alt="IR@SABAH logo">IR@SABAH CMS</h2>
-    <nav id="sideNav"></nav>
-    <div style="flex:1;"></div>
-    <div id="loggedInAs" class="hint" style="padding:0 4px 8px;"></div>
-    <button id="logoutBtn">Log out</button>
-  </aside>
-  <main id="main">
-    <div id="panelHeader">
-      <h1 id="panelTitle">&nbsp;</h1>
-      <div class="toolbar" id="panelToolbar"></div>
+  <div class="sidebar">
+    <div class="brand">Site CMS<small>IR@SABAH</small></div>
+    <nav id="navList"></nav>
+    <div class="sidebar-footer">
+      <a href="/" target="_blank" rel="noopener">View live site ↗</a>
+      <button id="logoutBtn">Log out</button>
     </div>
-    <div id="panelBody"></div>
-  </main>
+  </div>
+  <div class="main">
+    <div id="banner"></div>
+    <div class="main-header">
+      <h2 id="sectionTitle">—</h2>
+      <div class="actions">
+        <button class="btn" id="refreshBtn">Refresh</button>
+        <button class="btn btn-primary" id="saveBtn">Save</button>
+      </div>
+    </div>
+    <p class="helptext" id="sectionHint"></p>
+    <div id="sectionContent"></div>
+  </div>
 </div>
 
-<div id="toast"></div>
-
-<script src="../data.js"></script>
 <script>
-/* ============================================================
-   Content Admin — generic JSON-driven form renderer.
-   Talks to /api/auth, /api/content?section=X, /api/image.
-   ============================================================ */
-'use strict';
+(function(){
+  "use strict";
 
-const SECTIONS = [
-  { key: 'conditions',    label: 'Conditions',      kind: 'array' },
-  { key: 'treatments',    label: 'Treatments',      kind: 'array' },
-  { key: 'doctor-bio',    label: 'Doctor Bio',      kind: 'object' },
-  { key: 'education',     label: 'Education',       kind: 'array' },
-  { key: 'videos',        label: 'Videos',          kind: 'array' },
-  { key: 'testimonials',  label: 'Testimonials',    kind: 'array' },
-  { key: 'reviews',       label: 'Reviews',         kind: 'array' },
-  { key: 'site-text',     label: 'Site Text',       kind: 'sitetext' },
-  { key: 'site-images',   label: 'Photos & Logo',   kind: 'siteimages' },
-  { key: 'users',         label: 'Manage Users',    kind: 'users' },
-];
+  /* ============ CONFIG ============ */
+  var TOKEN_KEY = 'irsabah_cms_token';
+  var ICON_NAMES = ['home','user','stethoscope','syringe','play','book','star','message','calendar','qr',
+    'liver','kidney','uterus','leg','prostate','heartpulse','syringe2','flame','droplet','document',
+    'checklist','question','apple','pill','phone','sparkle','volume','clock','check','thyroid',
+    'whatsapp','instagram','facebook','linkedin'];
 
-const TITLE_FIELD_CANDIDATES = ['title_en', 'name', 'label'];
-const LABELS = {
-  title:'Title', desc:'Description', overview:'Overview', diagnosis:'Diagnosis',
-  symptoms:'Symptoms', causes:'Causes', steps:'Steps', benefits:'Benefits',
-  recovery:'Recovery', tag:'Tag', bio:'Bio', credline:'Credential Line',
-  meta:'Meta', quote:'Quote', text:'Text', name:'Name',
-};
-const TEXTAREA_BASE_RE = /desc|overview|bio|note|diagnosis|recovery|quote/i;
-
-const state = {
-  token: sessionStorage.getItem('cms_token') || null,
-  username: sessionStorage.getItem('cms_username') || null,
-  sections: JSON.parse(sessionStorage.getItem('cms_sections') || 'null') || [], // which SECTIONS keys this login can access
-  data: {},      // section key -> current (possibly edited) value
-  dirty: {},     // section key -> bool
-  loadError: {}, // section key -> error message, or null once loaded OK
-  active: null,
-};
-function visibleSections() { return SECTIONS.filter(s => state.sections.includes(s.key)); }
-
-/* ---------------- helpers ---------------- */
-function humanize(base) {
-  const lower = base.toLowerCase();
-  if (LABELS[lower]) return LABELS[lower];
-  const spaced = base.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_-]+/g, ' ');
-  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
-}
-function el(tag, attrs, ...children) {
-  const e = document.createElement(tag);
-  Object.entries(attrs || {}).forEach(([k, v]) => {
-    if (k === 'text') e.textContent = v;
-    else if (k === 'html') e.innerHTML = v;
-    else if (k.startsWith('on')) e.addEventListener(k.slice(2), v);
-    else e.setAttribute(k, v);
-  });
-  children.flat().forEach(c => { if (c) e.appendChild(c); });
-  return e;
-}
-function showToast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = isError ? 'error' : '';
-  t.style.display = 'block';
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => { t.style.display = 'none'; }, 3200);
-}
-function markDirty(key) { state.dirty[key] = true; updateToolbar(); }
-
-/* ---------------- API ---------------- */
-async function apiGet(section) {
-  let res;
-  try {
-    res = await fetch('/api/content?section=' + encodeURIComponent(section), { cache: 'no-store' });
-  } catch (e) {
-    throw new Error('Could not reach the server at all (network error). Check your connection and try again.');
-  }
-  if (!res.ok) {
-    let detail = '';
-    try { const j = await res.json(); if (j.error) detail = ' — ' + j.error; } catch {}
-    throw new Error('Server error (HTTP ' + res.status + ')' + detail + '. This is NOT the same as an empty section — do not save over it.');
-  }
-  return res.json();
-}
-async function apiSave(section, data) {
-  const res = await fetch('/api/content?section=' + encodeURIComponent(section), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
-    body: JSON.stringify(data),
-  });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Save failed');
-  return json;
-}
-async function apiUploadImage(dataUrl, filename) {
-  const res = await fetch('/api/image', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
-    body: JSON.stringify({ dataUrl, filename }),
-  });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Upload failed');
-  return json.url;
-}
-async function apiListUsers() {
-  const res = await fetch('/api/users', { headers: { 'Authorization': 'Bearer ' + state.token } });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Could not load users');
-  return json;
-}
-async function apiCreateUser(username, password, sections) {
-  const res = await fetch('/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
-    body: JSON.stringify({ username, password, sections }),
-  });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Could not save user');
-  return json;
-}
-async function apiUpdateUserSections(username, sections) {
-  const res = await fetch('/api/users', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.token },
-    body: JSON.stringify({ username, sections }),
-  });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Could not update permissions');
-  return json;
-}
-async function apiDeleteUser(username) {
-  const res = await fetch('/api/users?username=' + encodeURIComponent(username), {
-    method: 'DELETE',
-    headers: { 'Authorization': 'Bearer ' + state.token },
-  });
-  if (res.status === 401) { forceLogout('Your session expired — please log in again.'); throw new Error('unauthorized'); }
-  const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || 'Could not delete user');
-  return json;
-}
-
-/* ---------------- auth ---------------- */
-function forceLogout(message) {
-  state.token = null;
-  state.username = null;
-  state.sections = [];
-  sessionStorage.removeItem('cms_token');
-  sessionStorage.removeItem('cms_username');
-  sessionStorage.removeItem('cms_sections');
-  document.getElementById('app').classList.remove('show');
-  document.getElementById('loginScreen').style.display = 'flex';
-  if (message) document.getElementById('loginError').textContent = message;
-}
-async function login(username, password) {
-  const errEl = document.getElementById('loginError');
-  errEl.textContent = '';
-  try {
-    const res = await fetch('/api/auth', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    const json = await res.json().catch(() => ({}));
-    if (!res.ok) { errEl.textContent = json.error || 'Incorrect username or password'; return; }
-    state.token = json.token;
-    state.username = json.username;
-    state.sections = Array.isArray(json.sections) ? json.sections : [];
-    sessionStorage.setItem('cms_token', json.token);
-    sessionStorage.setItem('cms_username', json.username);
-    sessionStorage.setItem('cms_sections', JSON.stringify(state.sections));
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').classList.add('show');
-    updateLoggedInAs();
-    await boot();
-  } catch (e) {
-    errEl.textContent = 'Could not reach the server. Try again.';
-  }
-}
-function updateLoggedInAs() {
-  const el = document.getElementById('loggedInAs');
-  if (el) el.textContent = state.username ? 'Logged in as ' + state.username : '';
-}
-
-/* ---------------- boot / sidebar ---------------- */
-async function loadSectionData(key) {
-  const def = SECTIONS.find(s => s.key === key);
-  try {
-    state.data[key] = await apiGet(key);
-    state.loadError[key] = null;
-  } catch (e) {
-    // Keep any previously-loaded good data if this is a retry; only default
-    // to empty on the very first load. Either way, loadError is what the
-    // panel actually checks before showing an empty-state message, so a
-    // failed fetch is never confused with "there's genuinely nothing here."
-    if (!(key in state.data)) state.data[key] = def.kind === 'array' ? [] : {};
-    state.loadError[key] = e.message || 'Failed to load this section.';
-  }
-}
-async function boot() {
-  buildSidebar();
-  const visible = visibleSections();
-  // "users" isn't a content section — it's fetched from /api/users on
-  // demand by renderUsersPanel, not from /api/content.
-  await Promise.all(visible.filter(s => s.kind !== 'users').map(s => loadSectionData(s.key)));
-  if (visible.length) selectSection(visible[0].key);
-  else showNoAccess();
-}
-async function retrySection(key) {
-  await loadSectionData(key);
-  if (state.active === key) renderPanel(SECTIONS.find(s => s.key === key));
-}
-function buildSidebar() {
-  const nav = document.getElementById('sideNav');
-  nav.innerHTML = '';
-  visibleSections().forEach(s => {
-    const btn = el('button', {
-      class: 'navbtn', id: 'nav-' + s.key, text: s.label,
-      onclick: () => selectSection(s.key),
-    });
-    nav.appendChild(btn);
-  });
-}
-function showNoAccess() {
-  state.active = null;
-  document.getElementById('panelTitle').textContent = 'No sections available';
-  document.getElementById('panelToolbar').innerHTML = '';
-  document.getElementById('panelBody').innerHTML = '';
-  document.getElementById('panelBody').appendChild(el('p', {
-    class: 'hint',
-    text: 'Your login has no sections assigned yet. Ask an administrator to grant access from Manage Users.',
-  }));
-}
-function selectSection(key) {
-  state.active = key;
-  document.querySelectorAll('.navbtn').forEach(b => b.classList.toggle('active', b.id === 'nav-' + key));
-  const def = SECTIONS.find(s => s.key === key);
-  document.getElementById('panelTitle').textContent = def.label;
-  renderPanel(def);
-}
-function updateToolbar() {
-  const def = SECTIONS.find(s => s.key === state.active);
-  if (!def) return;
-  const saveBtn = document.getElementById('saveBtn-' + def.key);
-  if (saveBtn) saveBtn.disabled = !state.dirty[def.key];
-}
-
-/* ---------------- panel dispatch ---------------- */
-function renderPanel(def) {
-  const toolbar = document.getElementById('panelToolbar');
-  const body = document.getElementById('panelBody');
-  toolbar.innerHTML = ''; body.innerHTML = '';
-
-  // If the last fetch for this section failed, show that plainly instead of
-  // rendering an empty-looking section — and don't offer Save/Add, since
-  // saving right now would overwrite whatever's actually stored with an
-  // empty placeholder.
-  if (state.loadError[def.key]) {
-    const retryBtn = el('button', { class: 'btn primary', text: 'Retry', onclick: () => retrySection(def.key) });
-    toolbar.appendChild(retryBtn);
-    body.appendChild(el('div', {
-      style: 'background:#fde8e8;border:1px solid #f3b4b4;border-radius:10px;padding:16px 18px;color:#7a1f1f;',
-    },
-      el('strong', { text: "Couldn't load this section — this is a server error, not empty content." }),
-      el('p', { text: state.loadError[def.key], style: 'margin:8px 0 0;font-size:13px;' })
-    ));
-    return;
-  }
-
-  if (def.kind === 'siteimages') { renderSiteImages(body); return; }
-  if (def.kind === 'users') { renderUsersPanel(body); return; }
-
-  if (def.kind !== 'siteimages' && def.kind !== 'users') {
-    const saveBtn = el('button', {
-      class: 'btn primary', id: 'saveBtn-' + def.key, text: 'Save changes',
-      disabled: state.dirty[def.key] ? null : 'disabled',
-      onclick: () => doSave(def.key),
-    });
-    if (!state.dirty[def.key]) saveBtn.disabled = true;
-    toolbar.appendChild(saveBtn);
-  }
-
-  if (def.kind === 'array') {
-    const addBtn = el('button', { class: 'btn', text: '+ Add new', onclick: () => addArrayItem(def.key) });
-    toolbar.appendChild(addBtn);
-    renderArraySection(def.key, body);
-  } else if (def.kind === 'object') {
-    renderObjectFields(state.data[def.key], body, [def.key]);
-  } else if (def.kind === 'sitetext') {
-    renderSiteText(body, toolbar);
-  }
-}
-async function doSave(key) {
-  const btn = document.getElementById('saveBtn-' + key);
-  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
-  try {
-    await apiSave(key, state.data[key]);
-    state.dirty[key] = false;
-    showToast('Saved — live on the site now.');
-  } catch (e) {
-    showToast(e.message, true);
-  } finally {
-    if (btn) btn.textContent = 'Save changes';
-    updateToolbar();
-  }
-}
-
-/* ---------------- array sections (cards + add/remove) ---------------- */
-function itemTitle(item, index) {
-  for (const f of TITLE_FIELD_CANDIDATES) if (item[f]) return item[f];
-  return 'Item ' + (index + 1);
-}
-function blankLike(value) {
-  if (Array.isArray(value)) return value.length && typeof value[0] === 'object' ? [] : [];
-  if (typeof value === 'object' && value !== null) {
-    const out = {}; Object.keys(value).forEach(k => out[k] = blankLike(value[k])); return out;
-  }
-  if (typeof value === 'number') return 0;
-  return '';
-}
-function newArrayItem(key) {
-  const arr = state.data[key];
-  if (arr.length) {
-    const tmpl = blankLike(arr[0]);
-    // keep sensible defaults for icon/color so the new card doesn't look broken
-    if ('icon' in arr[0]) tmpl.icon = arr[0].icon;
-    if ('color' in arr[0]) tmpl.color = arr[0].color;
-    if ('stars' in arr[0]) tmpl.stars = 5;
-    return tmpl;
-  }
-  return { title_en: '', title_bm: '', title_zh: '' };
-}
-function addArrayItem(key) {
-  state.data[key].push(newArrayItem(key));
-  markDirty(key);
-  renderArraySection(key, document.getElementById('panelBody'));
-}
-function renderArraySection(key, container) {
-  container.innerHTML = '';
-  const arr = state.data[key];
-  arr.forEach((item, i) => {
-    const card = el('div', { class: 'card' });
-    const delBtn = el('button', { class: 'smallbtn', text: 'Delete' });
-    let confirming = false;
-    delBtn.addEventListener('click', () => {
-      if (!confirming) {
-        confirming = true; delBtn.textContent = 'Click again to confirm';
-        delBtn.style.background = '#fde8e8'; delBtn.style.borderColor = '#f3b4b4';
-        setTimeout(() => { confirming = false; delBtn.textContent = 'Delete'; delBtn.style.background=''; delBtn.style.borderColor=''; }, 3000);
-        return;
-      }
-      arr.splice(i, 1);
-      markDirty(key);
-      renderArraySection(key, container);
-    });
-    card.appendChild(el('div', { class: 'card-head' },
-      el('span', { class: 'card-title', text: itemTitle(item, i) },
-        item.id ? el('span', { class: 'idbadge', text: item.id }) : null),
-      delBtn));
-    const body = el('div', {});
-    renderObjectFields(item, body, [key, i], () => markDirty(key));
-    card.appendChild(body);
-    container.appendChild(card);
-  });
-  if (!arr.length) container.appendChild(el('p', { text: 'Nothing here yet — click "Add new" to create the first entry.', class:'hint' }));
-}
-
-/* ---------------- generic object field renderer ---------------- */
-function collectTriplets(obj) {
-  const consumed = new Set();
-  const groups = [];
-  Object.keys(obj).forEach(k => {
-    const m = /^(.+)_(en|bm|zh)$/.exec(k);
-    if (!m) return;
-    const [, base, lang] = m;
-    let group = groups.find(g => g.base === base);
-    if (!group) { group = { base, langs: {} }; groups.push(group); }
-    group.langs[lang] = k;
-    consumed.add(k);
-  });
-  return { groups, consumed };
-}
-function onChangeMarker(key, notify) {
-  return () => { if (notify) notify(); else markDirty(key); };
-}
-function renderObjectFields(obj, container, path, notify) {
-  const key = path[0];
-  const { groups, consumed } = collectTriplets(obj);
-  const renderedBases = new Set();
-  Object.keys(obj).forEach(k => {
-    if (k === 'id') { container.appendChild(renderIdField(obj, k, notify, key)); return; }
-    if (k === 'icon') { container.appendChild(renderIconField(obj, k, notify, key)); return; }
-    if (k === 'color') { container.appendChild(renderColorField(obj, k, notify, key)); return; }
-    if (k === 'related') { container.appendChild(renderRelatedField(obj, k, notify, key)); return; }
-    if (consumed.has(k)) {
-      const base = /^(.+)_(en|bm|zh)$/.exec(k)[1];
-      if (renderedBases.has(base)) return;
-      renderedBases.add(base);
-      container.appendChild(renderTripletGroup(obj, groups.find(g => g.base === base), notify, key));
-      return;
-    }
-    const val = obj[k];
-    if (Array.isArray(val)) {
-      if (!val.length || typeof val[0] !== 'object') container.appendChild(renderStringArrayField(obj, k, notify, key));
-      else container.appendChild(renderObjectArrayField(obj, k, notify, key));
-      return;
-    }
-    if (val && typeof val === 'object') { container.appendChild(renderNestedFlatObject(obj, k, notify, key)); return; }
-    if (typeof val === 'number') { container.appendChild(renderNumberField(obj, k, notify, key)); return; }
-    container.appendChild(renderPlainStringField(obj, k, notify, key));
-  });
-}
-function renderIdField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: 'ID' }));
-  const input = el('input', { type: 'text', value: obj[k] || '' });
-  input.value = obj[k] || '';
-  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
-  wrap.appendChild(input);
-  wrap.appendChild(el('div', { class: 'hint', text: 'Used by "Related" fields elsewhere — avoid changing once other entries reference it.' }));
-  return wrap;
-}
-function renderIconField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: 'Icon' }));
-  const select = el('select', {});
-  const names = (typeof ICONS !== 'undefined') ? Object.keys(ICONS) : [obj[k]];
-  names.forEach(name => {
-    const opt = el('option', { value: name, text: name });
-    if (name === obj[k]) opt.setAttribute('selected', 'selected');
-    select.appendChild(opt);
-  });
-  select.addEventListener('change', () => { obj[k] = select.value; onChangeMarker(key, notify)(); });
-  wrap.appendChild(select);
-  return wrap;
-}
-function renderColorField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: 'Color' }));
-  const row = el('div', { class: 'colorrow' });
-  const swatch = el('input', { type: 'color', value: /^#([0-9a-f]{6})$/i.test(obj[k]) ? obj[k] : '#2f6fed' });
-  const text = el('input', { type: 'text', value: obj[k] || '' });
-  swatch.addEventListener('input', () => { text.value = swatch.value; obj[k] = swatch.value; onChangeMarker(key, notify)(); });
-  text.addEventListener('input', () => { obj[k] = text.value; if (/^#([0-9a-f]{6})$/i.test(text.value)) swatch.value = text.value; onChangeMarker(key, notify)(); });
-  row.appendChild(swatch); row.appendChild(text);
-  wrap.appendChild(row);
-  return wrap;
-}
-function renderRelatedField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: 'Related (comma-separated IDs)' }));
-  const input = el('input', { type: 'text', value: obj[k] || '' });
-  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
-  wrap.appendChild(input);
-  return wrap;
-}
-function renderNumberField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: humanize(k) }));
-  const input = el('input', { type: 'number', value: obj[k] });
-  input.addEventListener('input', () => { obj[k] = Number(input.value); onChangeMarker(key, notify)(); });
-  wrap.appendChild(input);
-  return wrap;
-}
-function renderPlainStringField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: humanize(k) }));
-  const long = TEXTAREA_BASE_RE.test(k) || (obj[k] || '').length > 60;
-  const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
-  input.value = obj[k] || '';
-  input.addEventListener('input', () => { obj[k] = input.value; onChangeMarker(key, notify)(); });
-  wrap.appendChild(input);
-  return wrap;
-}
-function renderStringArrayField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  wrap.appendChild(el('label', { text: humanize(k) + ' (one per line)' }));
-  const textarea = el('textarea', {});
-  textarea.value = (obj[k] || []).join('\n');
-  textarea.addEventListener('input', () => {
-    obj[k] = textarea.value.split('\n').map(s => s.trim()).filter(Boolean);
-    onChangeMarker(key, notify)();
-  });
-  wrap.appendChild(textarea);
-  return wrap;
-}
-function renderTripletGroup(obj, group, notify, key) {
-  const wrap = el('div', { class: 'triplet' });
-  wrap.appendChild(el('div', { class: 'tlabel', text: humanize(group.base) }));
-  [['en', 'EN'], ['bm', 'BM'], ['zh', 'ZH']].forEach(([lang, tag]) => {
-    const fkey = group.langs[lang];
-    if (!fkey) return;
-    const row = el('div', { class: 'tlang' });
-    row.appendChild(el('div', { class: 'tag', text: tag }));
-    const fieldWrap = el('div', { class: 'field' });
-    if (Array.isArray(obj[fkey])) {
-      const ta = el('textarea', {});
-      ta.value = (obj[fkey] || []).join('\n');
-      ta.addEventListener('input', () => { obj[fkey] = ta.value.split('\n').map(s => s.trim()).filter(Boolean); onChangeMarker(key, notify)(); });
-      fieldWrap.appendChild(ta);
-    } else {
-      const long = TEXTAREA_BASE_RE.test(group.base) || (obj[fkey] || '').length > 60;
-      const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
-      input.value = obj[fkey] || '';
-      input.addEventListener('input', () => { obj[fkey] = input.value; onChangeMarker(key, notify)(); });
-      fieldWrap.appendChild(input);
-    }
-    row.appendChild(fieldWrap);
-    wrap.appendChild(row);
-  });
-  return wrap;
-}
-function renderNestedFlatObject(obj, k, notify, key) {
-  const wrap = el('div', { class: 'triplet' });
-  wrap.appendChild(el('div', { class: 'tlabel', text: humanize(k) }));
-  Object.keys(obj[k]).forEach(subKey => {
-    const row = el('div', { class: 'field' });
-    row.appendChild(el('label', { text: humanize(subKey) }));
-    const input = el('input', { type: 'text', value: obj[k][subKey] || '' });
-    input.addEventListener('input', () => { obj[k][subKey] = input.value; onChangeMarker(key, notify)(); });
-    row.appendChild(input);
-    wrap.appendChild(row);
-  });
-  return wrap;
-}
-function renderObjectArrayField(obj, k, notify, key) {
-  const wrap = el('div', { class: 'field' });
-  const header = el('div', { style: 'display:flex;justify-content:space-between;align-items:center;' });
-  header.appendChild(el('label', { text: humanize(k), style: 'margin:0;' }));
-  const addBtn = el('button', { class: 'smallbtn', text: '+ Add' });
-  header.appendChild(addBtn);
-  wrap.appendChild(header);
-  const listEl = el('div', {});
-  wrap.appendChild(listEl);
-
-  function renderList() {
-    listEl.innerHTML = '';
-    obj[k].forEach((item, i) => {
-      const sub = el('div', { class: 'subcard' });
-      const delBtn = el('button', { class: 'smallbtn', text: 'Remove', style: 'position:absolute;top:10px;right:10px;' });
-      delBtn.addEventListener('click', () => { obj[k].splice(i, 1); onChangeMarker(key, notify)(); renderList(); });
-      sub.appendChild(delBtn);
-      const body = el('div', {});
-      renderObjectFields(item, body, [key], () => onChangeMarker(key, notify)());
-      sub.appendChild(body);
-      listEl.appendChild(sub);
-    });
-  }
-  addBtn.addEventListener('click', () => {
-    const tmpl = obj[k].length ? blankLike(obj[k][0]) : { text_en: '', text_bm: '', text_zh: '' };
-    obj[k].push(tmpl);
-    onChangeMarker(key, notify)();
-    renderList();
-  });
-  renderList();
-  return wrap;
-}
-
-/* ---------------- Site Text (search + EN/BM/ZH map) ---------------- */
-function renderSiteText(body, toolbar) {
-  const search = el('input', { id: 'searchBox', type: 'text', placeholder: 'Search keys or text…' });
-  toolbar.insertBefore(search, toolbar.firstChild);
-  const list = el('div', {});
-  body.appendChild(list);
-
-  function draw(filter) {
-    list.innerHTML = '';
-    const data = state.data['site-text'];
-    const q = (filter || '').toLowerCase();
-    Object.keys(data).forEach(k => {
-      const entry = data[k] || {};
-      const hay = (k + ' ' + (entry.en||'') + ' ' + (entry.bm||'') + ' ' + (entry.zh||'')).toLowerCase();
-      if (q && !hay.includes(q)) return;
-      const card = el('div', { class: 'card' });
-      card.appendChild(el('div', { class: 'card-title', text: k, style: 'margin-bottom:10px;font-family:monospace;font-size:12.5px;color:#6b7688;' }));
-      ['en','bm','zh'].forEach(lang => {
-        const row = el('div', { class: 'tlang' });
-        row.appendChild(el('div', { class: 'tag', text: lang.toUpperCase() }));
-        const fieldWrap = el('div', { class: 'field' });
-        const long = (entry[lang] || '').length > 60;
-        const input = el(long ? 'textarea' : 'input', long ? {} : { type: 'text' });
-        input.value = entry[lang] || '';
-        input.addEventListener('input', () => { entry[lang] = input.value; data[k] = entry; markDirty('site-text'); });
-        fieldWrap.appendChild(input);
-        row.appendChild(fieldWrap);
-        card.appendChild(row);
-      });
-      list.appendChild(card);
-    });
-    if (!list.children.length) list.appendChild(el('p', { class: 'hint', text: 'No matches.' }));
-  }
-  search.addEventListener('input', () => draw(search.value));
-  draw('');
-}
-
-/* ---------------- Photos & Logo (auto-save on upload) ---------------- */
-const IMAGE_SLOTS = [
-  { key: 'doctor', label: 'Doctor Photo' },
-  { key: 'logo', label: 'Clinic Logo' },
-  { key: 'splashbg', label: 'Splash Background (desktop)' },
-  { key: 'splashbgmobile', label: 'Splash Background (mobile)' },
-  { key: 'adminBg', label: 'CMS Login Background' },
-];
-function resizeImageToDataUrl(file, maxDim, quality) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    const reader = new FileReader();
-    reader.onload = () => { img.onload = () => {
-      let { width, height } = img;
-      if (width > maxDim || height > maxDim) {
-        const scale = maxDim / Math.max(width, height);
-        width = Math.round(width * scale); height = Math.round(height * scale);
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = width; canvas.height = height;
-      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', quality));
-    }; img.onerror = reject; img.src = reader.result; };
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-function renderSiteImages(body) {
-  const grid = el('div', { class: 'imgslots' });
-  const data = state.data['site-images'] || {};
-  IMAGE_SLOTS.forEach(slot => {
-    const box = el('div', { class: 'imgslot' });
-    box.appendChild(el('h3', { text: slot.label }));
-    const img = el('img', { src: data[slot.key] || '' });
-    box.appendChild(img);
-    const fileInput = el('input', { type: 'file', accept: 'image/*', style: 'display:none;' });
-    const chooseBtn = el('button', { class: 'btn', text: 'Upload new photo', onclick: () => fileInput.click() });
-    const status = el('div', { class: 'hint' });
-    fileInput.addEventListener('change', async () => {
-      const file = fileInput.files[0];
-      if (!file) return;
-      status.textContent = 'Resizing…';
-      try {
-        const dataUrl = await resizeImageToDataUrl(file, 1600, 0.85);
-        status.textContent = 'Uploading…';
-        const url = await apiUploadImage(dataUrl, slot.key);
-        data[slot.key] = url;
-        state.data['site-images'] = data;
-        status.textContent = 'Saving…';
-        await apiSave('site-images', data);
-        img.src = url;
-        status.textContent = 'Saved.';
-        showToast(slot.label + ' updated — live on the site now.');
-      } catch (e) {
-        status.textContent = '';
-        showToast(e.message, true);
-      }
-    });
-    box.appendChild(chooseBtn);
-    box.appendChild(fileInput);
-    box.appendChild(status);
-    grid.appendChild(box);
-  });
-  body.appendChild(grid);
-}
-
-/* ---------------- Manage Users ---------------- */
-function renderSectionCheckboxGrid(checkedKeys, onToggle) {
-  // checkedKeys: a Set of currently-checked SECTIONS keys (mutated in place
-  // as boxes are toggled). onToggle(key, checked, checkboxEl) fires after.
-  const grid = el('div', { style: 'display:flex;flex-wrap:wrap;gap:8px 18px;' });
-  SECTIONS.forEach(s => {
-    const label = el('label', { style: 'display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;white-space:nowrap;' });
-    const cb = el('input', { type: 'checkbox' });
-    cb.checked = checkedKeys.has(s.key);
-    cb.addEventListener('change', () => onToggle(s.key, cb.checked, cb));
-    label.appendChild(cb);
-    label.appendChild(document.createTextNode(s.label));
-    grid.appendChild(label);
-  });
-  return grid;
-}
-async function renderUsersPanel(body) {
-  body.appendChild(el('p', { class: 'hint', text: 'Loading…' }));
-  let data;
-  try {
-    data = await apiListUsers();
-  } catch (e) {
-    body.innerHTML = '';
-    body.appendChild(el('div', {
-      style: 'background:#fde8e8;border:1px solid #f3b4b4;border-radius:10px;padding:16px 18px;color:#7a1f1f;',
-    },
-      el('strong', { text: "Couldn't load users." }),
-      el('p', { text: e.message, style: 'margin:8px 0 0;font-size:13px;' })
-    ));
-    return;
-  }
-  body.innerHTML = '';
-
-  const managerCount = data.users.filter(u => Array.isArray(u.sections) && u.sections.includes('users')).length;
-
-  const list = el('div', { style: 'margin-bottom:28px;max-width:640px;' });
-  data.users.forEach(u => {
-    const isMe = u.username === data.me;
-    const isLast = data.users.length <= 1;
-    const card = el('div', { class: 'card' });
-    const head = el('div', { class: 'card-head' });
-    head.appendChild(el('span', { class: 'card-title', text: u.username + (isMe ? '  (you)' : '') }));
-    const delBtn = el('button', {
-      class: 'smallbtn', text: 'Delete',
-      style: (isMe || isLast) ? 'opacity:.4;cursor:not-allowed;' : '',
-      onclick: async () => {
-        if (isMe || isLast) return;
-        if (!confirm('Remove login access for "' + u.username + '"?')) return;
-        try {
-          await apiDeleteUser(u.username);
-          showToast('User removed.');
-          renderUsersPanel(body);
-        } catch (e) { showToast(e.message, true); }
-      },
-    });
-    head.appendChild(delBtn);
-    card.appendChild(head);
-
-    card.appendChild(el('div', { class: 'hint', text: 'Sections this login can access:', style: 'margin-bottom:8px;' }));
-    const currentSections = new Set(Array.isArray(u.sections) ? u.sections : []);
-    const status = el('span', { class: 'hint' });
-    const wouldOrphanUsers = isMe && managerCount <= 1;
-    const grid = renderSectionCheckboxGrid(currentSections, async (key, checked, cb) => {
-      const next = new Set(currentSections);
-      if (checked) next.add(key); else next.delete(key);
-      if (!next.size) {
-        cb.checked = true;
-        showToast('A login needs at least one section.', true);
-        return;
-      }
-      if (wouldOrphanUsers && key === 'users' && !checked) {
-        cb.checked = true;
-        showToast("You can't remove your own Manage Users access — no other login has it.", true);
-        return;
-      }
-      status.textContent = 'Saving…';
-      try {
-        await apiUpdateUserSections(u.username, [...next]);
-        currentSections.clear();
-        next.forEach(k => currentSections.add(k));
-        status.textContent = 'Saved.';
-        setTimeout(() => { if (status.isConnected) status.textContent = ''; }, 1500);
-      } catch (e) {
-        cb.checked = !checked; // revert the checkbox to reflect the failed save
-        status.textContent = '';
-        showToast(e.message, true);
-      }
-    });
-    card.appendChild(grid);
-    card.appendChild(status);
-    list.appendChild(card);
-  });
-  body.appendChild(list);
-
-  const form = el('div', { style: 'max-width:480px;border-top:1px solid var(--line);padding-top:20px;' });
-  form.appendChild(el('h3', { text: 'Add a new login', style: 'margin:0 0 12px;font-size:15px;' }));
-  const uInput = el('input', {
-    type: 'text', placeholder: 'Username', autocomplete: 'off',
-    style: 'width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;',
-  });
-  const pInput = el('input', {
-    type: 'password', placeholder: 'Password (min 8 characters)', autocomplete: 'new-password',
-    style: 'width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:10px;',
-  });
-  const newUserSections = new Set();
-  const permGrid = renderSectionCheckboxGrid(newUserSections, (key, checked) => {
-    if (checked) newUserSections.add(key); else newUserSections.delete(key);
-  });
-  const addStatus = el('div', { class: 'hint', style: 'margin:10px 0;' });
-  const submit = async () => {
-    const username = uInput.value.trim().toLowerCase();
-    const password = pInput.value;
-    addStatus.textContent = '';
-    if (!/^[a-z0-9._-]{3,40}$/.test(username)) {
-      addStatus.textContent = 'Username must be 3-40 characters: letters, numbers, dot, underscore, hyphen only.';
-      return;
-    }
-    if (password.length < 8) {
-      addStatus.textContent = 'Password must be at least 8 characters.';
-      return;
-    }
-    if (!newUserSections.size) {
-      addStatus.textContent = 'Tick at least one section for this login.';
-      return;
-    }
-    try {
-      await apiCreateUser(username, password, [...newUserSections]);
-      showToast('User added.');
-      renderUsersPanel(body);
-    } catch (e) {
-      addStatus.textContent = e.message;
-    }
+  var SECTION_TEMPLATES = {
+    conditions: {id:'',icon:'liver',color:'#2f6fed',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',
+      desc_en:'',desc_bm:'',desc_zh:'',overview_en:'',overview_bm:'',overview_zh:'',diagnosis_en:'',diagnosis_bm:'',diagnosis_zh:'',
+      related:'',symptoms_en:[],symptoms_bm:[],symptoms_zh:[],causes_en:[],causes_bm:[],causes_zh:[]},
+    treatments: {id:'',icon:'syringe',color:'#8b5cf6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',
+      desc_en:'',desc_bm:'',desc_zh:'',overview_en:'',overview_bm:'',overview_zh:'',recovery_en:'',recovery_bm:'',recovery_zh:'',
+      related:'',steps_en:[],steps_bm:[],steps_zh:[],benefits_en:[],benefits_bm:[],benefits_zh:[]},
+    education: {icon:'book',color:'#14b8a6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',desc_en:'',desc_bm:'',desc_zh:''},
+    videos: {title_en:'',title_bm:'',title_zh:'',length:'',file:''},
+    testimonials: {name:'',color:'#14b8a6',meta_en:'',meta_bm:'',meta_zh:'',quote_en:'',quote_bm:'',quote_zh:''},
+    reviews: {name:'',color:'#14b8a6',stars:5,quote_en:'',quote_bm:'',quote_zh:''}
   };
-  uInput.addEventListener('keydown', e => { if (e.key === 'Enter') pInput.focus(); });
-  pInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
-  const addBtn = el('button', { class: 'btn primary', text: 'Add user', onclick: submit });
-  form.appendChild(uInput);
-  form.appendChild(pInput);
-  form.appendChild(el('div', { class: 'hint', text: 'Sections this login can access:', style: 'margin-bottom:8px;' }));
-  form.appendChild(permGrid);
-  form.appendChild(addStatus);
-  form.appendChild(addBtn);
-  body.appendChild(form);
-}
 
-/* ---------------- login screen background (public, no auth needed) ----------------
-   Loads the "CMS Login Background" image set in Photos & Logo and applies it behind
-   the login card. Falls back to the bundled splash-bg.png (already set in the CSS
-   above) if the fetch fails or nothing has been uploaded yet. */
-(async () => {
-  try {
-    const data = await apiGet('site-images');
-    const url = data && data.adminBg;
-    if (url) {
-      document.getElementById('loginScreen').style.backgroundImage =
-        "linear-gradient(160deg,rgba(10,38,71,.25),rgba(18,58,104,.4)), url('" + url + "')";
+  var SECTIONS = [
+    {key:'conditions', label:'Conditions', shape:'list', hint:'Conditions treated — shown on the Conditions page and linked from treatments.', itemLabel:function(it){return it.title_en || 'Untitled condition';}},
+    {key:'treatments', label:'Treatments', shape:'list', hint:'Treatments & procedures offered.', itemLabel:function(it){return it.title_en || 'Untitled treatment';}},
+    {key:'doctor-bio', label:'Doctor Bio', shape:'object', hint:'Dr. Chandran’s profile: bio, credentials, specialties, and social links.'},
+    {key:'education', label:'Education', shape:'list', hint:'Education library items (guides & brochures).', itemLabel:function(it){return it.title_en || 'Untitled item';}},
+    {key:'videos', label:'Videos', shape:'list', hint:'Patient education videos.', itemLabel:function(it){return it.title_en || 'Untitled video';}},
+    {key:'testimonials', label:'Testimonials', shape:'list', hint:'Patient testimonials.', itemLabel:function(it){return it.name || 'Untitled testimonial';}},
+    {key:'reviews', label:'Reviews', shape:'list', hint:'Star reviews shown on the site.', itemLabel:function(it){return it.name || 'Untitled review';}},
+    {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
+    {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'}
+  ];
+
+  var IMAGE_SLOTS = [
+    {key:'doctor', label:'Doctor Photo'},
+    {key:'logo', label:'Clinic Logo'},
+    {key:'splashbg', label:'Splash Background (Desktop)'},
+    {key:'splashbgmobile', label:'Splash Background (Mobile)'}
+  ];
+
+  var LONG_TEXT_HINTS = ['desc','bio','overview','causes','symptom','step','benefit','recovery','diagnosis','quote','sub','_p','waP','qrScanP'];
+
+  var state = { token: null, section: null, data: null, dirty: false };
+
+  /* ============ AUTH ============ */
+  function loadToken(){
+    try { return localStorage.getItem(TOKEN_KEY); } catch(e){ return null; }
+  }
+  function saveToken(t){
+    state.token = t;
+    try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
+  }
+  function clearToken(){
+    state.token = null;
+    try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
+  }
+
+  function showApp(){
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    selectSection(SECTIONS[0].key);
+  }
+  function showLogin(msg){
+    document.getElementById('app').classList.remove('visible');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginError').textContent = msg || '';
+  }
+
+  document.getElementById('loginForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var pw = document.getElementById('passwordInput').value;
+    var btn = document.getElementById('loginBtn');
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) })
+      .then(function(r){ return r.json().then(function(body){ return {ok:r.ok, body:body}; }); })
+      .then(function(res){
+        btn.disabled = false; btn.textContent = 'Log in';
+        if(!res.ok){
+          document.getElementById('loginError').textContent = res.body.error || 'Incorrect password';
+          return;
+        }
+        document.getElementById('passwordInput').value = '';
+        saveToken(res.body.token);
+        showApp();
+      })
+      .catch(function(){
+        btn.disabled = false; btn.textContent = 'Log in';
+        document.getElementById('loginError').textContent = 'Could not reach the server. Check your connection and try again.';
+      });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', function(){
+    clearToken();
+    showLogin('');
+  });
+
+  /* ============ API HELPERS ============ */
+  function apiGet(section){
+    return fetch('/api/content?section=' + encodeURIComponent(section), {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('Could not load this section (' + r.status + ')'); return r.json(); });
+  }
+  function apiSave(section, data){
+    return fetch('/api/content?section=' + encodeURIComponent(section), {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
+      body: JSON.stringify(data)
+    }).then(function(r){
+      if(r.status === 401){ clearToken(); showLogin('Your session expired — please log in again.'); throw new Error('Session expired'); }
+      return r.json().then(function(body){ if(!r.ok) throw new Error(body.error || 'Save failed'); return body; });
+    });
+  }
+  function apiUploadImage(key, dataUrl){
+    return fetch('/api/image', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
+      body: JSON.stringify({key:key, dataUrl:dataUrl})
+    }).then(function(r){
+      if(r.status === 401){ clearToken(); showLogin('Your session expired — please log in again.'); throw new Error('Session expired'); }
+      return r.json().then(function(body){ if(!r.ok) throw new Error(body.error || 'Upload failed'); return body; });
+    });
+  }
+
+  /* ============ BANNER ============ */
+  var bannerTimer = null;
+  function showBanner(msg, kind){
+    var el = document.getElementById('banner');
+    el.textContent = msg;
+    el.className = 'show ' + (kind || 'ok');
+    if(bannerTimer) clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(function(){ el.className = ''; }, 4000);
+  }
+
+  /* ============ SIDEBAR ============ */
+  function renderNav(){
+    var nav = document.getElementById('navList');
+    nav.innerHTML = '';
+    SECTIONS.forEach(function(s){
+      var a = document.createElement('div');
+      a.className = 'nav-item' + (state.section === s.key ? ' active' : '');
+      a.textContent = s.label;
+      a.addEventListener('click', function(){ selectSection(s.key); });
+      nav.appendChild(a);
+    });
+  }
+
+  /* ============ GENERIC FORM HELPERS ============ */
+  function humanize(key){
+    var overrides = {id:'ID', url:'URL', bm:'Bahasa Melayu', zh:'Chinese', en:'English'};
+    var withSpaces = key.replace(/_/g,' ').replace(/([a-z0-9])([A-Z])/g,'$1 $2');
+    return withSpaces.split(' ').map(function(w){
+      var lw = w.toLowerCase();
+      if(overrides[lw]) return overrides[lw];
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+  }
+
+  function singularize(word){
+    if(/ies$/.test(word)) return word.slice(0,-3) + 'y';
+    if(/s$/.test(word)) return word.slice(0,-1);
+    return word;
+  }
+
+  function isLongTextKey(base){
+    var b = base.toLowerCase();
+    return LONG_TEXT_HINTS.some(function(h){ return b.indexOf(h.toLowerCase()) !== -1; });
+  }
+
+  // Groups sibling keys like title_en/title_bm/title_zh into one i18n group.
+  function groupI18nKeys(keys){
+    var seen = {};
+    var groups = [];
+    keys.forEach(function(k){
+      if(seen[k]) return;
+      var m = /^(.+)_(en|bm|zh)$/.exec(k);
+      if(m){
+        var base = m[1];
+        var enK = base+'_en', bmK = base+'_bm', zhK = base+'_zh';
+        if(keys.indexOf(enK) !== -1 || keys.indexOf(bmK) !== -1 || keys.indexOf(zhK) !== -1){
+          groups.push({type:'i18n', base:base, keys:{en:enK, bm:bmK, zh:zhK}});
+          seen[enK]=seen[bmK]=seen[zhK]=true;
+          return;
+        }
+      }
+      groups.push({type:'single', key:k});
+      seen[k]=true;
+    });
+    return groups;
+  }
+
+  function isLangObject(v){
+    if(!v || typeof v !== 'object' || Array.isArray(v)) return false;
+    var keys = Object.keys(v);
+    if(keys.length === 0) return false;
+    return keys.every(function(k){ return k==='en'||k==='bm'||k==='zh'; });
+  }
+
+  function blankLike(v){
+    if(Array.isArray(v)){
+      if(v.length && typeof v[0] === 'object' && v[0] !== null) return [blankLike(v[0])];
+      return [];
     }
-  } catch (e) {
-    // keep the CSS fallback background — this is best-effort, never blocks login.
+    if(v && typeof v === 'object'){
+      var out = {};
+      Object.keys(v).forEach(function(k){ out[k] = blankLike(v[k]); });
+      return out;
+    }
+    if(typeof v === 'number') return 0;
+    return '';
+  }
+
+  function makeLangRow(labelBase, value, keyForLen){
+    // value: object with .en/.bm/.zh — mutated in place as the user types
+    var wrap = document.createElement('div');
+    var useTextarea = isLongTextKey(labelBase);
+    ['en','bm','zh'].forEach(function(lang){
+      var row = document.createElement('div');
+      row.className = 'lang-row';
+      var tag = document.createElement('div');
+      tag.className = 'lang-tag ' + lang;
+      tag.textContent = lang.toUpperCase();
+      var input = document.createElement(useTextarea ? 'textarea' : 'input');
+      if(!useTextarea) input.type = 'text';
+      input.value = value[lang] || '';
+      input.addEventListener('input', function(){ value[lang] = input.value; markDirty(); });
+      row.appendChild(tag);
+      row.appendChild(input);
+      wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
+  function makeStringArrayEditor(arr){
+    var ta = document.createElement('textarea');
+    ta.style.minHeight = '90px';
+    ta.value = arr.join('\n');
+    ta.placeholder = 'One per line';
+    ta.addEventListener('input', function(){
+      var lines = ta.value.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length; });
+      arr.length = 0;
+      lines.forEach(function(l){ arr.push(l); });
+      markDirty();
+    });
+    return ta;
+  }
+
+  function makeSimpleInput(value, onChange, keyHint){
+    var kh = (keyHint||'').toLowerCase();
+    if(kh === 'icon'){
+      var sel = document.createElement('select');
+      ICON_NAMES.forEach(function(name){
+        var opt = document.createElement('option');
+        opt.value = name; opt.textContent = name;
+        if(name === value) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', function(){ onChange(sel.value); });
+      return sel;
+    }
+    if(kh === 'color'){
+      var wrap = document.createElement('div');
+      wrap.style.display = 'flex'; wrap.style.gap = '8px'; wrap.style.alignItems='center';
+      var c = document.createElement('input'); c.type = 'color';
+      c.value = /^#[0-9a-fA-F]{6}$/.test(value) ? value : '#2f6fed';
+      var t = document.createElement('input'); t.type = 'text'; t.value = value; t.style.maxWidth='110px';
+      c.addEventListener('input', function(){ t.value = c.value; onChange(c.value); });
+      t.addEventListener('input', function(){ onChange(t.value); if(/^#[0-9a-fA-F]{6}$/.test(t.value)) c.value = t.value; });
+      wrap.appendChild(c); wrap.appendChild(t);
+      return wrap;
+    }
+    if(typeof value === 'number' || kh === 'stars'){
+      var n = document.createElement('input'); n.type = 'number';
+      if(kh === 'stars'){ n.min = 1; n.max = 5; }
+      n.value = value;
+      n.addEventListener('input', function(){ onChange(Number(n.value) || 0); });
+      return n;
+    }
+    if(isLongTextKey(kh)){
+      var ta = document.createElement('textarea');
+      ta.value = value || '';
+      ta.addEventListener('input', function(){ onChange(ta.value); });
+      return ta;
+    }
+    var input = document.createElement('input'); input.type = 'text';
+    input.value = value == null ? '' : value;
+    input.addEventListener('input', function(){ onChange(input.value); });
+    return input;
+  }
+
+  function fieldHintFor(key){
+    if(key === 'id') return '(technical — must stay unique, no spaces; used to link related items)';
+    if(key === 'related') return '(comma-separated IDs of related conditions/treatments)';
+    if(key === 'icon') return '(controls which icon shows on the card)';
+    if(key === 'file') return '(video filename, as uploaded to the site)';
+    return '';
+  }
+
+  // Renders every field of a plain object into `container`. Recurses for
+  // nested objects/arrays (credentials, specialties, social, etc).
+  function renderObjectFields(obj, container){
+    var groups = groupI18nKeys(Object.keys(obj));
+    groups.forEach(function(g){
+      var box = document.createElement('div');
+      box.className = 'field-group';
+
+      if(g.type === 'i18n'){
+        var label = document.createElement('label');
+        label.className = 'group-label';
+        label.textContent = humanize(g.base);
+        box.appendChild(label);
+        // Ensure all three keys exist so typing in one doesn't error.
+        ['en','bm','zh'].forEach(function(l){ if(!(g.keys[l] in obj)) obj[g.keys[l]] = ''; });
+        var proxy = {
+          get en(){ return obj[g.keys.en]; }, set en(v){ obj[g.keys.en] = v; },
+          get bm(){ return obj[g.keys.bm]; }, set bm(v){ obj[g.keys.bm] = v; },
+          get zh(){ return obj[g.keys.zh]; }, set zh(v){ obj[g.keys.zh] = v; }
+        };
+        box.appendChild(makeLangRow(g.base, proxy));
+        container.appendChild(box);
+        return;
+      }
+
+      var key = g.key;
+      var value = obj[key];
+      var label2 = document.createElement('label');
+      label2.className = 'group-label';
+      label2.textContent = humanize(key);
+      var hint = fieldHintFor(key);
+      if(hint){
+        var hspan = document.createElement('span');
+        hspan.className = 'field-hint';
+        hspan.textContent = hint;
+        label2.appendChild(hspan);
+      }
+      box.appendChild(label2);
+
+      if(isLangObject(value)){
+        box.appendChild(makeLangRow(key, value));
+      } else if(Array.isArray(value)){
+        if(value.length === 0 || typeof value[0] !== 'object'){
+          box.appendChild(makeStringArrayEditor(value));
+          var hint2 = document.createElement('div');
+          hint2.className = 'field-hint';
+          hint2.style.marginTop = '4px';
+          hint2.textContent = 'One per line.';
+          box.appendChild(hint2);
+        } else {
+          var listWrap = document.createElement('div');
+          function renderSubItems(){
+            listWrap.innerHTML = '';
+            value.forEach(function(subItem, idx){
+              var card = document.createElement('div');
+              card.className = 'nested-group';
+              var head = document.createElement('div');
+              head.style.display = 'flex'; head.style.justifyContent = 'space-between'; head.style.alignItems='center'; head.style.marginBottom='6px';
+              var title = document.createElement('strong');
+              title.style.fontSize = '.8rem';
+              title.textContent = humanize(key) + ' #' + (idx+1);
+              var rm = document.createElement('button');
+              rm.type = 'button'; rm.className = 'remove-btn'; rm.textContent = 'Remove';
+              rm.addEventListener('click', function(){ value.splice(idx,1); markDirty(); renderSubItems(); });
+              head.appendChild(title); head.appendChild(rm);
+              card.appendChild(head);
+              renderObjectFields(subItem, card);
+              listWrap.appendChild(card);
+            });
+          }
+          renderSubItems();
+          box.appendChild(listWrap);
+          var addBtn = document.createElement('button');
+          addBtn.type = 'button'; addBtn.className = 'btn add-row'; addBtn.textContent = '+ Add ' + singularize(humanize(key));
+          addBtn.addEventListener('click', function(){ value.push(blankLike(value[0] || {})); markDirty(); renderSubItems(); });
+          box.appendChild(addBtn);
+        }
+      } else if(value && typeof value === 'object'){
+        var sub = document.createElement('div');
+        sub.className = 'nested-group';
+        renderObjectFields(value, sub);
+        box.appendChild(sub);
+      } else {
+        box.appendChild(makeSimpleInput(value, function(v){ obj[key] = v; markDirty(); }, key));
+      }
+      container.appendChild(box);
+    });
+  }
+
+  function renderListSection(container, data, sectionCfg){
+    if(!Array.isArray(data.items)) data.items = [];
+    var listWrap = document.createElement('div');
+    function renderItems(){
+      listWrap.innerHTML = '';
+      data.items.forEach(function(item, idx){
+        var det = document.createElement('details');
+        det.className = 'item-card';
+        if(idx === 0) det.open = true;
+        var sum = document.createElement('summary');
+        var titleSpan = document.createElement('span');
+        titleSpan.textContent = sectionCfg.itemLabel(item);
+        var right = document.createElement('span');
+        right.style.display = 'flex'; right.style.alignItems='center'; right.style.gap='10px';
+        var chev = document.createElement('span'); chev.className='chev'; chev.textContent = 'tap to edit';
+        var rm = document.createElement('button');
+        rm.type = 'button'; rm.className = 'remove-btn'; rm.textContent = 'Remove';
+        rm.addEventListener('click', function(e){
+          e.preventDefault(); e.stopPropagation();
+          if(!confirm('Remove "' + sectionCfg.itemLabel(item) + '"? This takes effect once you click Save.')) return;
+          data.items.splice(idx,1); markDirty(); renderItems();
+        });
+        right.appendChild(chev); right.appendChild(rm);
+        sum.appendChild(titleSpan); sum.appendChild(right);
+        det.appendChild(sum);
+        var body = document.createElement('div');
+        body.className = 'item-body';
+        renderObjectFields(item, body);
+        det.appendChild(body);
+        listWrap.appendChild(det);
+      });
+    }
+    renderItems();
+    container.appendChild(listWrap);
+
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button'; addBtn.className = 'btn btn-add';
+    addBtn.textContent = '+ Add new';
+    addBtn.addEventListener('click', function(){
+      var template = data.items[0] || SECTION_TEMPLATES[sectionCfg.key] || {};
+      data.items.push(blankLike(template));
+      markDirty();
+      renderItems();
+      var last = listWrap.querySelector('.item-card:last-child');
+      if(last){ last.open = true; last.scrollIntoView({behavior:'smooth', block:'center'}); }
+    });
+    container.appendChild(addBtn);
+  }
+
+  function renderImagesSection(container, data){
+    var grid = document.createElement('div');
+    grid.className = 'images-grid';
+    IMAGE_SLOTS.forEach(function(slot){
+      var card = document.createElement('div');
+      card.className = 'image-card';
+      var h3 = document.createElement('h3'); h3.textContent = slot.label;
+      var img = document.createElement('img'); img.className = 'preview';
+      var current = data[slot.key] || '';
+      img.src = /^https?:\/\//.test(current) || current.charAt(0) === '/' ? current : '/' + current;
+      var file = document.createElement('input'); file.type = 'file'; file.accept = 'image/*';
+      var status = document.createElement('div'); status.className = 'upload-status';
+      file.addEventListener('change', function(){
+        var f = file.files[0];
+        if(!f) return;
+        status.textContent = 'Preparing image…';
+        resizeImageFile(f, 1600, 0.85).then(function(dataUrl){
+          status.textContent = 'Uploading…';
+          return apiUploadImage(slot.key, dataUrl);
+        }).then(function(res){
+          data[slot.key] = res.url;
+          img.src = res.url;
+          status.textContent = 'Saving…';
+          return apiSave('site-images', data);
+        }).then(function(){
+          status.textContent = 'Uploaded and live.';
+          showBanner(slot.label + ' updated — live now.', 'ok');
+        }).catch(function(err){
+          status.textContent = '';
+          showBanner('Could not update ' + slot.label + ': ' + err.message, 'err');
+        });
+      });
+      card.appendChild(h3); card.appendChild(img); card.appendChild(file); card.appendChild(status);
+      grid.appendChild(card);
+    });
+    container.appendChild(grid);
+  }
+
+  // Resizes/compresses an image file in the browser before upload, so we
+  // never need a server-side image library and uploads stay small & fast.
+  function resizeImageFile(file, maxDim, quality){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(new Error('Could not read the file')); };
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ reject(new Error('Could not read that image')); };
+        img.onload = function(){
+          var w = img.width, h = img.height;
+          if(w > maxDim || h > maxDim){
+            if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
+            else { w = Math.round(w * maxDim / h); h = maxDim; }
+          }
+          var canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ============ SECTION LOAD / SAVE ============ */
+  function markDirty(){ state.dirty = true; }
+
+  function selectSection(key){
+    state.section = key;
+    state.dirty = false;
+    renderNav();
+    loadSection(key);
+  }
+
+  function loadSection(key){
+    var cfg = SECTIONS.filter(function(s){ return s.key === key; })[0];
+    document.getElementById('sectionTitle').textContent = cfg.label;
+    document.getElementById('sectionHint').textContent = cfg.hint || '';
+    var content = document.getElementById('sectionContent');
+    content.innerHTML = '<p class="helptext">Loading…</p>';
+    document.getElementById('saveBtn').disabled = true;
+
+    apiGet(key).then(function(data){
+      state.data = data;
+      document.getElementById('saveBtn').disabled = (cfg.shape === 'images');
+      renderSection(cfg, data);
+    }).catch(function(err){
+      content.innerHTML = '';
+      showBanner('Could not load this section: ' + err.message, 'err');
+    });
+  }
+
+  function renderSection(cfg, data){
+    var content = document.getElementById('sectionContent');
+    content.innerHTML = '';
+
+    if(cfg.shape === 'images'){
+      renderImagesSection(content, data);
+      return;
+    }
+
+    if(cfg.flatSearch){
+      var search = document.createElement('input');
+      search.type = 'text'; search.id = 'searchBox'; search.placeholder = 'Filter fields… (e.g. "hero", "button", "review")';
+      content.appendChild(search);
+      var listBox = document.createElement('div');
+      content.appendChild(listBox);
+      renderObjectFields(data, listBox);
+      search.addEventListener('input', function(){
+        var q = search.value.trim().toLowerCase();
+        Array.prototype.forEach.call(listBox.querySelectorAll('.field-group'), function(fg){
+          var label = fg.querySelector('.group-label');
+          var text = (label ? label.textContent : '').toLowerCase();
+          fg.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
+        });
+      });
+      return;
+    }
+
+    if(cfg.shape === 'list'){
+      renderListSection(content, data, cfg);
+      return;
+    }
+
+    // shape === 'object' (doctor-bio)
+    renderObjectFields(data, content);
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', function(){
+    if(state.dirty && !confirm('Discard unsaved changes and reload from the live site?')) return;
+    loadSection(state.section);
+  });
+
+  document.getElementById('saveBtn').addEventListener('click', function(){
+    var btn = document.getElementById('saveBtn');
+    btn.disabled = true; var original = btn.textContent; btn.textContent = 'Saving…';
+    apiSave(state.section, state.data).then(function(){
+      state.dirty = false;
+      showBanner('Saved — changes are live now.', 'ok');
+    }).catch(function(err){
+      showBanner('Could not save: ' + err.message, 'err');
+    }).finally(function(){
+      btn.disabled = false; btn.textContent = original;
+    });
+  });
+
+  window.addEventListener('beforeunload', function(e){
+    if(state.dirty){ e.preventDefault(); e.returnValue = ''; }
+  });
+
+  /* ============ BOOT ============ */
+  var existing = loadToken();
+  if(existing){
+    state.token = existing;
+    showApp();
+  } else {
+    showLogin();
   }
 })();
-
-/* ---------------- wire up login ---------------- */
-function doLogin() {
-  login(document.getElementById('usernameInput').value.trim(), document.getElementById('passwordInput').value);
-}
-document.getElementById('loginBtn').addEventListener('click', doLogin);
-document.getElementById('usernameInput').addEventListener('keydown', e => { if (e.key === 'Enter') document.getElementById('passwordInput').focus(); });
-document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-document.getElementById('logoutBtn').addEventListener('click', () => forceLogout());
-
-if (state.token) {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('app').classList.add('show');
-  updateLoggedInAs();
-  boot().catch(() => forceLogout('Please log in again.'));
-}
 </script>
 </body>
 </html>
