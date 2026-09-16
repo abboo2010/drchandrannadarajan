@@ -767,16 +767,28 @@
 // looks correct — it just won't reflect a very recent photo swap yet.
 (function(){
   "use strict";
+  // Image paths stored in the CMS are written relative to the SITE ROOT
+  // (e.g. "images/splash-bg.png"), because that's correct on the public
+  // pages which live at "/". This admin page lives at "/admin/", so that
+  // same relative path would resolve to "/admin/images/splash-bg.png"
+  // (404) unless we anchor it to the root ourselves. An already-uploaded
+  // photo's path ("/api/image?key=...") already starts with "/" and is
+  // left untouched, as is any absolute http(s) URL.
+  function resolveImgUrl(u){
+    if (!u) return u;
+    if (/^https?:\/\//i.test(u) || u.charAt(0) === '/') return u;
+    return '/' + u;
+  }
   fetch('/api/content?section=site-images', { cache: 'no-store' })
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(data){
       if (!data) return;
       if (data.splashbg) {
         document.getElementById('loginScreen').style.backgroundImage =
-          "linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('" + data.splashbg + "')";
+          "linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('" + resolveImgUrl(data.splashbg) + "')";
       }
       if (data.logo) {
-        document.getElementById('loginLogo').src = data.logo;
+        document.getElementById('loginLogo').src = resolveImgUrl(data.logo);
       }
     })
     .catch(function(){ /* keep the bundled default painted by CSS */ });
