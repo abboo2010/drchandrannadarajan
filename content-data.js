@@ -894,6 +894,12 @@ const VIDEOS = [
   }
 ];
 
+// Whether the Testimonials nav item / page is shown on the live site at all.
+// Updated from the CMS-saved value in content-loader.js once the real
+// content loads (defaults to true here so the page still works if that
+// fetch is ever slow or offline).
+let TESTIMONIALS_ENABLED = true;
+
 const TESTIMONIALS = [
   {
     "name": "Salmah A.",
