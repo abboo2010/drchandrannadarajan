@@ -180,8 +180,8 @@
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
     {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
     {key:'popup', label:'Announcement Popup', shape:'object',
-      defaults:{position:'center', width:420, height:'', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
-      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, choose where on the screen it appears and how wide it is, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
+      defaults:{position:'center', width:420, height:'', backgroundColor:'#0b1e38', textColor:'', borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
+      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, choose where on the screen it appears and how wide it is, style its colors/border/corners/shadow, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
   ];
 
   var IMAGE_SLOTS = [
@@ -465,16 +465,45 @@
       sel.addEventListener('change', function(){ onChange(sel.value); });
       return sel;
     }
-    if(kh === 'color'){
+    if(kh === 'color' || kh === 'backgroundcolor' || kh === 'textcolor' || kh === 'bordercolor'){
       var wrap = document.createElement('div');
       wrap.style.display = 'flex'; wrap.style.gap = '8px'; wrap.style.alignItems='center';
       var c = document.createElement('input'); c.type = 'color';
-      c.value = /^#[0-9a-fA-F]{6}$/.test(value) ? value : '#2f6fed';
+      // When blank (e.g. Text Color, whose blank state means "use the
+      // built-in default look" rather than a real color), the swatch just
+      // needs a harmless starting point — it never overwrites the blank
+      // value unless the doctor actually touches the picker.
+      c.value = /^#[0-9a-fA-F]{6}$/.test(value) ? value : (kh === 'textcolor' ? '#ffffff' : '#2f6fed');
       var t = document.createElement('input'); t.type = 'text'; t.value = value; t.style.maxWidth='110px';
+      if(kh === 'textcolor') t.placeholder = 'Default';
       c.addEventListener('input', function(){ t.value = c.value; onChange(c.value); });
       t.addEventListener('input', function(){ onChange(t.value); if(/^#[0-9a-fA-F]{6}$/.test(t.value)) c.value = t.value; });
       wrap.appendChild(c); wrap.appendChild(t);
       return wrap;
+    }
+    if(kh === 'borderstyle'){
+      var bsSel = document.createElement('select');
+      var bsOptions = [['none','None (no border)'],['solid','Solid'],['dashed','Dashed'],['dotted','Dotted'],['double','Double']];
+      bsOptions.forEach(function(pair){
+        var opt = document.createElement('option');
+        opt.value = pair[0]; opt.textContent = pair[1];
+        if(pair[0] === value) opt.selected = true;
+        bsSel.appendChild(opt);
+      });
+      bsSel.addEventListener('change', function(){ onChange(bsSel.value); });
+      return bsSel;
+    }
+    if(kh === 'shadowstyle'){
+      var shSel = document.createElement('select');
+      var shOptions = [['none','None (default)'],['soft','Soft'],['strong','Strong']];
+      shOptions.forEach(function(pair){
+        var opt = document.createElement('option');
+        opt.value = pair[0]; opt.textContent = pair[1];
+        if(pair[0] === value) opt.selected = true;
+        shSel.appendChild(opt);
+      });
+      shSel.addEventListener('change', function(){ onChange(shSel.value); });
+      return shSel;
     }
     if(typeof value === 'number' || kh === 'stars'){
       var n = document.createElement('input'); n.type = 'number';
@@ -506,6 +535,13 @@
     if(key === 'position') return '(where the popup appears on the screen — the background behind it still dims the whole page)';
     if(key === 'width') return '(exact width of the popup box, in pixels — try 420 as a starting point)';
     if(key === 'height') return '(leave blank for automatic height, which fits whatever content is turned on below — set a number only if you want a fixed height; it still never grows taller than the screen)';
+    if(key === 'backgroundColor') return '(background color of the popup box)';
+    if(key === 'textColor') return '(leave blank for the current default look — title in white, message in a softer light blue; pick a color to apply it to the title, with the message using the same color at a softer, lighter shade)';
+    if(key === 'borderStyle') return '(leave as None for the current look with no border)';
+    if(key === 'borderColor') return '(only used when Border Style is not None)';
+    if(key === 'borderWidth') return '(border thickness in pixels — only used when Border Style is not None)';
+    if(key === 'borderRadius') return '(how rounded the popup’s corners are, in pixels — 18 matches the current look)';
+    if(key === 'shadowStyle') return '(an optional drop shadow behind the popup box)';
     if(key === 'showImage') return '(show/hide the image below — the image itself is uploaded under Photos & Logo → Popup Image)';
     if(key === 'imageSize') return '(how large the image appears in the popup)';
     if(key === 'showTitle') return '(show/hide the title text below)';
