@@ -467,6 +467,8 @@ let POPUP = {
   enabled:false, startDate:'', endDate:'', position:'center', width:420, height:'',
   backgroundColor:'#0b1e38', textColor:'',
   borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none',
+  closeButtonPosition:'outside', closeButtonColor:'#ffffff', closeButtonIconColor:'#0a2647', closeButtonSize:44,
+  animationStyle:'none', animationDuration:300, reappear:'session',
   showImage:true, imageSize:'medium',
   showTitle:true, showMessage:true, textSize:'medium',
   showButtonText:true, showButtonLink:true, buttonLink:''
@@ -505,6 +507,43 @@ const POPUP_POSITION_CLASSES = [
 function applyPopupPosition(overlay, position){
   overlay.classList.remove.apply(overlay.classList, POPUP_POSITION_CLASSES);
   if(position && position !== 'center') overlay.classList.add('pos-' + position);
+}
+// Maps a CMS "Animation Style" choice to its @keyframes name (see style.css)
+// for the given direction. "none" (the default — today's instant, no-motion
+// appearance) intentionally has no entry, since callers check for 'none'
+// themselves before ever asking for a name.
+const POPUP_ANIMATION_NAMES = {
+  fade: {in:'popupFadeIn', out:'popupFadeOut'},
+  'slide-down': {in:'popupSlideDownIn', out:'popupSlideDownOut'},
+  'slide-up': {in:'popupSlideUpIn', out:'popupSlideUpOut'},
+  zoom: {in:'popupZoomIn', out:'popupZoomOut'}
+};
+function popupAnimationName(style, direction){
+  const entry = POPUP_ANIMATION_NAMES[style];
+  return entry ? entry[direction] : '';
+}
+// How often the popup is allowed to reappear to the same visitor.
+// "session" (the default, matching the original behavior) uses
+// sessionStorage — a fresh browser tab always sees it again. "always" skips
+// storage entirely. "daily"/"once" persist across tabs via localStorage.
+const POPUP_LOCAL_KEY = 'irsabahPopupLastShown';
+function popupAlreadyShown(){
+  const mode = POPUP.reappear || 'session';
+  try {
+    if(mode === 'always') return false;
+    if(mode === 'session') return sessionStorage.getItem(POPUP_SESSION_KEY) === '1';
+    if(mode === 'once') return localStorage.getItem(POPUP_LOCAL_KEY) === '1';
+    if(mode === 'daily') return localStorage.getItem(POPUP_LOCAL_KEY) === todayLocalISO();
+  } catch(e){}
+  return false;
+}
+function popupMarkShown(){
+  const mode = POPUP.reappear || 'session';
+  try {
+    if(mode === 'session') sessionStorage.setItem(POPUP_SESSION_KEY, '1');
+    else if(mode === 'once') localStorage.setItem(POPUP_LOCAL_KEY, '1');
+    else if(mode === 'daily') localStorage.setItem(POPUP_LOCAL_KEY, todayLocalISO());
+  } catch(e){}
 }
 function renderPopupContent(){
   const box = document.querySelector('.popup-box');
@@ -570,6 +609,22 @@ function renderPopupContent(){
   closeBtn.style.background = POPUP.closeButtonColor || '#ffffff';
   closeBtn.style.color = POPUP.closeButtonIconColor || '#0a2647';
 
+  // Entrance animation. "none" (the default) leaves the box with no
+  // animation property at all — the exact original instant appearance —
+  // rather than a 0ms/"none" animation, which some browsers still flash.
+  const animStyle = POPUP.animationStyle || 'none';
+  const animDuration = Number(POPUP.animationDuration) || 300;
+  if(animStyle === 'none'){
+    box.style.animation = '';
+  } else {
+    // Clear first and force a reflow so re-showing the popup with the same
+    // style (e.g. testing it twice in a row) restarts the animation instead
+    // of silently no-op'ing.
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = popupAnimationName(animStyle, 'in') + ' ' + animDuration + 'ms ease';
+  }
+
   titleEl.textContent = tf(POPUP, 'title');
   const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
   titleEl.style.display = wantTitle ? '' : 'none';
@@ -624,9 +679,7 @@ function renderPopupContent(){
 }
 function maybeShowPopup(){
   if(!POPUP.enabled || !popupWithinDateWindow()) return;
-  let alreadyShown = false;
-  try { alreadyShown = sessionStorage.getItem(POPUP_SESSION_KEY) === '1'; } catch(e){}
-  if(alreadyShown) return;
+  if(popupAlreadyShown()) return;
   // Don't compete with the splash screen — wait until it's dismissed.
   if(!splash.classList.contains('hide')){
     splash.addEventListener('click', () => setTimeout(maybeShowPopup, 400), { once:true });
@@ -634,10 +687,23 @@ function maybeShowPopup(){
   }
   renderPopupContent();
   document.getElementById('announcementPopup').classList.add('show');
-  try { sessionStorage.setItem(POPUP_SESSION_KEY, '1'); } catch(e){}
+  popupMarkShown();
 }
 function closeAnnouncementPopup(){
-  document.getElementById('announcementPopup').classList.remove('show');
+  const overlay = document.getElementById('announcementPopup');
+  const box = overlay.querySelector('.popup-box');
+  const animStyle = POPUP.animationStyle || 'none';
+  if(animStyle === 'none'){
+    overlay.classList.remove('show');
+    return;
+  }
+  // Play the matching exit animation, then actually hide once it finishes —
+  // same duration as the entrance so it feels symmetric.
+  const duration = Number(POPUP.animationDuration) || 300;
+  box.style.animation = 'none';
+  void box.offsetWidth;
+  box.style.animation = popupAnimationName(animStyle, 'out') + ' ' + duration + 'ms ease forwards';
+  setTimeout(() => { overlay.classList.remove('show'); box.style.animation = ''; }, duration);
 }
 // Clicking the dimmed area around the box (not the box itself) also closes
 // it — mainly so "Close Button Position: Hidden" never traps a visitor with
