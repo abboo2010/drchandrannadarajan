@@ -10,7 +10,7 @@
 //   overwriting the old one in place, so browsers never show a stale
 //   cached copy after a photo is swapped.
 
-const { getStore } = require('@netlify/blobs');
+const { getBlobStore } = require('./_blobs-store');
 const { isAuthorized, json, CORS_HEADERS } = require('./_auth-helper');
 
 const MAX_BYTES = 8 * 1024 * 1024; // 8MB, comfortably under the function payload limit
@@ -22,7 +22,7 @@ exports.handler = async (event) => {
     return { statusCode: 204, headers: CORS_HEADERS, body: '' };
   }
 
-  const store = getStore('images');
+  const store = getBlobStore('images');
 
   if (event.httpMethod === 'GET') {
     const key = (event.queryStringParameters || {}).key;
