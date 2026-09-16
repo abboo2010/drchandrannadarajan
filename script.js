@@ -464,7 +464,7 @@ function triggerIdleReset(){
    browser session (sessionStorage), gated by the CMS on/off switch and an
    optional start/end date window. */
 let POPUP = {
-  enabled:false, startDate:'', endDate:'', popupWidth:'medium',
+  enabled:false, startDate:'', endDate:'', position:'center', width:420, height:'',
   showImage:true, imageSize:'medium',
   showTitle:true, showMessage:true, textSize:'medium',
   showButtonText:true, showButtonLink:true, buttonLink:''
@@ -492,6 +492,18 @@ function applySizeClass(el, size){
   if(size === 'large') el.classList.add('size-large');
   if(size === 'xlarge') el.classList.add('size-xlarge');
 }
+const POPUP_POSITION_CLASSES = [
+  'pos-top-left', 'pos-top-center', 'pos-top-right',
+  'pos-middle-left', 'pos-center', 'pos-middle-right',
+  'pos-bottom-left', 'pos-bottom-center', 'pos-bottom-right'
+];
+// Moves the popup to one of 9 screen positions (the dimmed background
+// always still covers the whole page). "center" needs no class since
+// that's the overlay's own default alignment.
+function applyPopupPosition(overlay, position){
+  overlay.classList.remove.apply(overlay.classList, POPUP_POSITION_CLASSES);
+  if(position && position !== 'center') overlay.classList.add('pos-' + position);
+}
 function renderPopupContent(){
   const box = document.querySelector('.popup-box');
   const titleEl = document.getElementById('popupTitle');
@@ -499,11 +511,17 @@ function renderPopupContent(){
   const img = document.getElementById('popupImage');
   const btn = document.getElementById('popupActionBtn');
 
-  // Width is the only dimension the CMS sets directly — height always
-  // follows from however much content ends up visible below (see the
-  // .popup-box max-height/overflow rule in style.css, which keeps it from
-  // ever growing taller than the screen regardless of what's turned on).
-  applySizeClass(box, POPUP.popupWidth);
+  const overlay = document.getElementById('announcementPopup');
+  applyPopupPosition(overlay, POPUP.position);
+
+  // Width is an exact pixel value from the CMS. Height defaults to
+  // "automatic" (blank), following however much content ends up visible
+  // below; the .popup-scroll max-height/overflow rule in style.css keeps
+  // it from ever growing taller than the screen either way, and also caps
+  // a manually-set fixed height on a short screen.
+  box.style.maxWidth = (Number(POPUP.width) || 420) + 'px';
+  const scrollEl = box.querySelector('.popup-scroll');
+  scrollEl.style.height = POPUP.height ? (Number(POPUP.height) + 'px') : '';
 
   titleEl.textContent = tf(POPUP, 'title');
   const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
