@@ -24,6 +24,7 @@ const SEEDS = {
   reviews: require('../../content/reviews.json'),
   'site-text': require('../../content/site-text.json'),
   'site-images': require('../../content/site-images.json'),
+  popup: require('../../content/popup.json'),
 };
 
 const SECTIONS = Object.keys(SEEDS);

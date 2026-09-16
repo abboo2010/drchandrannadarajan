@@ -168,14 +168,16 @@
     {key:'testimonials', label:'Testimonials', shape:'list', hint:'Patient testimonials.', itemLabel:function(it){return it.name || 'Untitled testimonial';}},
     {key:'reviews', label:'Reviews', shape:'list', hint:'Star reviews shown on the site.', itemLabel:function(it){return it.name || 'Untitled review';}},
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
-    {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'}
+    {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
+    {key:'popup', label:'Announcement Popup', shape:'object', hint:'A one-time popup shown to visitors (image + message + optional button), once per visit. Turn it on/off and optionally set a start/end date — the image itself is uploaded under Photos & Logo → Popup Image.'}
   ];
 
   var IMAGE_SLOTS = [
     {key:'doctor', label:'Doctor Photo'},
     {key:'logo', label:'Clinic Logo'},
     {key:'splashbg', label:'Splash Background (Desktop)'},
-    {key:'splashbgmobile', label:'Splash Background (Mobile)'}
+    {key:'splashbgmobile', label:'Splash Background (Mobile)'},
+    {key:'popupImage', label:'Popup Image (shown in the Announcement Popup)'}
   ];
 
   var LONG_TEXT_HINTS = ['desc','bio','overview','causes','symptom','step','benefit','recovery','diagnosis','quote','sub','_p','waP','qrScanP'];
@@ -385,6 +387,18 @@
 
   function makeSimpleInput(value, onChange, keyHint){
     var kh = (keyHint||'').toLowerCase();
+    if(typeof value === 'boolean'){
+      var cb = document.createElement('input'); cb.type = 'checkbox';
+      cb.checked = value;
+      cb.addEventListener('change', function(){ onChange(cb.checked); });
+      return cb;
+    }
+    if(kh === 'startdate' || kh === 'enddate'){
+      var d = document.createElement('input'); d.type = 'date';
+      d.value = value || '';
+      d.addEventListener('input', function(){ onChange(d.value); });
+      return d;
+    }
     if(kh === 'icon'){
       var sel = document.createElement('select');
       ICON_NAMES.forEach(function(name){
@@ -431,6 +445,11 @@
     if(key === 'related') return '(comma-separated IDs of related conditions/treatments)';
     if(key === 'icon') return '(controls which icon shows on the card)';
     if(key === 'file') return '(video filename, as uploaded to the site)';
+    if(key === 'enabled') return '(turns the popup on/off on the live site)';
+    if(key === 'startDate') return '(optional — leave blank to show as soon as it’s turned on)';
+    if(key === 'endDate') return '(optional — leave blank to keep showing until turned off)';
+    if(key === 'buttonText') return '(leave blank to show the popup with no button)';
+    if(key === 'buttonLink') return '(where the button goes — a WhatsApp link or any https:// URL)';
     return '';
   }
 

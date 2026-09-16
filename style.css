@@ -464,6 +464,18 @@
   .modal-video-title{color:#fff;font-weight:700;font-size:15px;margin-top:12px;}
   .modal-video-sub{color:#8896a8;font-size:12px;margin-top:3px;}
 
+  /* ---- ANNOUNCEMENT POPUP ---- */
+  /* No overflow:hidden here (unlike a plain image crop) — .modal-close sits
+     outside the box via negative top/right offsets, and clipping overflow
+     would cut the button off. The image gets its own matching top corners
+     instead. */
+  .popup-box{max-width:420px;padding:0;}
+  .popup-img{width:100%;display:none;max-height:260px;object-fit:cover;border-radius:18px 18px 0 0;}
+  .popup-body{padding:22px 24px 26px;}
+  .popup-title{color:#fff;font-weight:800;font-size:19px;margin-bottom:8px;}
+  .popup-message{color:#c7d3e3;font-size:14px;line-height:1.5;margin-bottom:18px;white-space:pre-line;}
+  .popup-btn{width:100%;justify-content:center;text-decoration:none;}
+
   /* ============================================================
      RESPONSIVE / MOBILE LAYOUT
      Below this width the sidebar becomes a slide-out drawer

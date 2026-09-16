@@ -280,6 +280,22 @@
   </div>
 </div>
 
+<!-- ============ ANNOUNCEMENT POPUP ============ -->
+<!-- CMS-editable at Admin → Announcement Popup (image, title, message, optional
+     button) and Admin → Photos & Logo → Popup Image. Shown at most once per
+     browser session — see script.js's maybeShowPopup()/renderPopupContent(). -->
+<div class="modal-overlay" id="announcementPopup">
+  <div class="modal-box popup-box">
+    <button class="modal-close" onclick="closeAnnouncementPopup()">✕</button>
+    <img id="popupImage" data-img-src="popupImage" class="popup-img" alt="" />
+    <div class="popup-body">
+      <div class="popup-title" id="popupTitle"></div>
+      <div class="popup-message" id="popupMessage"></div>
+      <a id="popupActionBtn" class="btn-gold popup-btn" href="#" target="_blank" rel="noopener" style="display:none;"></a>
+    </div>
+  </div>
+</div>
+
 
 <script src="data.js"></script>
 <script src="content-data.js"></script>

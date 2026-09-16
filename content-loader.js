@@ -24,6 +24,7 @@ const CONTENT_URLS = {
   reviews:      "/api/content?section=reviews",
   siteText:     "/api/content?section=site-text",
   siteImages:   "/api/content?section=site-images",
+  popup:        "/api/content?section=popup",
 };
 
 async function fetchJSON(url){
@@ -94,8 +95,16 @@ async function loadSiteText(){
 async function loadSiteImages(){
   const data = await fetchJSON(CONTENT_URLS.siteImages);
   Object.keys(data).forEach(key => {
+    if (!data[key]) return; // unset slot (e.g. popupImage before anything's uploaded) — leave the <img> alone
     document.querySelectorAll('img[data-img-src="' + key + '"]').forEach(img => { img.src = data[key]; });
   });
+}
+// Announcement popup (image + message + optional button) — see script.js's
+// maybeShowPopup()/renderPopupContent() for the on/off + date-window logic
+// and how it's actually displayed. This just gets the CMS data into POPUP.
+async function loadPopup(){
+  const data = await fetchJSON(CONTENT_URLS.popup);
+  Object.assign(POPUP, data);
 }
 
 /* ---------------- ORCHESTRATION ---------------- */
@@ -105,7 +114,7 @@ async function loadLiveContent(){
   await Promise.allSettled([
     loadConditions(), loadTreatments(), loadDoctorBio(),
     loadEducation(), loadVideos(), loadTestimonials(), loadReviews(),
-    loadSiteText(), loadSiteImages(),
+    loadSiteText(), loadSiteImages(), loadPopup(),
   ]);
 
   rebuildLookups();
@@ -115,6 +124,7 @@ async function loadLiveContent(){
   renderTestimonials(); renderReviews();
   renderDoctorBio();
   applyUI();
+  maybeShowPopup();
 
   // If a detail page happens to be open already, refresh it with the new data too
   const activePanel = document.querySelector('.panel.active');

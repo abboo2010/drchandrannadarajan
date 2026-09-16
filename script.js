@@ -382,6 +382,7 @@ function setLanguage(lang){
   renderReviews();
   renderDoctorBio();
   tick();
+  if(document.getElementById('announcementPopup').classList.contains('show')) renderPopupContent();
 
   // Re-apply the correct active nav highlight + panel after re-rendering nav buttons
   const activePanel = document.querySelector('.panel.active');
@@ -435,6 +436,7 @@ function triggerIdleReset(){
   const videoOpen = document.getElementById('videoModal').classList.contains('show');
   if(videoOpen){ armIdleReset(); return; }
   closeVideoModal();
+  closeAnnouncementPopup();
   closeSidebarDrawer();
   showPanel('home');
   splash.classList.remove('hide');
@@ -442,6 +444,61 @@ function triggerIdleReset(){
 ['touchstart','mousedown','keydown'].forEach(evt=>{
   document.addEventListener(evt, armIdleReset, {passive:true});
 });
+
+/* ---------------- ANNOUNCEMENT POPUP ----------------
+   CMS-editable (Admin → Announcement Popup + Photos & Logo → Popup Image):
+   an image, title, message, and an optional button/link. content-loader.js's
+   loadPopup() fills POPUP from /api/content?section=popup and then calls
+   maybeShowPopup() once every section has loaded. Shown at most once per
+   browser session (sessionStorage), gated by the CMS on/off switch and an
+   optional start/end date window. */
+let POPUP = { enabled:false, startDate:'', endDate:'', buttonLink:'' };
+const POPUP_SESSION_KEY = 'irsabahPopupShown';
+
+// Local (not UTC) calendar date as 'YYYY-MM-DD', so the start/end date
+// fields match what the clinic actually means by "today" here in Sabah.
+function todayLocalISO(){
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+function popupWithinDateWindow(){
+  const today = todayLocalISO();
+  if(POPUP.startDate && today < POPUP.startDate) return false;
+  if(POPUP.endDate && today > POPUP.endDate) return false;
+  return true;
+}
+function renderPopupContent(){
+  document.getElementById('popupTitle').textContent = tf(POPUP, 'title');
+  document.getElementById('popupMessage').textContent = tf(POPUP, 'message');
+  const img = document.getElementById('popupImage');
+  img.style.display = img.getAttribute('src') ? 'block' : 'none';
+  const btnText = tf(POPUP, 'buttonText');
+  const btn = document.getElementById('popupActionBtn');
+  if(btnText && POPUP.buttonLink){
+    btn.textContent = btnText;
+    btn.href = POPUP.buttonLink;
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+  }
+}
+function maybeShowPopup(){
+  if(!POPUP.enabled || !popupWithinDateWindow()) return;
+  let alreadyShown = false;
+  try { alreadyShown = sessionStorage.getItem(POPUP_SESSION_KEY) === '1'; } catch(e){}
+  if(alreadyShown) return;
+  // Don't compete with the splash screen — wait until it's dismissed.
+  if(!splash.classList.contains('hide')){
+    splash.addEventListener('click', () => setTimeout(maybeShowPopup, 400), { once:true });
+    return;
+  }
+  renderPopupContent();
+  document.getElementById('announcementPopup').classList.add('show');
+  try { sessionStorage.setItem(POPUP_SESSION_KEY, '1'); } catch(e){}
+}
+function closeAnnouncementPopup(){
+  document.getElementById('announcementPopup').classList.remove('show');
+}
 
 /* ---------------- PWA SERVICE WORKER REGISTRATION ---------------- */
 /* Only registers over https (or localhost) — browsers block service workers
