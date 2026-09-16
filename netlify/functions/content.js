@@ -8,7 +8,7 @@
 // is the source of truth and updates are visible immediately — no git
 // commit, no rebuild.
 
-const { getStore } = require('@netlify/blobs');
+const { getBlobStore } = require('./_blobs-store');
 const { isAuthorized, json, CORS_HEADERS } = require('./_auth-helper');
 
 // Whitelist of editable sections and their seed (baked-in default) data.
@@ -39,7 +39,7 @@ exports.handler = async (event) => {
     return json(400, { error: `Unknown or missing section. Valid sections: ${SECTIONS.join(', ')}` });
   }
 
-  const store = getStore('content');
+  const store = getBlobStore('content');
 
   if (event.httpMethod === 'GET') {
     let data;
