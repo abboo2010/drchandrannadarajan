@@ -465,6 +465,8 @@ function triggerIdleReset(){
    optional start/end date window. */
 let POPUP = {
   enabled:false, startDate:'', endDate:'', position:'center', width:420, height:'',
+  backgroundColor:'#0b1e38', textColor:'',
+  borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none',
   showImage:true, imageSize:'medium',
   showTitle:true, showMessage:true, textSize:'medium',
   showButtonText:true, showButtonLink:true, buttonLink:''
@@ -523,14 +525,45 @@ function renderPopupContent(){
   const scrollEl = box.querySelector('.popup-scroll');
   scrollEl.style.height = POPUP.height ? (Number(POPUP.height) + 'px') : '';
 
+  // Colors, border, corner radius and shadow are all applied inline so they
+  // override the CSS defaults only when the CMS actually sets them — a
+  // freshly-added popup with these fields at their defaults looks pixel-
+  // identical to the original hard-coded navy box.
+  box.style.backgroundColor = POPUP.backgroundColor || '#0b1e38';
+  const radius = (POPUP.borderRadius === '' || POPUP.borderRadius == null) ? 18 : Number(POPUP.borderRadius);
+  box.style.setProperty('--popup-radius', radius + 'px');
+  box.style.borderRadius = radius + 'px';
+  if(POPUP.borderStyle && POPUP.borderStyle !== 'none'){
+    box.style.border = (Number(POPUP.borderWidth) || 2) + 'px ' + POPUP.borderStyle + ' ' + (POPUP.borderColor || '#d4a94a');
+  } else {
+    box.style.border = 'none';
+  }
+  if(POPUP.shadowStyle === 'soft'){
+    box.style.boxShadow = '0 10px 40px rgba(0,0,0,0.35)';
+  } else if(POPUP.shadowStyle === 'strong'){
+    box.style.boxShadow = '0 20px 60px rgba(0,0,0,0.55)';
+  } else {
+    box.style.boxShadow = 'none';
+  }
+
   titleEl.textContent = tf(POPUP, 'title');
   const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
   titleEl.style.display = wantTitle ? '' : 'none';
+  // Blank Text Color means "use the built-in look" (white title, softer
+  // light-blue message from style.css) — only an explicit color overrides
+  // both, so a popup nobody has touched this field on looks pixel-identical
+  // to before this feature existed.
+  titleEl.style.color = POPUP.textColor || '';
   applySizeClass(titleEl, POPUP.textSize);
 
   msgEl.textContent = tf(POPUP, 'message');
   const wantMessage = (POPUP.showMessage !== false) && msgEl.textContent;
   msgEl.style.display = wantMessage ? '' : 'none';
+  // The message reuses the same chosen text color but softened (lighter
+  // opacity), rather than exposing a second color picker for one field
+  // that visually only ever wants to read as "less prominent than the title".
+  msgEl.style.color = POPUP.textColor || '';
+  msgEl.style.opacity = POPUP.textColor ? '0.78' : '';
   applySizeClass(msgEl, POPUP.textSize);
 
   const wantImage = (POPUP.showImage !== false) && img.getAttribute('src');
@@ -563,7 +596,7 @@ function renderPopupContent(){
   const body = document.querySelector('.popup-body');
   const bodyHasContent = wantTitle || wantMessage || wantButtonText;
   body.style.display = bodyHasContent ? '' : 'none';
-  img.style.borderRadius = bodyHasContent ? '' : '18px';
+  img.style.borderRadius = bodyHasContent ? '' : 'var(--popup-radius, 18px)';
 }
 function maybeShowPopup(){
   if(!POPUP.enabled || !popupWithinDateWindow()) return;
