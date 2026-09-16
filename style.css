@@ -470,6 +470,16 @@
      would cut the button off. The image gets its own matching top corners
      instead. */
   .popup-box{max-width:420px;padding:0;}
+  .popup-box.size-small{max-width:320px;}
+  .popup-box.size-large{max-width:520px;}
+  .popup-box.size-xlarge{max-width:620px;}
+  /* Caps the popup's total height at 90% of the viewport and scrolls
+     internally past that, instead of the box overflowing off-screen (a
+     real risk once Large/Extra Large sizes are picked on a short phone
+     screen). Lives on this inner wrapper rather than .popup-box itself so
+     .modal-close — deliberately positioned half outside the box — never
+     gets clipped by the overflow rule. */
+  .popup-scroll{max-height:90vh;overflow-y:auto;border-radius:18px;}
   .popup-img{width:100%;display:none;max-height:260px;object-fit:cover;border-radius:18px 18px 0 0;}
   .popup-img.size-small{max-height:160px;}
   .popup-img.size-large{max-height:360px;}
