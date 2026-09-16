@@ -287,11 +287,17 @@
 <div class="modal-overlay" id="announcementPopup">
   <div class="modal-box popup-box">
     <button class="modal-close" onclick="closeAnnouncementPopup()">✕</button>
-    <img id="popupImage" data-img-src="popupImage" class="popup-img" alt="" />
-    <div class="popup-body">
-      <div class="popup-title" id="popupTitle"></div>
-      <div class="popup-message" id="popupMessage"></div>
-      <a id="popupActionBtn" class="btn-gold popup-btn" href="#" target="_blank" rel="noopener" style="display:none;"></a>
+    <!-- .popup-scroll (not .popup-box itself) is what scrolls if the chosen
+         image/text sizes end up taller than the screen, so the close button
+         above — positioned partly outside the box on purpose — never gets
+         clipped by that overflow rule. -->
+    <div class="popup-scroll">
+      <img id="popupImage" data-img-src="popupImage" class="popup-img" alt="" />
+      <div class="popup-body">
+        <div class="popup-title" id="popupTitle"></div>
+        <div class="popup-message" id="popupMessage"></div>
+        <a id="popupActionBtn" class="btn-gold popup-btn" href="#" target="_blank" rel="noopener" style="display:none;"></a>
+      </div>
     </div>
   </div>
 </div>
