@@ -698,7 +698,7 @@
     background:linear-gradient(135deg, #f3d387, #e9b949);
     color:#1a1204; font-weight:800; letter-spacing:0.5px; cursor:pointer;
     font-size:clamp(11px, 1.15vw, 17px);
-    box-shadow:0 6px 18px rgba(212,169,74,0.3);
+    box-shadow:0 4px 10px rgba(212,169,74,0.25);
     opacity:0;
     animation: splashFadeUp2 0.9s ease-out 1.2s both, splashBtnPulse 2.6s ease-in-out 2.1s infinite;
     transition:transform .15s ease;
