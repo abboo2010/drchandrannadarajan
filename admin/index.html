@@ -15,8 +15,12 @@
   input,textarea,select{font:inherit;}
 
   /* ---------- LOGIN ---------- */
-  #loginScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
-  .login-card{background:var(--panel);border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 8px 30px rgba(20,20,40,.08);text-align:center;}
+  #loginScreen{
+    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+    background:linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('../images/splash-bg.png') center/cover no-repeat;
+  }
+  .login-card{background:rgba(255,255,255,.97);border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 14px 40px rgba(8,18,38,.35);text-align:center;}
+  .login-card img.login-logo{width:72px;height:72px;object-fit:contain;margin:0 auto 14px;display:block;}
   .login-card h1{font-size:1.25rem;margin:0 0 4px;}
   .login-card p.sub{color:var(--sub);font-size:.9rem;margin:0 0 22px;}
   .login-card input[type=password]{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:1rem;margin-bottom:12px;}
@@ -104,6 +108,7 @@
 
 <div id="loginScreen">
   <form class="login-card" id="loginForm">
+    <img class="login-logo" id="loginLogo" src="../images/logo.png" alt="" />
     <h1>Site CMS</h1>
     <p class="sub">IR@SABAH — Dr. Chandran Nadarajan</p>
     <p class="login-error" id="loginError"></p>
@@ -749,6 +754,32 @@
   } else {
     showLogin();
   }
+})();
+</script>
+
+<script>
+// Pulls the CURRENT splash background + logo (whatever the doctor has
+// uploaded via Photos & Logo on the live site) so the login screen matches
+// the real site theme instead of the bundled default image. This is a
+// pure upgrade: the CSS above already paints the bundled default
+// (../images/splash-bg.png) immediately, so if this fetch is slow, fails,
+// or the CMS content store is briefly unreachable, the login screen still
+// looks correct — it just won't reflect a very recent photo swap yet.
+(function(){
+  "use strict";
+  fetch('/api/content?section=site-images', { cache: 'no-store' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(data){
+      if (!data) return;
+      if (data.splashbg) {
+        document.getElementById('loginScreen').style.backgroundImage =
+          "linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('" + data.splashbg + "')";
+      }
+      if (data.logo) {
+        document.getElementById('loginLogo').src = data.logo;
+      }
+    })
+    .catch(function(){ /* keep the bundled default painted by CSS */ });
 })();
 </script>
 </body>
