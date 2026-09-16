@@ -175,7 +175,7 @@
     {key:'doctor-bio', label:'Doctor Bio', shape:'object', hint:'Dr. Chandran’s profile: bio, credentials, specialties, and social links.'},
     {key:'education', label:'Education', shape:'list', hint:'Education library items (guides & brochures).', itemLabel:function(it){return it.title_en || 'Untitled item';}},
     {key:'videos', label:'Videos', shape:'list', hint:'Patient education videos.', itemLabel:function(it){return it.title_en || 'Untitled video';}},
-    {key:'testimonials', label:'Testimonials', shape:'list', hint:'Patient testimonials.', itemLabel:function(it){return it.name || 'Untitled testimonial';}},
+    {key:'testimonials', label:'Testimonials', shape:'list', hasToggle:true, hint:'Patient testimonials. Use the switch below to hide this whole section from the live site (menu item and page) without deleting anything — turn it back on any time.', itemLabel:function(it){return it.name || 'Untitled testimonial';}},
     {key:'reviews', label:'Reviews', shape:'list', hint:'Star reviews shown on the site.', itemLabel:function(it){return it.name || 'Untitled review';}},
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
     {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
@@ -554,6 +554,30 @@
 
   function renderListSection(container, data, sectionCfg){
     if(!Array.isArray(data.items)) data.items = [];
+
+    if(sectionCfg.hasToggle){
+      if(typeof data.enabled !== 'boolean') data.enabled = true;
+      var toggleBox = document.createElement('div');
+      toggleBox.className = 'field-group';
+      var toggleLabel = document.createElement('label');
+      toggleLabel.className = 'group-label';
+      toggleLabel.style.display = 'flex';
+      toggleLabel.style.alignItems = 'center';
+      toggleLabel.style.gap = '8px';
+      toggleLabel.style.cursor = 'pointer';
+      var toggleCb = document.createElement('input');
+      toggleCb.type = 'checkbox';
+      toggleCb.checked = data.enabled;
+      toggleCb.addEventListener('change', function(){
+        data.enabled = toggleCb.checked;
+        markDirty();
+      });
+      toggleLabel.appendChild(toggleCb);
+      toggleLabel.appendChild(document.createTextNode('Show ' + sectionCfg.label + ' on the live site'));
+      toggleBox.appendChild(toggleLabel);
+      container.appendChild(toggleBox);
+    }
+
     var listWrap = document.createElement('div');
     function renderItems(){
       listWrap.innerHTML = '';
