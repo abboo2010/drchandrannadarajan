@@ -470,9 +470,17 @@
      would cut the button off. The image gets its own matching top corners
      instead. */
   .popup-box{max-width:420px;padding:0;}
-  .popup-box.size-small{max-width:320px;}
-  .popup-box.size-large{max-width:520px;}
-  .popup-box.size-xlarge{max-width:620px;}
+  /* Position presets: move the box within the overlay instead of its
+     default center/center alignment. The overlay itself still dims and
+     covers the full screen either way — only the box moves. */
+  #announcementPopup.pos-top-left{align-items:flex-start;justify-content:flex-start;}
+  #announcementPopup.pos-top-center{align-items:flex-start;justify-content:center;}
+  #announcementPopup.pos-top-right{align-items:flex-start;justify-content:flex-end;}
+  #announcementPopup.pos-middle-left{align-items:center;justify-content:flex-start;}
+  #announcementPopup.pos-middle-right{align-items:center;justify-content:flex-end;}
+  #announcementPopup.pos-bottom-left{align-items:flex-end;justify-content:flex-start;}
+  #announcementPopup.pos-bottom-center{align-items:flex-end;justify-content:center;}
+  #announcementPopup.pos-bottom-right{align-items:flex-end;justify-content:flex-end;}
   /* Caps the popup's total height at 90% of the viewport and scrolls
      internally past that, instead of the box overflowing off-screen (a
      real risk once Large/Extra Large sizes are picked on a short phone
