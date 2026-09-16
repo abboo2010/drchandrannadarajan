@@ -688,7 +688,7 @@
     animation: splashFadeUp2 1s ease-out 1s both;
   }
  .splash-enter-btn{
-    position:absolute; left:50%; top:85%;
+    position:absolute; left:50%; top:87%;
     transform:translate(-50%, -50%);
     /* Sized as a real touch target for kiosk-scale landscape screens, not
        just a readable label — the old clamp topped out at 11px/thin
