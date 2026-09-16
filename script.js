@@ -25,9 +25,19 @@ document.addEventListener('keydown', (e)=>{
 });
 
 const navList = document.getElementById('navList');
+// Nav items that can be switched off from the CMS (currently just
+// Testimonials) map their NAV id to the flag content-loader.js sets from
+// the saved CMS data. Checked fresh on every render so a live toggle
+// (Save in the admin panel -> next content refresh here) hides/shows the
+// nav item and bottom-nav item without needing a full page reload.
+function isNavItemEnabled(id){
+  if(id === 'testimonials') return TESTIMONIALS_ENABLED !== false;
+  return true;
+}
 function renderNav(){
   navList.innerHTML = '';
   NAV.forEach(item=>{
+    if(!isNavItemEnabled(item.id)) return;
     const btn = document.createElement('button');
     btn.className = 'nav-btn' + (item.id==='home' ? ' active' : '');
     btn.dataset.target = item.id;
@@ -67,6 +77,7 @@ const bottomNav = document.getElementById('bottomNav');
 function renderBottomNav(){
   bottomNav.innerHTML = '';
   NAV.forEach(item=>{
+    if(!isNavItemEnabled(item.id)) return;
     const btn = document.createElement('button');
     btn.className = 'bottom-nav-item' + (item.id==='home' ? ' active' : '');
     btn.dataset.bnTarget = item.id;
