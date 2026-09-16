@@ -463,7 +463,12 @@ function triggerIdleReset(){
    maybeShowPopup() once every section has loaded. Shown at most once per
    browser session (sessionStorage), gated by the CMS on/off switch and an
    optional start/end date window. */
-let POPUP = { enabled:false, startDate:'', endDate:'', buttonLink:'' };
+let POPUP = {
+  enabled:false, startDate:'', endDate:'',
+  showImage:true, imageSize:'medium',
+  showTitle:true, showMessage:true, textSize:'medium',
+  showButtonText:true, showButtonLink:true, buttonLink:''
+};
 const POPUP_SESSION_KEY = 'irsabahPopupShown';
 
 // Local (not UTC) calendar date as 'YYYY-MM-DD', so the start/end date
@@ -478,20 +483,60 @@ function popupWithinDateWindow(){
   if(POPUP.endDate && today > POPUP.endDate) return false;
   return true;
 }
+// Applies one of the CMS "Small/Medium/Large" size choices as a CSS class
+// (medium = the original default look, so it needs no class of its own).
+function applySizeClass(el, size){
+  el.classList.remove('size-small', 'size-large');
+  if(size === 'small') el.classList.add('size-small');
+  if(size === 'large') el.classList.add('size-large');
+}
 function renderPopupContent(){
-  document.getElementById('popupTitle').textContent = tf(POPUP, 'title');
-  document.getElementById('popupMessage').textContent = tf(POPUP, 'message');
+  const titleEl = document.getElementById('popupTitle');
+  const msgEl = document.getElementById('popupMessage');
   const img = document.getElementById('popupImage');
-  img.style.display = img.getAttribute('src') ? 'block' : 'none';
-  const btnText = tf(POPUP, 'buttonText');
   const btn = document.getElementById('popupActionBtn');
-  if(btnText && POPUP.buttonLink){
+
+  titleEl.textContent = tf(POPUP, 'title');
+  const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
+  titleEl.style.display = wantTitle ? '' : 'none';
+  applySizeClass(titleEl, POPUP.textSize);
+
+  msgEl.textContent = tf(POPUP, 'message');
+  const wantMessage = (POPUP.showMessage !== false) && msgEl.textContent;
+  msgEl.style.display = wantMessage ? '' : 'none';
+  applySizeClass(msgEl, POPUP.textSize);
+
+  const wantImage = (POPUP.showImage !== false) && img.getAttribute('src');
+  img.style.display = wantImage ? 'block' : 'none';
+  applySizeClass(img, POPUP.imageSize);
+
+  const btnText = tf(POPUP, 'buttonText');
+  const wantButtonText = (POPUP.showButtonText !== false) && btnText;
+  if(wantButtonText){
     btn.textContent = btnText;
-    btn.href = POPUP.buttonLink;
+    const wantLink = (POPUP.showButtonLink !== false) && POPUP.buttonLink;
+    if(wantLink){
+      btn.href = POPUP.buttonLink;
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+    } else {
+      // Text-only "badge" — visible but not clickable (no link set, or the
+      // link switch is off), e.g. a plain "Limited slots" label.
+      btn.removeAttribute('href');
+      btn.style.pointerEvents = 'none';
+    }
     btn.style.display = '';
   } else {
     btn.style.display = 'none';
   }
+
+  // If the whole text/button area is empty (image-only popup), collapse
+  // its padding and round the image's bottom corners to match the box,
+  // instead of leaving an empty gap under the photo.
+  const body = document.querySelector('.popup-body');
+  const bodyHasContent = wantTitle || wantMessage || wantButtonText;
+  body.style.display = bodyHasContent ? '' : 'none';
+  img.style.borderRadius = bodyHasContent ? '' : '18px';
 }
 function maybeShowPopup(){
   if(!POPUP.enabled || !popupWithinDateWindow()) return;
