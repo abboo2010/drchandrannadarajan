@@ -487,6 +487,18 @@
      screen). Lives on this inner wrapper rather than .popup-box itself so
      .modal-close — deliberately positioned half outside the box — never
      gets clipped by the overflow rule. */
+  /* Entrance/exit animations, applied via an inline `animation` property set
+     in script.js (see popupAnimationName()) — not used by default, so a
+     popup that never touches Animation Style has no animation property set
+     at all and keeps its original instant appearance. */
+  @keyframes popupFadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes popupFadeOut{from{opacity:1;}to{opacity:0;}}
+  @keyframes popupSlideDownIn{from{opacity:0;transform:translateY(-40px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes popupSlideDownOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(-40px);}}
+  @keyframes popupSlideUpIn{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes popupSlideUpOut{from{opacity:1;transform:translateY(0);}to{opacity:0;transform:translateY(40px);}}
+  @keyframes popupZoomIn{from{opacity:0;transform:scale(0.85);}to{opacity:1;transform:scale(1);}}
+  @keyframes popupZoomOut{from{opacity:1;transform:scale(1);}to{opacity:0;transform:scale(0.85);}}
   .popup-scroll{max-height:90vh;overflow-y:auto;border-radius:var(--popup-radius, 18px);}
   .popup-img{width:100%;display:none;max-height:260px;object-fit:cover;border-radius:var(--popup-radius, 18px) var(--popup-radius, 18px) 0 0;}
   .popup-img.size-small{max-height:160px;}
