@@ -180,8 +180,8 @@
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
     {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
     {key:'popup', label:'Announcement Popup', shape:'object',
-      defaults:{showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
-      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
+      defaults:{popupWidth:'medium', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
+      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the popup box, image, and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
   ];
 
   var IMAGE_SLOTS = [
@@ -411,9 +411,11 @@
       d.addEventListener('input', function(){ onChange(d.value); });
       return d;
     }
-    if(kh === 'imagesize' || kh === 'textsize'){
+    if(kh === 'imagesize' || kh === 'textsize' || kh === 'popupwidth'){
       var sizeSel = document.createElement('select');
-      [['small','Small'],['medium','Medium (default)'],['large','Large']].forEach(function(pair){
+      var sizeOptions = [['small','Small'],['medium','Medium (default)'],['large','Large']];
+      if(kh === 'popupwidth') sizeOptions.push(['xlarge','Extra Large']);
+      sizeOptions.forEach(function(pair){
         var opt = document.createElement('option');
         opt.value = pair[0]; opt.textContent = pair[1];
         if(pair[0] === value) opt.selected = true;
@@ -471,6 +473,7 @@
     if(key === 'enabled') return '(turns the popup on/off on the live site)';
     if(key === 'startDate') return '(optional — leave blank to show as soon as it’s turned on)';
     if(key === 'endDate') return '(optional — leave blank to keep showing until turned off)';
+    if(key === 'popupWidth') return '(how wide the whole popup box is — the height always adjusts automatically to fit whatever is turned on below, and never grows taller than the screen)';
     if(key === 'showImage') return '(show/hide the image below — the image itself is uploaded under Photos & Logo → Popup Image)';
     if(key === 'imageSize') return '(how large the image appears in the popup)';
     if(key === 'showTitle') return '(show/hide the title text below)';
