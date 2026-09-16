@@ -464,7 +464,7 @@ function triggerIdleReset(){
    browser session (sessionStorage), gated by the CMS on/off switch and an
    optional start/end date window. */
 let POPUP = {
-  enabled:false, startDate:'', endDate:'',
+  enabled:false, startDate:'', endDate:'', popupWidth:'medium',
   showImage:true, imageSize:'medium',
   showTitle:true, showMessage:true, textSize:'medium',
   showButtonText:true, showButtonLink:true, buttonLink:''
@@ -483,18 +483,27 @@ function popupWithinDateWindow(){
   if(POPUP.endDate && today > POPUP.endDate) return false;
   return true;
 }
-// Applies one of the CMS "Small/Medium/Large" size choices as a CSS class
-// (medium = the original default look, so it needs no class of its own).
+// Applies one of the CMS "Small/Medium/Large(/Extra Large)" size choices as
+// a CSS class (medium = the original default look, so it needs no class of
+// its own).
 function applySizeClass(el, size){
-  el.classList.remove('size-small', 'size-large');
+  el.classList.remove('size-small', 'size-large', 'size-xlarge');
   if(size === 'small') el.classList.add('size-small');
   if(size === 'large') el.classList.add('size-large');
+  if(size === 'xlarge') el.classList.add('size-xlarge');
 }
 function renderPopupContent(){
+  const box = document.querySelector('.popup-box');
   const titleEl = document.getElementById('popupTitle');
   const msgEl = document.getElementById('popupMessage');
   const img = document.getElementById('popupImage');
   const btn = document.getElementById('popupActionBtn');
+
+  // Width is the only dimension the CMS sets directly — height always
+  // follows from however much content ends up visible below (see the
+  // .popup-box max-height/overflow rule in style.css, which keeps it from
+  // ever growing taller than the screen regardless of what's turned on).
+  applySizeClass(box, POPUP.popupWidth);
 
   titleEl.textContent = tf(POPUP, 'title');
   const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
