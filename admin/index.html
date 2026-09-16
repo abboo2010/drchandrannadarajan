@@ -180,8 +180,8 @@
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
     {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
     {key:'popup', label:'Announcement Popup', shape:'object',
-      defaults:{popupWidth:'medium', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
-      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the popup box, image, and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
+      defaults:{position:'center', width:420, height:'', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
+      hint:'A one-time popup shown to visitors (image + title + message + optional button), once per visit. Turn it on/off overall, optionally set a start/end date, choose where on the screen it appears and how wide it is, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
   ];
 
   var IMAGE_SLOTS = [
@@ -411,10 +411,9 @@
       d.addEventListener('input', function(){ onChange(d.value); });
       return d;
     }
-    if(kh === 'imagesize' || kh === 'textsize' || kh === 'popupwidth'){
+    if(kh === 'imagesize' || kh === 'textsize'){
       var sizeSel = document.createElement('select');
       var sizeOptions = [['small','Small'],['medium','Medium (default)'],['large','Large']];
-      if(kh === 'popupwidth') sizeOptions.push(['xlarge','Extra Large']);
       sizeOptions.forEach(function(pair){
         var opt = document.createElement('option');
         opt.value = pair[0]; opt.textContent = pair[1];
@@ -423,6 +422,37 @@
       });
       sizeSel.addEventListener('change', function(){ onChange(sizeSel.value); });
       return sizeSel;
+    }
+    if(kh === 'position'){
+      var posSel = document.createElement('select');
+      var posOptions = [
+        ['top-left','Top Left'], ['top-center','Top Center'], ['top-right','Top Right'],
+        ['middle-left','Middle Left'], ['center','Center (default)'], ['middle-right','Middle Right'],
+        ['bottom-left','Bottom Left'], ['bottom-center','Bottom Center'], ['bottom-right','Bottom Right']
+      ];
+      posOptions.forEach(function(pair){
+        var opt = document.createElement('option');
+        opt.value = pair[0]; opt.textContent = pair[1];
+        if(pair[0] === value) opt.selected = true;
+        posSel.appendChild(opt);
+      });
+      posSel.addEventListener('change', function(){ onChange(posSel.value); });
+      return posSel;
+    }
+    if(kh === 'width'){
+      var w = document.createElement('input'); w.type = 'number';
+      w.min = 240; w.max = 800; w.step = 10;
+      w.value = value == null || value === '' ? 420 : value;
+      w.addEventListener('input', function(){ onChange(Number(w.value) || 420); });
+      return w;
+    }
+    if(kh === 'height'){
+      var h = document.createElement('input'); h.type = 'number';
+      h.min = 100; h.max = 2000; h.step = 10;
+      h.placeholder = 'Automatic (recommended)';
+      h.value = value == null ? '' : value;
+      h.addEventListener('input', function(){ onChange(h.value === '' ? '' : (Number(h.value) || '')); });
+      return h;
     }
     if(kh === 'icon'){
       var sel = document.createElement('select');
@@ -473,7 +503,9 @@
     if(key === 'enabled') return '(turns the popup on/off on the live site)';
     if(key === 'startDate') return '(optional — leave blank to show as soon as it’s turned on)';
     if(key === 'endDate') return '(optional — leave blank to keep showing until turned off)';
-    if(key === 'popupWidth') return '(how wide the whole popup box is — the height always adjusts automatically to fit whatever is turned on below, and never grows taller than the screen)';
+    if(key === 'position') return '(where the popup appears on the screen — the background behind it still dims the whole page)';
+    if(key === 'width') return '(exact width of the popup box, in pixels — try 420 as a starting point)';
+    if(key === 'height') return '(leave blank for automatic height, which fits whatever content is turned on below — set a number only if you want a fixed height; it still never grows taller than the screen)';
     if(key === 'showImage') return '(show/hide the image below — the image itself is uploaded under Photos & Logo → Popup Image)';
     if(key === 'imageSize') return '(how large the image appears in the popup)';
     if(key === 'showTitle') return '(show/hide the title text below)';
@@ -731,6 +763,15 @@
     document.getElementById('saveBtn').disabled = true;
 
     apiGet(key).then(function(data){
+      // One-time migration: the popup's old "Popup Width" preset
+      // (Small/Medium/Large/Extra Large) has been replaced by an exact
+      // pixel Width plus a Position picker. Carry an already-saved preset
+      // over to its closest pixel value instead of silently discarding it.
+      if(key === 'popup' && data.popupWidth && data.width === undefined){
+        var widthPresetMap = {small:320, medium:420, large:520, xlarge:620};
+        data.width = widthPresetMap[data.popupWidth] || 420;
+      }
+      if(key === 'popup') delete data.popupWidth;
       // Backfills any fields added to this section after some data was
       // already saved (e.g. the popup's Show.../size controls, added
       // after this doctor had already saved a popup) so they show up
