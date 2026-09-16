@@ -2,6 +2,7 @@
   "enabled": false,
   "startDate": "",
   "endDate": "",
+  "popupWidth": "medium",
   "showImage": true,
   "imageSize": "medium",
   "showTitle": true,
