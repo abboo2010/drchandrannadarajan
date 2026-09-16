@@ -73,6 +73,11 @@ async function loadVideos(){
 async function loadTestimonials(){
   const data = await fetchJSON(CONTENT_URLS.testimonials);
   if (data.items && data.items.length) replaceArrayContents(TESTIMONIALS, data.items);
+  // data.enabled is the CMS on/off switch for this whole section (added
+  // alongside the "Show Testimonials on the live site" toggle in the
+  // admin panel). Older saved data won't have this key yet, so treat
+  // anything other than an explicit `false` as "on".
+  TESTIMONIALS_ENABLED = (data.enabled !== false);
 }
 async function loadReviews(){
   const data = await fetchJSON(CONTENT_URLS.reviews);
