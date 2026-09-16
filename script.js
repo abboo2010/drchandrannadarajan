@@ -546,6 +546,30 @@ function renderPopupContent(){
     box.style.boxShadow = 'none';
   }
 
+  // Close button: position (outside the box, same look as before this
+  // feature existed; inside the box; or hidden entirely — visitors can
+  // still dismiss a hidden one by clicking the dimmed area around the box,
+  // wired up once below), plus its own color/icon color/size.
+  const closeBtn = overlay.querySelector('.modal-close');
+  if(POPUP.closeButtonPosition === 'hidden'){
+    closeBtn.style.display = 'none';
+  } else {
+    closeBtn.style.display = '';
+    if(POPUP.closeButtonPosition === 'inside'){
+      closeBtn.style.top = '12px';
+      closeBtn.style.right = '12px';
+    } else {
+      closeBtn.style.top = '';
+      closeBtn.style.right = '';
+    }
+  }
+  const closeSize = (POPUP.closeButtonSize === '' || POPUP.closeButtonSize == null) ? 44 : Number(POPUP.closeButtonSize);
+  closeBtn.style.width = closeSize + 'px';
+  closeBtn.style.height = closeSize + 'px';
+  closeBtn.style.fontSize = Math.max(14, Math.round(closeSize * 0.36)) + 'px';
+  closeBtn.style.background = POPUP.closeButtonColor || '#ffffff';
+  closeBtn.style.color = POPUP.closeButtonIconColor || '#0a2647';
+
   titleEl.textContent = tf(POPUP, 'title');
   const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
   titleEl.style.display = wantTitle ? '' : 'none';
@@ -615,6 +639,13 @@ function maybeShowPopup(){
 function closeAnnouncementPopup(){
   document.getElementById('announcementPopup').classList.remove('show');
 }
+// Clicking the dimmed area around the box (not the box itself) also closes
+// it — mainly so "Close Button Position: Hidden" never traps a visitor with
+// no way out. Checking e.target === overlay (not a descendant) means clicks
+// inside the box, including on the image/button, are unaffected.
+document.getElementById('announcementPopup').addEventListener('click', function(e){
+  if(e.target === this) closeAnnouncementPopup();
+});
 
 /* ---------------- PWA SERVICE WORKER REGISTRATION ---------------- */
 /* Only registers over https (or localhost) — browsers block service workers
