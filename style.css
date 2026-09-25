@@ -826,3 +826,5 @@
 .exp-chip{display:inline-flex;align-items:baseline;gap:6px;background:#eef3ff;color:var(--navy-900);border:1px solid #d6e0fb;border-radius:999px;padding:6px 14px;font-size:13px;}
 .exp-chip b{font-size:16px;font-weight:800;color:var(--blue);}
 .doc-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
+.doc-name-row{align-items:baseline;gap:6px 12px;}
+.doc-qual{font-size:13px;font-weight:700;font-style:italic;color:var(--ink-600);}

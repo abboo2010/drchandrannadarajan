@@ -62,6 +62,7 @@ const UI = {
   heroSub: {en:'Precision Care. Minimally Invasive.', bm:'Penjagaan Tepat. Invasif Minimal.', zh:'精准护理，微创治疗。'},
   doctorRole: {en:'Consultant Clinical &amp; Interventional Radiologist', bm:'Perunding Klinikal &amp; Radiologi Intervensi', zh:'临床顾问兼介入放射科医生'},
   yearsExperience: {en:'Years Experience', bm:'Tahun Pengalaman', zh:'年经验'},
+  doctorQual: {en:'MD (USM), M.Med (Rad) (USM)', bm:'MD (USM), M.Med (Rad) (USM)', zh:'MD (USM), M.Med (Rad) (USM)'},
   expMdNum: {en:'19', bm:'19', zh:'19'},
   expIrNum: {en:'8', bm:'8', zh:'8'},
   expCrNum: {en:'11', bm:'11', zh:'11'},
