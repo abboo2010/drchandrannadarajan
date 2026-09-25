@@ -143,6 +143,12 @@ function visibleItems(kind, items){
   return items.filter(it => groupFilter[kind]==='all' || tagKey(it)===groupFilter[kind]);
 }
 
+function helpCardHtml(){
+  return `<div class="help-card" tabindex="0" role="button" onclick="showPanel('appointment')">
+      <div><h3>${L(UI.notSureTitle)}</h3><p>${L(UI.notSureText)}</p></div>
+      <span class="help-btn">${L(UI.notSureBtn)}</span>
+    </div>`;
+}
 function renderConditions(){
   conditionsGrid.innerHTML = '';
   const pub = CONDITIONS.filter(isPublished);
@@ -156,6 +162,7 @@ function renderConditions(){
         <p>${tf(c,'desc')}</p>
       </div>`;
   });
+  conditionsGrid.innerHTML += helpCardHtml();
 }
 renderConditions();
 
@@ -174,6 +181,7 @@ function renderTreatments(){
         <p>${tf(t,'desc')}</p>
       </div>`;
   });
+  treatmentsGrid.innerHTML += helpCardHtml();
 }
 renderTreatments();
 
