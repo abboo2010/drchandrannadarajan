@@ -821,3 +821,8 @@
     .splash-tap-hint.m{ top:74.5%; font-size:clamp(10px, 2.6vw, 13px); }
     .splash-orbit-wrap.m{ left:50%; top:40.625%; width:44.44%; height:25%; }
   }
+
+.exp-chips{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px;}
+.exp-chip{display:inline-flex;align-items:baseline;gap:6px;background:#eef3ff;color:var(--navy-900);border:1px solid #d6e0fb;border-radius:999px;padding:6px 14px;font-size:13px;}
+.exp-chip b{font-size:16px;font-weight:800;color:var(--blue);}
+.doc-name-row{display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
