@@ -1,998 +1,260 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Site CMS — IR@SABAH</title>
-<style>
-  :root{
-    --gold:#d4a94a; --blue:#2f6fed; --ink:#1c2333; --sub:#5b6478;
-    --bg:#f4f5f8; --panel:#ffffff; --line:#e4e7ee; --danger:#d64545; --ok:#1a9c5a;
-  }
-  *{box-sizing:border-box;}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);}
-  button{font:inherit;cursor:pointer;}
-  input,textarea,select{font:inherit;}
-
-  /* ---------- LOGIN ---------- */
-  #loginScreen{
-    min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
-    background:linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('../images/splash-bg.png') center/cover no-repeat;
-  }
-  .login-card{background:rgba(255,255,255,.97);border-radius:16px;padding:36px 32px;width:100%;max-width:360px;box-shadow:0 14px 40px rgba(8,18,38,.35);text-align:center;}
-  .login-card img.login-logo{width:72px;height:72px;object-fit:contain;margin:0 auto 14px;display:block;}
-  .login-card h1{font-size:1.25rem;margin:0 0 4px;}
-  .login-card p.sub{color:var(--sub);font-size:.9rem;margin:0 0 22px;}
-  .login-card input[type=password]{
-    width:100%;padding:12px 14px;border:1px solid #0a2340;border-radius:10px;font-size:1rem;margin-bottom:12px;
-    background:#0e2f57;color:#ffffff;
-  }
-  .login-card input[type=password]::placeholder{color:#a9bcd6;}
-  .login-card input[type=password]:focus{outline:2px solid var(--gold);border-color:var(--gold);}
-  .login-card button{width:100%;padding:12px;border:1px solid var(--gold);border-radius:10px;background:#0e2f57;color:var(--gold);font-weight:700;font-size:1rem;}
-  .login-card button:hover{background:#123a68;}
-  .login-card button:disabled{opacity:.6;cursor:default;}
-  .login-error{color:var(--danger);font-size:.85rem;margin:0 0 12px;min-height:1.1em;}
-
-  /* ---------- APP SHELL ---------- */
-  #app{display:none;min-height:100vh;}
-  #app.visible{display:flex;}
-  .sidebar{width:230px;flex:0 0 230px;background:#1c2333;color:#e9ebf3;padding:18px 0;display:flex;flex-direction:column;}
-  .sidebar .brand{padding:0 20px 18px;font-weight:800;font-size:1.05rem;border-bottom:1px solid #303a52;margin-bottom:10px;}
-  .sidebar .brand small{display:block;font-weight:400;color:#8b93ab;font-size:.72rem;margin-top:2px;}
-  .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#c4c9db;text-decoration:none;font-size:.92rem;border-left:3px solid transparent;cursor:pointer;}
-  .nav-item:hover{background:#252d44;color:#fff;}
-  .nav-item.active{background:#252d44;color:#fff;border-left-color:var(--gold);}
-  .sidebar-footer{margin-top:auto;padding:14px 20px 0;border-top:1px solid #303a52;}
-  .sidebar-footer a, .sidebar-footer button{display:block;width:100%;text-align:left;background:none;border:none;color:#c4c9db;padding:9px 0;font-size:.85rem;}
-  .sidebar-footer button:hover, .sidebar-footer a:hover{color:#fff;}
-
-  .main{flex:1;min-width:0;padding:28px 32px;max-width:920px;}
-  .main-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
-  .main-header h2{margin:0;font-size:1.4rem;}
-  .main-header .actions{display:flex;gap:8px;}
-  .btn{padding:9px 16px;border-radius:8px;border:1px solid var(--line);background:#fff;font-size:.88rem;font-weight:600;color:var(--ink);}
-  .btn:hover{background:#f0f1f5;}
-  .btn-primary{background:var(--blue);border-color:var(--blue);color:#fff;}
-  .btn-primary:hover{background:#2559c9;}
-  .btn-primary:disabled{opacity:.55;cursor:default;}
-  .btn-add{background:var(--ok);border-color:var(--ok);color:#fff;}
-  .btn-add:hover{background:#158049;}
-  .btn-danger{color:var(--danger);border-color:#f0c7c7;}
-  .btn-danger:hover{background:#fdeeee;}
-  .helptext{color:var(--sub);font-size:.85rem;margin:0 0 20px;}
-  #banner{display:none;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:.88rem;font-weight:600;}
-  #banner.show{display:block;}
-  #banner.ok{background:#e4f7ec;color:var(--ok);}
-  #banner.err{background:#fdeaea;color:var(--danger);}
-
-  #searchBox{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;margin-bottom:18px;font-size:.9rem;}
-
-  .field-group{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
-  .field-group > label.group-label{display:block;font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px;}
-  .field-hint{color:var(--sub);font-size:.76rem;font-weight:400;margin-left:6px;}
-  .lang-row{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start;margin-bottom:6px;}
-  .lang-row:last-child{margin-bottom:0;}
-  .lang-tag{font-size:.72rem;font-weight:700;color:#fff;background:#9098ad;border-radius:5px;text-align:center;padding:3px 0;margin-top:4px;}
-  .lang-tag.en{background:var(--blue);} .lang-tag.bm{background:#c98a1f;} .lang-tag.zh{background:#c0392b;}
-  input[type=text], input[type=number], input[type=url], textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:7px;font-size:.9rem;}
-  textarea{resize:vertical;min-height:56px;line-height:1.4;}
-  input[type=color]{width:44px;height:34px;border:1px solid var(--line);border-radius:7px;padding:2px;}
-  select{padding:8px 10px;border:1px solid var(--line);border-radius:7px;background:#fff;}
-  .field-group input[type=text], .field-group select{max-width:100%;}
-
-  .item-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;}
-  .item-card summary{list-style:none;display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;font-weight:700;font-size:.94rem;background:#fafbfd;}
-  .item-card summary::-webkit-details-marker{display:none;}
-  .item-card summary .chev{color:var(--sub);font-weight:400;font-size:.8rem;}
-  .item-card .item-body{padding:14px 16px 16px;border-top:1px solid var(--line);}
-  .item-card .remove-btn{background:none;border:1px solid #f0c7c7;color:var(--danger);border-radius:7px;padding:4px 10px;font-size:.78rem;font-weight:600;}
-  .item-card .remove-btn:hover{background:#fdeeee;}
-
-  .nested-group{border:1px dashed var(--line);border-radius:9px;padding:10px 12px;margin-top:6px;}
-  .add-row{margin-top:6px;}
-
-  .images-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
-  .image-card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;}
-  .image-card h3{margin:0 0 10px;font-size:.92rem;}
-  .image-card .preview{width:100%;height:130px;object-fit:cover;border-radius:8px;background:#eee;display:block;margin-bottom:10px;}
-  .image-card input[type=file]{font-size:.78rem;width:100%;}
-  .image-card .upload-status{font-size:.78rem;margin-top:6px;color:var(--sub);}
-
-  @media (max-width: 720px){
-    #app.visible{flex-direction:column;}
-    .sidebar{width:100%;flex:none;flex-direction:row;overflow-x:auto;padding:10px 6px;}
-    .sidebar .brand,.sidebar-footer{display:none;}
-    .nav-item{border-left:none;border-bottom:3px solid transparent;white-space:nowrap;padding:9px 14px;}
-    .nav-item.active{border-bottom-color:var(--gold);}
-    .main{padding:18px 16px;}
-  }
-</style>
-</head>
-<body>
-
-<div id="loginScreen">
-  <form class="login-card" id="loginForm">
-    <img class="login-logo" id="loginLogo" src="../images/logo.png" alt="" />
-    <h1>Site CMS</h1>
-    <p class="sub">IR@SABAH — Dr. Chandran Nadarajan</p>
-    <p class="login-error" id="loginError"></p>
-    <input type="password" id="passwordInput" placeholder="Admin password" autocomplete="current-password" autofocus />
-    <button type="submit" id="loginBtn">Log in</button>
-  </form>
-</div>
-
-<div id="app">
-  <div class="sidebar">
-    <div class="brand">Site CMS<small>IR@SABAH</small></div>
-    <nav id="navList"></nav>
-    <div class="sidebar-footer">
-      <a href="/" target="_blank" rel="noopener">View live site ↗</a>
-      <button id="logoutBtn">Log out</button>
-    </div>
-  </div>
-  <div class="main">
-    <div id="banner"></div>
-    <div class="main-header">
-      <h2 id="sectionTitle">—</h2>
-      <div class="actions">
-        <button class="btn" id="refreshBtn">Refresh</button>
-        <button class="btn btn-primary" id="saveBtn">Save</button>
-      </div>
-    </div>
-    <p class="helptext" id="sectionHint"></p>
-    <div id="sectionContent"></div>
-  </div>
-</div>
-
-<script>
-(function(){
-  "use strict";
-
-  /* ============ CONFIG ============ */
-  var TOKEN_KEY = 'irsabah_cms_token';
-  var ICON_NAMES = ['home','user','stethoscope','syringe','play','book','star','message','calendar','qr',
-    'liver','kidney','uterus','leg','prostate','heartpulse','syringe2','flame','droplet','document',
-    'checklist','question','apple','pill','phone','sparkle','volume','clock','check','thyroid',
-    'whatsapp','instagram','facebook','linkedin'];
-
-  var SECTION_TEMPLATES = {
-    conditions: {id:'',icon:'liver',color:'#2f6fed',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',
-      desc_en:'',desc_bm:'',desc_zh:'',overview_en:'',overview_bm:'',overview_zh:'',diagnosis_en:'',diagnosis_bm:'',diagnosis_zh:'',
-      related:'',symptoms_en:[],symptoms_bm:[],symptoms_zh:[],causes_en:[],causes_bm:[],causes_zh:[]},
-    treatments: {id:'',icon:'syringe',color:'#8b5cf6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',
-      desc_en:'',desc_bm:'',desc_zh:'',overview_en:'',overview_bm:'',overview_zh:'',recovery_en:'',recovery_bm:'',recovery_zh:'',
-      related:'',steps_en:[],steps_bm:[],steps_zh:[],benefits_en:[],benefits_bm:[],benefits_zh:[]},
-    education: {icon:'book',color:'#14b8a6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',desc_en:'',desc_bm:'',desc_zh:''},
-    videos: {title_en:'',title_bm:'',title_zh:'',length:'',file:''},
-    testimonials: {name:'',color:'#14b8a6',meta_en:'',meta_bm:'',meta_zh:'',quote_en:'',quote_bm:'',quote_zh:''},
-    reviews: {name:'',color:'#14b8a6',stars:5,quote_en:'',quote_bm:'',quote_zh:''}
-  };
-
-  var SECTIONS = [
-    {key:'conditions', label:'Conditions', shape:'list', hint:'Conditions treated — shown on the Conditions page and linked from treatments.', itemLabel:function(it){return it.title_en || 'Untitled condition';}},
-    {key:'treatments', label:'Treatments', shape:'list', hint:'Treatments & procedures offered.', itemLabel:function(it){return it.title_en || 'Untitled treatment';}},
-    {key:'doctor-bio', label:'Doctor Bio', shape:'object', hint:'Dr. Chandran’s profile: bio, credentials, specialties, and social links.'},
-    {key:'education', label:'Education', shape:'list', hint:'Education library items (guides & brochures).', itemLabel:function(it){return it.title_en || 'Untitled item';}},
-    {key:'videos', label:'Videos', shape:'list', hint:'Patient education videos.', itemLabel:function(it){return it.title_en || 'Untitled video';}},
-    {key:'testimonials', label:'Testimonials', shape:'list', hasToggle:true, hint:'Patient testimonials. Use the switch below to hide this whole section from the live site (menu item and page) without deleting anything — turn it back on any time.', itemLabel:function(it){return it.name || 'Untitled testimonial';}},
-    {key:'reviews', label:'Reviews', shape:'list', hint:'Star reviews shown on the site.', itemLabel:function(it){return it.name || 'Untitled review';}},
-    {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
-    {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
-    {key:'popup', label:'Announcement Popup', shape:'object',
-      defaults:{position:'center', width:420, height:'', backgroundColor:'#0b1e38', textColor:'', borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none', closeButtonPosition:'outside', closeButtonColor:'#ffffff', closeButtonIconColor:'#0a2647', closeButtonSize:44, animationStyle:'none', animationDuration:300, reappear:'session', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
-      hint:'A one-time popup shown to visitors (image + title + message + optional button). Turn it on/off overall, optionally set a start/end date, choose where on the screen it appears and how wide it is, style its colors/border/corners/shadow/close button/entrance animation, choose how often it’s allowed to reappear, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
-  ];
-
-  var IMAGE_SLOTS = [
-    {key:'doctor', label:'Doctor Photo'},
-    {key:'logo', label:'Clinic Logo'},
-    {key:'splashbg', label:'Splash Background (Desktop)'},
-    {key:'splashbgmobile', label:'Splash Background (Mobile)'},
-    {key:'popupImage', label:'Popup Image (shown in the Announcement Popup)'}
-  ];
-
-  var LONG_TEXT_HINTS = ['desc','bio','overview','causes','symptom','step','benefit','recovery','diagnosis','quote','sub','_p','waP','qrScanP'];
-
-  var state = { token: null, section: null, data: null, dirty: false };
-
-  /* ============ AUTH ============ */
-  function loadToken(){
-    try { return localStorage.getItem(TOKEN_KEY); } catch(e){ return null; }
-  }
-  function saveToken(t){
-    state.token = t;
-    try { localStorage.setItem(TOKEN_KEY, t); } catch(e){}
-  }
-  function clearToken(){
-    state.token = null;
-    try { localStorage.removeItem(TOKEN_KEY); } catch(e){}
-  }
-
-  function showApp(){
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    selectSection(SECTIONS[0].key);
-  }
-  function showLogin(msg){
-    document.getElementById('app').classList.remove('visible');
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loginError').textContent = msg || '';
-  }
-
-  document.getElementById('loginForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var pw = document.getElementById('passwordInput').value;
-    var btn = document.getElementById('loginBtn');
-    btn.disabled = true; btn.textContent = 'Logging in…';
-    fetch('/api/auth', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({password: pw}) })
-      .then(function(r){ return r.json().then(function(body){ return {ok:r.ok, body:body}; }); })
-      .then(function(res){
-        btn.disabled = false; btn.textContent = 'Log in';
-        if(!res.ok){
-          document.getElementById('loginError').textContent = res.body.error || 'Incorrect password';
-          return;
-        }
-        document.getElementById('passwordInput').value = '';
-        saveToken(res.body.token);
-        showApp();
-      })
-      .catch(function(){
-        btn.disabled = false; btn.textContent = 'Log in';
-        document.getElementById('loginError').textContent = 'Could not reach the server. Check your connection and try again.';
-      });
-  });
-
-  document.getElementById('logoutBtn').addEventListener('click', function(){
-    clearToken();
-    showLogin('');
-  });
-
-  /* ============ API HELPERS ============ */
-  function apiGet(section){
-    return fetch('/api/content?section=' + encodeURIComponent(section), {cache:'no-store'})
-      .then(function(r){ if(!r.ok) throw new Error('Could not load this section (' + r.status + ')'); return r.json(); });
-  }
-  function apiSave(section, data){
-    return fetch('/api/content?section=' + encodeURIComponent(section), {
-      method:'POST',
-      headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
-      body: JSON.stringify(data)
-    }).then(function(r){
-      if(r.status === 401){ clearToken(); showLogin('Your session expired — please log in again.'); throw new Error('Session expired'); }
-      return r.json().then(function(body){ if(!r.ok) throw new Error(body.error || 'Save failed'); return body; });
-    });
-  }
-  function apiUploadImage(key, dataUrl){
-    return fetch('/api/image', {
-      method:'POST',
-      headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
-      body: JSON.stringify({key:key, dataUrl:dataUrl})
-    }).then(function(r){
-      if(r.status === 401){ clearToken(); showLogin('Your session expired — please log in again.'); throw new Error('Session expired'); }
-      return r.json().then(function(body){ if(!r.ok) throw new Error(body.error || 'Upload failed'); return body; });
-    });
-  }
-
-  /* ============ BANNER ============ */
-  var bannerTimer = null;
-  function showBanner(msg, kind){
-    var el = document.getElementById('banner');
-    el.textContent = msg;
-    el.className = 'show ' + (kind || 'ok');
-    if(bannerTimer) clearTimeout(bannerTimer);
-    bannerTimer = setTimeout(function(){ el.className = ''; }, 4000);
-  }
-
-  /* ============ SIDEBAR ============ */
-  function renderNav(){
-    var nav = document.getElementById('navList');
-    nav.innerHTML = '';
-    SECTIONS.forEach(function(s){
-      var a = document.createElement('div');
-      a.className = 'nav-item' + (state.section === s.key ? ' active' : '');
-      a.textContent = s.label;
-      a.addEventListener('click', function(){ selectSection(s.key); });
-      nav.appendChild(a);
-    });
-  }
-
-  /* ============ GENERIC FORM HELPERS ============ */
-  function humanize(key){
-    var overrides = {id:'ID', url:'URL', bm:'Bahasa Melayu', zh:'Chinese', en:'English'};
-    var withSpaces = key.replace(/_/g,' ').replace(/([a-z0-9])([A-Z])/g,'$1 $2');
-    return withSpaces.split(' ').map(function(w){
-      var lw = w.toLowerCase();
-      if(overrides[lw]) return overrides[lw];
-      return w.charAt(0).toUpperCase() + w.slice(1);
-    }).join(' ');
-  }
-
-  function singularize(word){
-    if(/ies$/.test(word)) return word.slice(0,-3) + 'y';
-    if(/s$/.test(word)) return word.slice(0,-1);
-    return word;
-  }
-
-  function isLongTextKey(base){
-    var b = base.toLowerCase();
-    return LONG_TEXT_HINTS.some(function(h){ return b.indexOf(h.toLowerCase()) !== -1; });
-  }
-
-  // Groups sibling keys like title_en/title_bm/title_zh into one i18n group.
-  function groupI18nKeys(keys){
-    var seen = {};
-    var groups = [];
-    keys.forEach(function(k){
-      if(seen[k]) return;
-      var m = /^(.+)_(en|bm|zh)$/.exec(k);
-      if(m){
-        var base = m[1];
-        var enK = base+'_en', bmK = base+'_bm', zhK = base+'_zh';
-        if(keys.indexOf(enK) !== -1 || keys.indexOf(bmK) !== -1 || keys.indexOf(zhK) !== -1){
-          groups.push({type:'i18n', base:base, keys:{en:enK, bm:bmK, zh:zhK}});
-          seen[enK]=seen[bmK]=seen[zhK]=true;
-          return;
-        }
-      }
-      groups.push({type:'single', key:k});
-      seen[k]=true;
-    });
-    return groups;
-  }
-
-  function isLangObject(v){
-    if(!v || typeof v !== 'object' || Array.isArray(v)) return false;
-    var keys = Object.keys(v);
-    if(keys.length === 0) return false;
-    return keys.every(function(k){ return k==='en'||k==='bm'||k==='zh'; });
-  }
-
-  function blankLike(v){
-    if(Array.isArray(v)){
-      if(v.length && typeof v[0] === 'object' && v[0] !== null) return [blankLike(v[0])];
-      return [];
-    }
-    if(v && typeof v === 'object'){
-      var out = {};
-      Object.keys(v).forEach(function(k){ out[k] = blankLike(v[k]); });
-      return out;
-    }
-    if(typeof v === 'number') return 0;
-    return '';
-  }
-
-  function makeLangRow(labelBase, value, keyForLen){
-    // value: object with .en/.bm/.zh — mutated in place as the user types
-    var wrap = document.createElement('div');
-    var useTextarea = isLongTextKey(labelBase);
-    ['en','bm','zh'].forEach(function(lang){
-      var row = document.createElement('div');
-      row.className = 'lang-row';
-      var tag = document.createElement('div');
-      tag.className = 'lang-tag ' + lang;
-      tag.textContent = lang.toUpperCase();
-      var input = document.createElement(useTextarea ? 'textarea' : 'input');
-      if(!useTextarea) input.type = 'text';
-      input.value = value[lang] || '';
-      input.addEventListener('input', function(){ value[lang] = input.value; markDirty(); });
-      row.appendChild(tag);
-      row.appendChild(input);
-      wrap.appendChild(row);
-    });
-    return wrap;
-  }
-
-  function makeStringArrayEditor(arr){
-    var ta = document.createElement('textarea');
-    ta.style.minHeight = '90px';
-    ta.value = arr.join('\n');
-    ta.placeholder = 'One per line';
-    ta.addEventListener('input', function(){
-      var lines = ta.value.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length; });
-      arr.length = 0;
-      lines.forEach(function(l){ arr.push(l); });
-      markDirty();
-    });
-    return ta;
-  }
-
-  function makeSimpleInput(value, onChange, keyHint){
-    var kh = (keyHint||'').toLowerCase();
-    if(typeof value === 'boolean'){
-      var cb = document.createElement('input'); cb.type = 'checkbox';
-      cb.checked = value;
-      cb.addEventListener('change', function(){ onChange(cb.checked); });
-      return cb;
-    }
-    if(kh === 'startdate' || kh === 'enddate'){
-      var d = document.createElement('input'); d.type = 'date';
-      d.value = value || '';
-      d.addEventListener('input', function(){ onChange(d.value); });
-      return d;
-    }
-    if(kh === 'imagesize' || kh === 'textsize'){
-      var sizeSel = document.createElement('select');
-      var sizeOptions = [['small','Small'],['medium','Medium (default)'],['large','Large']];
-      sizeOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        sizeSel.appendChild(opt);
-      });
-      sizeSel.addEventListener('change', function(){ onChange(sizeSel.value); });
-      return sizeSel;
-    }
-    if(kh === 'position'){
-      var posSel = document.createElement('select');
-      var posOptions = [
-        ['top-left','Top Left'], ['top-center','Top Center'], ['top-right','Top Right'],
-        ['middle-left','Middle Left'], ['center','Center (default)'], ['middle-right','Middle Right'],
-        ['bottom-left','Bottom Left'], ['bottom-center','Bottom Center'], ['bottom-right','Bottom Right']
-      ];
-      posOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        posSel.appendChild(opt);
-      });
-      posSel.addEventListener('change', function(){ onChange(posSel.value); });
-      return posSel;
-    }
-    if(kh === 'width'){
-      var w = document.createElement('input'); w.type = 'number';
-      w.min = 240; w.max = 800; w.step = 10;
-      w.value = value == null || value === '' ? 420 : value;
-      w.addEventListener('input', function(){ onChange(Number(w.value) || 420); });
-      return w;
-    }
-    if(kh === 'height'){
-      var h = document.createElement('input'); h.type = 'number';
-      h.min = 100; h.max = 2000; h.step = 10;
-      h.placeholder = 'Automatic (recommended)';
-      h.value = value == null ? '' : value;
-      h.addEventListener('input', function(){ onChange(h.value === '' ? '' : (Number(h.value) || '')); });
-      return h;
-    }
-    if(kh === 'closebuttonposition'){
-      var cbpSel = document.createElement('select');
-      var cbpOptions = [['outside','Outside the box (default)'],['inside','Inside the box'],['hidden','Hidden']];
-      cbpOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        cbpSel.appendChild(opt);
-      });
-      cbpSel.addEventListener('change', function(){ onChange(cbpSel.value); });
-      return cbpSel;
-    }
-    if(kh === 'closebuttonsize'){
-      var cbs = document.createElement('input'); cbs.type = 'number';
-      cbs.min = 24; cbs.max = 72; cbs.step = 2;
-      cbs.value = value == null || value === '' ? 44 : value;
-      cbs.addEventListener('input', function(){ onChange(Number(cbs.value) || 44); });
-      return cbs;
-    }
-    if(kh === 'animationstyle'){
-      var animSel = document.createElement('select');
-      var animOptions = [['none','None (default — appears instantly)'],['fade','Fade'],['slide-down','Slide Down (from above)'],['slide-up','Slide Up (from below)'],['zoom','Zoom']];
-      animOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        animSel.appendChild(opt);
-      });
-      animSel.addEventListener('change', function(){ onChange(animSel.value); });
-      return animSel;
-    }
-    if(kh === 'animationduration'){
-      var ad = document.createElement('input'); ad.type = 'number';
-      ad.min = 100; ad.max = 1500; ad.step = 50;
-      ad.value = value == null || value === '' ? 300 : value;
-      ad.addEventListener('input', function(){ onChange(Number(ad.value) || 300); });
-      return ad;
-    }
-    if(kh === 'reappear'){
-      var reSel = document.createElement('select');
-      var reOptions = [
-        ['session','Once per browser session (default)'],
-        ['always','Every time the page loads'],
-        ['daily','Once per day'],
-        ['once','Only once, ever, on this device']
-      ];
-      reOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        reSel.appendChild(opt);
-      });
-      reSel.addEventListener('change', function(){ onChange(reSel.value); });
-      return reSel;
-    }
-    if(kh === 'icon'){
-      var sel = document.createElement('select');
-      ICON_NAMES.forEach(function(name){
-        var opt = document.createElement('option');
-        opt.value = name; opt.textContent = name;
-        if(name === value) opt.selected = true;
-        sel.appendChild(opt);
-      });
-      sel.addEventListener('change', function(){ onChange(sel.value); });
-      return sel;
-    }
-    if(kh === 'color' || kh === 'backgroundcolor' || kh === 'textcolor' || kh === 'bordercolor' || kh === 'closebuttoncolor' || kh === 'closebuttoniconcolor'){
-      var wrap = document.createElement('div');
-      wrap.style.display = 'flex'; wrap.style.gap = '8px'; wrap.style.alignItems='center';
-      var c = document.createElement('input'); c.type = 'color';
-      // When blank (e.g. Text Color, whose blank state means "use the
-      // built-in default look" rather than a real color), the swatch just
-      // needs a harmless starting point — it never overwrites the blank
-      // value unless the doctor actually touches the picker.
-      c.value = /^#[0-9a-fA-F]{6}$/.test(value) ? value : (kh === 'textcolor' ? '#ffffff' : '#2f6fed');
-      var t = document.createElement('input'); t.type = 'text'; t.value = value; t.style.maxWidth='110px';
-      if(kh === 'textcolor') t.placeholder = 'Default';
-      c.addEventListener('input', function(){ t.value = c.value; onChange(c.value); });
-      t.addEventListener('input', function(){ onChange(t.value); if(/^#[0-9a-fA-F]{6}$/.test(t.value)) c.value = t.value; });
-      wrap.appendChild(c); wrap.appendChild(t);
-      return wrap;
-    }
-    if(kh === 'borderstyle'){
-      var bsSel = document.createElement('select');
-      var bsOptions = [['none','None (no border)'],['solid','Solid'],['dashed','Dashed'],['dotted','Dotted'],['double','Double']];
-      bsOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        bsSel.appendChild(opt);
-      });
-      bsSel.addEventListener('change', function(){ onChange(bsSel.value); });
-      return bsSel;
-    }
-    if(kh === 'shadowstyle'){
-      var shSel = document.createElement('select');
-      var shOptions = [['none','None (default)'],['soft','Soft'],['strong','Strong']];
-      shOptions.forEach(function(pair){
-        var opt = document.createElement('option');
-        opt.value = pair[0]; opt.textContent = pair[1];
-        if(pair[0] === value) opt.selected = true;
-        shSel.appendChild(opt);
-      });
-      shSel.addEventListener('change', function(){ onChange(shSel.value); });
-      return shSel;
-    }
-    if(typeof value === 'number' || kh === 'stars'){
-      var n = document.createElement('input'); n.type = 'number';
-      if(kh === 'stars'){ n.min = 1; n.max = 5; }
-      n.value = value;
-      n.addEventListener('input', function(){ onChange(Number(n.value) || 0); });
-      return n;
-    }
-    if(isLongTextKey(kh)){
-      var ta = document.createElement('textarea');
-      ta.value = value || '';
-      ta.addEventListener('input', function(){ onChange(ta.value); });
-      return ta;
-    }
-    var input = document.createElement('input'); input.type = 'text';
-    input.value = value == null ? '' : value;
-    input.addEventListener('input', function(){ onChange(input.value); });
-    return input;
-  }
-
-  function fieldHintFor(key){
-    if(key === 'id') return '(technical — must stay unique, no spaces; used to link related items)';
-    if(key === 'related') return '(comma-separated IDs of related conditions/treatments)';
-    if(key === 'icon') return '(controls which icon shows on the card)';
-    if(key === 'file') return '(video filename, as uploaded to the site)';
-    if(key === 'enabled') return '(turns the popup on/off on the live site)';
-    if(key === 'startDate') return '(optional — leave blank to show as soon as it’s turned on)';
-    if(key === 'endDate') return '(optional — leave blank to keep showing until turned off)';
-    if(key === 'position') return '(where the popup appears on the screen — the background behind it still dims the whole page)';
-    if(key === 'width') return '(exact width of the popup box, in pixels — try 420 as a starting point)';
-    if(key === 'height') return '(leave blank for automatic height, which fits whatever content is turned on below — set a number only if you want a fixed height; it still never grows taller than the screen)';
-    if(key === 'backgroundColor') return '(background color of the popup box)';
-    if(key === 'textColor') return '(leave blank for the current default look — title in white, message in a softer light blue; pick a color to apply it to the title, with the message using the same color at a softer, lighter shade)';
-    if(key === 'borderStyle') return '(leave as None for the current look with no border)';
-    if(key === 'borderColor') return '(only used when Border Style is not None)';
-    if(key === 'borderWidth') return '(border thickness in pixels — only used when Border Style is not None)';
-    if(key === 'borderRadius') return '(how rounded the popup’s corners are, in pixels — 18 matches the current look)';
-    if(key === 'shadowStyle') return '(an optional drop shadow behind the popup box)';
-    if(key === 'closeButtonPosition') return '(Outside is the current look — the round × button sits half outside the box’s top-right corner. Hidden removes it entirely — visitors can still dismiss the popup by clicking the dimmed area around the box.)';
-    if(key === 'closeButtonColor') return '(background color of the round close button)';
-    if(key === 'closeButtonIconColor') return '(color of the × symbol inside the close button)';
-    if(key === 'closeButtonSize') return '(diameter of the close button, in pixels)';
-    if(key === 'animationStyle') return '(how the popup appears and disappears — None matches the current look, appearing instantly with no motion)';
-    if(key === 'animationDuration') return '(how long the appear/disappear animation takes, in milliseconds — only used when Animation Style is not None)';
-    if(key === 'reappear') return '(how often the popup is allowed to show again to the same visitor — Once per browser session is the current behavior: it won’t show again until they close and reopen their browser tab)';
-    if(key === 'showImage') return '(show/hide the image below — the image itself is uploaded under Photos & Logo → Popup Image)';
-    if(key === 'imageSize') return '(how large the image appears in the popup)';
-    if(key === 'showTitle') return '(show/hide the title text below)';
-    if(key === 'showMessage') return '(show/hide the message text below)';
-    if(key === 'textSize') return '(size of the title and message text)';
-    if(key === 'showButtonText') return '(show/hide the button below — turn off for an image/text-only popup with no button)';
-    if(key === 'buttonText') return '(leave blank to show the popup with no button)';
-    if(key === 'showButtonLink') return '(when off, the button (if shown) is just text and is not clickable — use this for a badge/label with no link)';
-    if(key === 'buttonLink') return '(where the button goes — a WhatsApp link or any https:// URL)';
-    return '';
-  }
-
-  // Renders every field of a plain object into `container`. Recurses for
-  // nested objects/arrays (credentials, specialties, social, etc).
-  function renderObjectFields(obj, container){
-    var groups = groupI18nKeys(Object.keys(obj));
-    groups.forEach(function(g){
-      var box = document.createElement('div');
-      box.className = 'field-group';
-
-      if(g.type === 'i18n'){
-        var label = document.createElement('label');
-        label.className = 'group-label';
-        label.textContent = humanize(g.base);
-        box.appendChild(label);
-        // Ensure all three keys exist so typing in one doesn't error.
-        ['en','bm','zh'].forEach(function(l){ if(!(g.keys[l] in obj)) obj[g.keys[l]] = ''; });
-        var proxy = {
-          get en(){ return obj[g.keys.en]; }, set en(v){ obj[g.keys.en] = v; },
-          get bm(){ return obj[g.keys.bm]; }, set bm(v){ obj[g.keys.bm] = v; },
-          get zh(){ return obj[g.keys.zh]; }, set zh(v){ obj[g.keys.zh] = v; }
-        };
-        box.appendChild(makeLangRow(g.base, proxy));
-        container.appendChild(box);
-        return;
-      }
-
-      var key = g.key;
-      var value = obj[key];
-      var label2 = document.createElement('label');
-      label2.className = 'group-label';
-      label2.textContent = humanize(key);
-      var hint = fieldHintFor(key);
-      if(hint){
-        var hspan = document.createElement('span');
-        hspan.className = 'field-hint';
-        hspan.textContent = hint;
-        label2.appendChild(hspan);
-      }
-      box.appendChild(label2);
-
-      if(isLangObject(value)){
-        box.appendChild(makeLangRow(key, value));
-      } else if(Array.isArray(value)){
-        if(value.length === 0 || typeof value[0] !== 'object'){
-          box.appendChild(makeStringArrayEditor(value));
-          var hint2 = document.createElement('div');
-          hint2.className = 'field-hint';
-          hint2.style.marginTop = '4px';
-          hint2.textContent = 'One per line.';
-          box.appendChild(hint2);
-        } else {
-          var listWrap = document.createElement('div');
-          function renderSubItems(){
-            listWrap.innerHTML = '';
-            value.forEach(function(subItem, idx){
-              var card = document.createElement('div');
-              card.className = 'nested-group';
-              var head = document.createElement('div');
-              head.style.display = 'flex'; head.style.justifyContent = 'space-between'; head.style.alignItems='center'; head.style.marginBottom='6px';
-              var title = document.createElement('strong');
-              title.style.fontSize = '.8rem';
-              title.textContent = humanize(key) + ' #' + (idx+1);
-              var rm = document.createElement('button');
-              rm.type = 'button'; rm.className = 'remove-btn'; rm.textContent = 'Remove';
-              rm.addEventListener('click', function(){ value.splice(idx,1); markDirty(); renderSubItems(); });
-              head.appendChild(title); head.appendChild(rm);
-              card.appendChild(head);
-              renderObjectFields(subItem, card);
-              listWrap.appendChild(card);
-            });
-          }
-          renderSubItems();
-          box.appendChild(listWrap);
-          var addBtn = document.createElement('button');
-          addBtn.type = 'button'; addBtn.className = 'btn add-row'; addBtn.textContent = '+ Add ' + singularize(humanize(key));
-          addBtn.addEventListener('click', function(){ value.push(blankLike(value[0] || {})); markDirty(); renderSubItems(); });
-          box.appendChild(addBtn);
-        }
-      } else if(value && typeof value === 'object'){
-        var sub = document.createElement('div');
-        sub.className = 'nested-group';
-        renderObjectFields(value, sub);
-        box.appendChild(sub);
-      } else {
-        box.appendChild(makeSimpleInput(value, function(v){ obj[key] = v; markDirty(); }, key));
-      }
-      container.appendChild(box);
-    });
-  }
-
-  function renderListSection(container, data, sectionCfg){
-    if(!Array.isArray(data.items)) data.items = [];
-
-    if(sectionCfg.hasToggle){
-      if(typeof data.enabled !== 'boolean') data.enabled = true;
-      var toggleBox = document.createElement('div');
-      toggleBox.className = 'field-group';
-      var toggleLabel = document.createElement('label');
-      toggleLabel.className = 'group-label';
-      toggleLabel.style.display = 'flex';
-      toggleLabel.style.alignItems = 'center';
-      toggleLabel.style.gap = '8px';
-      toggleLabel.style.cursor = 'pointer';
-      var toggleCb = document.createElement('input');
-      toggleCb.type = 'checkbox';
-      toggleCb.checked = data.enabled;
-      toggleCb.addEventListener('change', function(){
-        data.enabled = toggleCb.checked;
-        markDirty();
-      });
-      toggleLabel.appendChild(toggleCb);
-      toggleLabel.appendChild(document.createTextNode('Show ' + sectionCfg.label + ' on the live site'));
-      toggleBox.appendChild(toggleLabel);
-      container.appendChild(toggleBox);
-    }
-
-    var listWrap = document.createElement('div');
-    function renderItems(){
-      listWrap.innerHTML = '';
-      data.items.forEach(function(item, idx){
-        var det = document.createElement('details');
-        det.className = 'item-card';
-        if(idx === 0) det.open = true;
-        var sum = document.createElement('summary');
-        var titleSpan = document.createElement('span');
-        titleSpan.textContent = sectionCfg.itemLabel(item);
-        var right = document.createElement('span');
-        right.style.display = 'flex'; right.style.alignItems='center'; right.style.gap='10px';
-        var chev = document.createElement('span'); chev.className='chev'; chev.textContent = 'tap to edit';
-        var rm = document.createElement('button');
-        rm.type = 'button'; rm.className = 'remove-btn'; rm.textContent = 'Remove';
-        rm.addEventListener('click', function(e){
-          e.preventDefault(); e.stopPropagation();
-          if(!confirm('Remove "' + sectionCfg.itemLabel(item) + '"? This takes effect once you click Save.')) return;
-          data.items.splice(idx,1); markDirty(); renderItems();
-        });
-        right.appendChild(chev); right.appendChild(rm);
-        sum.appendChild(titleSpan); sum.appendChild(right);
-        det.appendChild(sum);
-        var body = document.createElement('div');
-        body.className = 'item-body';
-        renderObjectFields(item, body);
-        det.appendChild(body);
-        listWrap.appendChild(det);
-      });
-    }
-    renderItems();
-    container.appendChild(listWrap);
-
-    var addBtn = document.createElement('button');
-    addBtn.type = 'button'; addBtn.className = 'btn btn-add';
-    addBtn.textContent = '+ Add new';
-    addBtn.addEventListener('click', function(){
-      var template = data.items[0] || SECTION_TEMPLATES[sectionCfg.key] || {};
-      data.items.push(blankLike(template));
-      markDirty();
-      renderItems();
-      var last = listWrap.querySelector('.item-card:last-child');
-      if(last){ last.open = true; last.scrollIntoView({behavior:'smooth', block:'center'}); }
-    });
-    container.appendChild(addBtn);
-  }
-
-  function renderImagesSection(container, data){
-    var grid = document.createElement('div');
-    grid.className = 'images-grid';
-    IMAGE_SLOTS.forEach(function(slot){
-      var card = document.createElement('div');
-      card.className = 'image-card';
-      var h3 = document.createElement('h3'); h3.textContent = slot.label;
-      var img = document.createElement('img'); img.className = 'preview';
-      var current = data[slot.key] || '';
-      img.src = /^https?:\/\//.test(current) || current.charAt(0) === '/' ? current : '/' + current;
-      var file = document.createElement('input'); file.type = 'file'; file.accept = 'image/*';
-      var status = document.createElement('div'); status.className = 'upload-status';
-      file.addEventListener('change', function(){
-        var f = file.files[0];
-        if(!f) return;
-        status.textContent = 'Preparing image…';
-        resizeImageFile(f, 1600, 0.85).then(function(dataUrl){
-          status.textContent = 'Uploading…';
-          return apiUploadImage(slot.key, dataUrl);
-        }).then(function(res){
-          data[slot.key] = res.url;
-          img.src = res.url;
-          status.textContent = 'Saving…';
-          return apiSave('site-images', data);
-        }).then(function(){
-          status.textContent = 'Uploaded and live.';
-          showBanner(slot.label + ' updated — live now.', 'ok');
-        }).catch(function(err){
-          status.textContent = '';
-          showBanner('Could not update ' + slot.label + ': ' + err.message, 'err');
-        });
-      });
-      card.appendChild(h3); card.appendChild(img); card.appendChild(file); card.appendChild(status);
-      grid.appendChild(card);
-    });
-    container.appendChild(grid);
-  }
-
-  // Resizes/compresses an image file in the browser before upload, so we
-  // never need a server-side image library and uploads stay small & fast.
-  function resizeImageFile(file, maxDim, quality){
-    return new Promise(function(resolve, reject){
-      var reader = new FileReader();
-      reader.onerror = function(){ reject(new Error('Could not read the file')); };
-      reader.onload = function(){
-        var img = new Image();
-        img.onerror = function(){ reject(new Error('Could not read that image')); };
-        img.onload = function(){
-          var w = img.width, h = img.height;
-          if(w > maxDim || h > maxDim){
-            if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
-            else { w = Math.round(w * maxDim / h); h = maxDim; }
-          }
-          var canvas = document.createElement('canvas');
-          canvas.width = w; canvas.height = h;
-          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.src = reader.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  /* ============ SECTION LOAD / SAVE ============ */
-  function markDirty(){ state.dirty = true; }
-
-  function selectSection(key){
-    state.section = key;
-    state.dirty = false;
-    renderNav();
-    loadSection(key);
-  }
-
-  function loadSection(key){
-    var cfg = SECTIONS.filter(function(s){ return s.key === key; })[0];
-    document.getElementById('sectionTitle').textContent = cfg.label;
-    document.getElementById('sectionHint').textContent = cfg.hint || '';
-    var content = document.getElementById('sectionContent');
-    content.innerHTML = '<p class="helptext">Loading…</p>';
-    document.getElementById('saveBtn').disabled = true;
-
-    apiGet(key).then(function(data){
-      // One-time migration: the popup's old "Popup Width" preset
-      // (Small/Medium/Large/Extra Large) has been replaced by an exact
-      // pixel Width plus a Position picker. Carry an already-saved preset
-      // over to its closest pixel value instead of silently discarding it.
-      if(key === 'popup' && data.popupWidth && data.width === undefined){
-        var widthPresetMap = {small:320, medium:420, large:520, xlarge:620};
-        data.width = widthPresetMap[data.popupWidth] || 420;
-      }
-      if(key === 'popup') delete data.popupWidth;
-      // Backfills any fields added to this section after some data was
-      // already saved (e.g. the popup's Show.../size controls, added
-      // after this doctor had already saved a popup) so they show up
-      // with a sensible default instead of silently not appearing.
-      if(cfg.defaults){
-        Object.keys(cfg.defaults).forEach(function(k){
-          if(!(k in data)) data[k] = cfg.defaults[k];
-        });
-      }
-      state.data = data;
-      document.getElementById('saveBtn').disabled = (cfg.shape === 'images');
-      renderSection(cfg, data);
-    }).catch(function(err){
-      content.innerHTML = '';
-      showBanner('Could not load this section: ' + err.message, 'err');
-    });
-  }
-
-  function renderSection(cfg, data){
-    var content = document.getElementById('sectionContent');
-    content.innerHTML = '';
-
-    if(cfg.shape === 'images'){
-      renderImagesSection(content, data);
-      return;
-    }
-
-    if(cfg.flatSearch){
-      var search = document.createElement('input');
-      search.type = 'text'; search.id = 'searchBox'; search.placeholder = 'Filter fields… (e.g. "hero", "button", "review")';
-      content.appendChild(search);
-      var listBox = document.createElement('div');
-      content.appendChild(listBox);
-      renderObjectFields(data, listBox);
-      search.addEventListener('input', function(){
-        var q = search.value.trim().toLowerCase();
-        Array.prototype.forEach.call(listBox.querySelectorAll('.field-group'), function(fg){
-          var label = fg.querySelector('.group-label');
-          var text = (label ? label.textContent : '').toLowerCase();
-          fg.style.display = (!q || text.indexOf(q) !== -1) ? '' : 'none';
-        });
-      });
-      return;
-    }
-
-    if(cfg.shape === 'list'){
-      renderListSection(content, data, cfg);
-      return;
-    }
-
-    // shape === 'object' (doctor-bio)
-    renderObjectFields(data, content);
-  }
-
-  document.getElementById('refreshBtn').addEventListener('click', function(){
-    if(state.dirty && !confirm('Discard unsaved changes and reload from the live site?')) return;
-    loadSection(state.section);
-  });
-
-  document.getElementById('saveBtn').addEventListener('click', function(){
-    var btn = document.getElementById('saveBtn');
-    btn.disabled = true; var original = btn.textContent; btn.textContent = 'Saving…';
-    apiSave(state.section, state.data).then(function(){
-      state.dirty = false;
-      showBanner('Saved — changes are live now.', 'ok');
-    }).catch(function(err){
-      showBanner('Could not save: ' + err.message, 'err');
-    }).finally(function(){
-      btn.disabled = false; btn.textContent = original;
-    });
-  });
-
-  window.addEventListener('beforeunload', function(e){
-    if(state.dirty){ e.preventDefault(); e.returnValue = ''; }
-  });
-
-  /* ============ BOOT ============ */
-  var existing = loadToken();
-  if(existing){
-    state.token = existing;
-    showApp();
-  } else {
-    showLogin();
-  }
-})();
-</script>
-
-<script>
-// Pulls the CURRENT splash background + logo (whatever the doctor has
-// uploaded via Photos & Logo on the live site) so the login screen matches
-// the real site theme instead of the bundled default image. This is a
-// pure upgrade: the CSS above already paints the bundled default
-// (../images/splash-bg.png) immediately, so if this fetch is slow, fails,
-// or the CMS content store is briefly unreachable, the login screen still
-// looks correct — it just won't reflect a very recent photo swap yet.
-(function(){
-  "use strict";
-  // Image paths stored in the CMS are written relative to the SITE ROOT
-  // (e.g. "images/splash-bg.png"), because that's correct on the public
-  // pages which live at "/". This admin page lives at "/admin/", so that
-  // same relative path would resolve to "/admin/images/splash-bg.png"
-  // (404) unless we anchor it to the root ourselves. An already-uploaded
-  // photo's path ("/api/image?key=...") already starts with "/" and is
-  // left untouched, as is any absolute http(s) URL.
-  function resolveImgUrl(u){
-    if (!u) return u;
-    if (/^https?:\/\//i.test(u) || u.charAt(0) === '/') return u;
-    return '/' + u;
-  }
-  fetch('/api/content?section=site-images', { cache: 'no-store' })
-    .then(function(r){ return r.ok ? r.json() : null; })
-    .then(function(data){
-      if (!data) return;
-      if (data.splashbg) {
-        document.getElementById('loginScreen').style.backgroundImage =
-          "linear-gradient(160deg,rgba(10,38,71,.72),rgba(18,58,104,.78)), url('" + resolveImgUrl(data.splashbg) + "')";
-      }
-      if (data.logo) {
-        document.getElementById('loginLogo').src = resolveImgUrl(data.logo);
-      }
-    })
-    .catch(function(){ /* keep the bundled default painted by CSS */ });
-})();
-</script>
-</body>
-</html>
+diff --git a/admin/index.html b/admin/index.html
+index a5a15db..8530b58 100644
+--- a/admin/index.html
++++ b/admin/index.html
+@@ -71,6 +71,13 @@
+   .field-group{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
+   .field-group > label.group-label{display:block;font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px;}
+   .field-hint{color:var(--sub);font-size:.76rem;font-weight:400;margin-left:6px;}
++  .rel-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;}
++  .rel-opt{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:.86rem;cursor:pointer;background:#fff;}
++  .rel-opt input{width:18px;height:18px;flex:none;}
++  .rel-opt.on{border-color:#2f6fed;background:#eef4ff;}
++  .rel-opt.auto{opacity:.75;cursor:default;background:#f3f5f9;}
++  .rel-opt.missing{border-color:#e0a0a0;background:#fdeeee;color:#a12626;}
++  .rel-note{font-size:.76rem;color:var(--sub);margin-top:8px;}
+   .lang-row{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start;margin-bottom:6px;}
+   .lang-row:last-child{margin-bottom:0;}
+   .lang-tag{font-size:.72rem;font-weight:700;color:#fff;background:#9098ad;border-radius:5px;text-align:center;padding:3px 0;margin-top:4px;}
+@@ -580,8 +587,10 @@
+   }
+ 
+   function fieldHintFor(key){
+-    if(key === 'id') return '(technical — must stay unique, no spaces; used to link related items)';
+-    if(key === 'related') return '(comma-separated IDs of related conditions/treatments)';
++    if(key === 'id') return '(technical — filled in automatically from the English title when left blank; must stay unique, no spaces)';
++    if(key === 'related') return (state.section === 'conditions' || state.section === 'treatments')
++      ? '(tick the ' + (state.section === 'conditions' ? 'treatments' : 'conditions') + ' that go with this one — the link shows on both pages automatically)'
++      : '(comma-separated IDs of related items)';
+     if(key === 'icon') return '(controls which icon shows on the card)';
+     if(key === 'file') return '(video filename, as uploaded to the site)';
+     if(key === 'enabled') return '(turns the popup on/off on the live site)';
+@@ -698,6 +707,8 @@
+         sub.className = 'nested-group';
+         renderObjectFields(value, sub);
+         box.appendChild(sub);
++      } else if(key === 'related' && (state.section === 'conditions' || state.section === 'treatments') && ('id' in obj)){
++        box.appendChild(makeRelatedPicker(obj));
+       } else {
+         box.appendChild(makeSimpleInput(value, function(v){ obj[key] = v; markDirty(); }, key));
+       }
+@@ -705,6 +716,91 @@
+     });
+   }
+ 
++  /* ---- Related picker (conditions <-> treatments) ---- */
++  var otherCache = {};
++  function getOtherItems(sec){
++    if(!otherCache[sec]) otherCache[sec] = apiGet(sec).then(function(d){ return (d && d.items) || []; });
++    return otherCache[sec];
++  }
++  function relList(s){ return String(s || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); }
++  function slugify(s){
++    return String(s || '').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
++  }
++
++  function makeRelatedPicker(item){
++    var wrap = document.createElement('div');
++    wrap.innerHTML = '<p class="rel-note">Loading list…</p>';
++    var otherSec = state.section === 'conditions' ? 'treatments' : 'conditions';
++    getOtherItems(otherSec).then(function(others){
++      wrap.innerHTML = '';
++      var grid = document.createElement('div'); grid.className = 'rel-picker';
++      var chosen = relList(item.related);
++      var known = {};
++      var choosable = others.filter(function(o){ return o.id && (o.title_en || '').trim(); });
++      choosable.forEach(function(o){ known[o.id] = true; });
++
++      function commit(){ item.related = chosen.join(', '); markDirty(); }
++
++      choosable.forEach(function(o){
++        var lab = document.createElement('label');
++        var cb = document.createElement('input'); cb.type = 'checkbox';
++        var linkedFromOther = relList(o.related).indexOf(item.id) !== -1 && item.id;
++        cb.checked = chosen.indexOf(o.id) !== -1;
++        lab.className = 'rel-opt' + (cb.checked ? ' on' : '');
++        lab.appendChild(cb);
++        var dec = document.createElement('textarea'); dec.innerHTML = o.title_en.trim();  // titles may be stored as "&amp;"
++        lab.appendChild(document.createTextNode(dec.value));
++        if(linkedFromOther && !cb.checked){
++          lab.className = 'rel-opt auto';
++          lab.title = 'Already linked from the other side — shows on both pages automatically.';
++          cb.checked = true; cb.disabled = true;
++          lab.appendChild(document.createTextNode(' (linked from its page)'));
++        }
++        cb.addEventListener('change', function(){
++          var i = chosen.indexOf(o.id);
++          if(cb.checked && i === -1) chosen.push(o.id);
++          if(!cb.checked && i !== -1) chosen.splice(i, 1);
++          lab.className = 'rel-opt' + (cb.checked ? ' on' : '');
++          commit();
++        });
++        grid.appendChild(lab);
++      });
++
++      // IDs that point at something that no longer exists — show them so they can be cleared.
++      chosen.filter(function(id){ return !known[id]; }).forEach(function(id){
++        var lab = document.createElement('label'); lab.className = 'rel-opt missing';
++        var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
++        lab.appendChild(cb);
++        lab.appendChild(document.createTextNode('Missing: ' + id + ' (untick to remove)'));
++        cb.addEventListener('change', function(){
++          if(!cb.checked){ chosen.splice(chosen.indexOf(id), 1); lab.style.display = 'none'; commit(); }
++        });
++        grid.appendChild(lab);
++      });
++
++      wrap.appendChild(grid);
++      var note = document.createElement('div'); note.className = 'rel-note';
++      note.textContent = choosable.length ? 'Only finished items with an ID and an English title appear here.' : 'Nothing to choose from yet.';
++      wrap.appendChild(note);
++    }).catch(function(){
++      wrap.innerHTML = '<p class="rel-note">Could not load the list. Refresh and try again.</p>';
++    });
++    return wrap;
++  }
++
++  // Fills a blank ID from the English title (unique), so a new item can be linked.
++  function fillMissingIds(items){
++    var used = {}, changed = 0;
++    items.forEach(function(it){ if(it.id) used[it.id] = true; });
++    items.forEach(function(it){
++      if(it.id || !(it.title_en || '').trim()) return;
++      var base = slugify(it.title_en) || 'item', id = base, n = 2;
++      while(used[id]){ id = base + '-' + n++; }
++      it.id = id; used[id] = true; changed++;
++    });
++    return changed;
++  }
++
+   function renderListSection(container, data, sectionCfg){
+     if(!Array.isArray(data.items)) data.items = [];
+ 
+@@ -848,6 +944,7 @@
+   function selectSection(key){
+     state.section = key;
+     state.dirty = false;
++    otherCache = {};
+     renderNav();
+     loadSection(key);
+   }
+@@ -931,10 +1028,16 @@
+ 
+   document.getElementById('saveBtn').addEventListener('click', function(){
+     var btn = document.getElementById('saveBtn');
++    var idsAdded = 0;
++    if((state.section === 'conditions' || state.section === 'treatments') && state.data && Array.isArray(state.data.items)){
++      idsAdded = fillMissingIds(state.data.items);
++    }
+     btn.disabled = true; var original = btn.textContent; btn.textContent = 'Saving…';
+     apiSave(state.section, state.data).then(function(){
+       state.dirty = false;
+-      showBanner('Saved — changes are live now.', 'ok');
++      delete otherCache.conditions; delete otherCache.treatments;
++      showBanner('Saved — changes are live now.' + (idsAdded ? ' (' + idsAdded + ' new item ID' + (idsAdded > 1 ? 's' : '') + ' created automatically.)' : ''), 'ok');
++      if(idsAdded){ loadSection(state.section); }
+     }).catch(function(err){
+       showBanner('Could not save: ' + err.message, 'err');
+     }).finally(function(){
+diff --git a/script.js b/script.js
+index 698ad66..94a968e 100644
+--- a/script.js
++++ b/script.js
+@@ -88,11 +88,32 @@ function renderBottomNav(){
+ }
+ renderBottomNav();
+ 
++/* ---------------- PUBLISHED FILTER + TWO-WAY LINKS ----------------
++   An item only shows on the site once it has an ID, an English title and
++   some description text. Half-finished drafts saved in the CMS stay hidden
++   until they are filled in.
++
++   Links between conditions and treatments are two-way automatically: a
++   condition lists a treatment if EITHER side names the other in "related".
++   So the CMS only needs to be ticked on one side and both pages agree. */
++function isPublished(it){
++  return !!(it && it.id && (it.title_en||'').trim() && ((it.desc_en||'').trim() || (it.overview_en||'').trim()));
++}
++function relIds(it){
++  return (it.related||'').split(',').map(x=>x.trim()).filter(Boolean);
++}
++function relatedTreatmentsOf(c){
++  return TREATMENTS.filter(t => isPublished(t) && (relIds(c).includes(t.id) || relIds(t).includes(c.id)));
++}
++function relatedConditionsOf(t){
++  return CONDITIONS.filter(c => isPublished(c) && (relIds(t).includes(c.id) || relIds(c).includes(t.id)));
++}
++
+ /* ---------------- CONDITIONS ---------------- */
+ const conditionsGrid = document.getElementById('conditionsGrid');
+ function renderConditions(){
+   conditionsGrid.innerHTML = '';
+-  CONDITIONS.forEach(c=>{
++  CONDITIONS.filter(isPublished).forEach(c=>{
+     conditionsGrid.innerHTML += `
+       <div class="info-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
+         <div class="info-ico" style="background:${c.color};color:#fff;">${svgIcon(c.icon,24)}</div>
+@@ -108,7 +129,7 @@ renderConditions();
+ const treatmentsGrid = document.getElementById('treatmentsGrid');
+ function renderTreatments(){
+   treatmentsGrid.innerHTML = '';
+-  TREATMENTS.forEach(t=>{
++  TREATMENTS.filter(isPublished).forEach(t=>{
+     treatmentsGrid.innerHTML += `
+       <div class="info-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
+         <div class="info-ico" style="background:${t.color};color:#fff;">${svgIcon(t.icon,24)}</div>
+@@ -143,9 +164,8 @@ function showConditionDetail(id){
+   const c = conditionsById[id];
+   if(!c) return;
+   lastDetail = {type:'condition', id};
+-  const relatedHtml = (c.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(tid=>{
+-    const t = treatmentsById[tid];
+-    if(!t) return '';
++  const relTreatments = relatedTreatmentsOf(c);
++  const relatedHtml = relTreatments.map(t=>{
+     return `<div class="related-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
+       <div class="related-ico" style="background:${t.color};">${svgIcon(t.icon,20)}</div>
+       <div><h4>${tf(t,'title')}</h4><span>${L(UI.treatmentOption)}</span></div>
+@@ -165,7 +185,7 @@ function showConditionDetail(id){
+         <div class="detail-card"><h3>${L(UI.howDiagnosed)}</h3><p>${tf(c,'diagnosis')}</p></div>
+       </div>
+       <div>
+-        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L((c.related||'').split(',').filter(Boolean).length>1?UI.relatedTreatments:UI.relatedTreatment)}</h3>
++        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relTreatments.length>1?UI.relatedTreatments:UI.relatedTreatment)}</h3>
+         ${relatedHtml}
+         <div class="cta-card" style="margin-top:16px;">
+           <p>${L(UI.questionsAboutCondition)}</p>
+@@ -180,9 +200,8 @@ function showTreatmentDetail(id){
+   const t = treatmentsById[id];
+   if(!t) return;
+   lastDetail = {type:'treatment', id};
+-  const relatedHtml = (t.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(cid=>{
+-    const c = conditionsById[cid];
+-    if(!c) return '';
++  const relConditions = relatedConditionsOf(t);
++  const relatedHtml = relConditions.map(c=>{
+     return `<div class="related-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
+       <div class="related-ico" style="background:${c.color};">${svgIcon(c.icon,20)}</div>
+       <div><h4>${tf(c,'title')}</h4><span>${L(UI.conditionTreated)}</span></div>
+@@ -202,7 +221,7 @@ function showTreatmentDetail(id){
+         <div class="detail-card"><h3>${L(UI.recovery)}</h3><p>${tf(t,'recovery')||''}</p></div>
+       </div>
+       <div>
+-        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L((t.related||'').split(',').filter(Boolean).length>1?UI.conditionsThisTreatsPlural:UI.conditionsThisTreats)}</h3>
++        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relConditions.length>1?UI.conditionsThisTreatsPlural:UI.conditionsThisTreats)}</h3>
+         ${relatedHtml}
+         <div class="cta-card" style="margin-top:16px;">
+           <p>${L(UI.curiousAboutTreatment)}</p>
+diff --git a/sw.js b/sw.js
+index 397ed13..51afd5f 100644
+--- a/sw.js
++++ b/sw.js
+@@ -1,7 +1,7 @@
+ // Minimal service worker — exists mainly so Chrome/Android recognizes this
+ // page as an installable app (a real "Install app" prompt instead of a
+ // plain bookmark). It caches only the small app-shell files, not the video.
+-const CACHE_NAME = 'meditouch-shell-v46';
++const CACHE_NAME = 'meditouch-shell-v47';
+ const SHELL_FILES = [
+   './index.html',
+   './style.css',
