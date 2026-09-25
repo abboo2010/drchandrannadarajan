@@ -111,13 +111,47 @@ function relatedConditionsOf(t){
 
 /* ---------------- CONDITIONS ---------------- */
 const conditionsGrid = document.getElementById('conditionsGrid');
+function isUrgent(it){ return /emergenc/i.test(it.tag_en||''); }
+const groupFilter = {conditions:'all', treatments:'all'};
+function tagKey(it){ return (it.tag_en||'').trim(); }
+
+// Filter chips built from the Tag field of the published items, so the groups
+// are managed from the CMS (rename a Tag there and the chip follows).
+function renderChips(kind, items, grid, rerender){
+  let bar = document.getElementById(kind+'Chips');
+  if(!bar){
+    bar = document.createElement('div');
+    bar.id = kind+'Chips'; bar.className = 'filter-chips';
+    bar.setAttribute('role','tablist');
+    grid.insertAdjacentElement('beforebegin', bar);
+  }
+  const groups = [];
+  items.forEach(it=>{ const k = tagKey(it); if(k && !groups.some(g=>g.key===k)) groups.push({key:k, label:tf(it,'tag')}); });
+  if(groupFilter[kind] !== 'all' && !groups.some(g=>g.key===groupFilter[kind])) groupFilter[kind] = 'all';
+  bar.style.display = groups.length > 1 ? '' : 'none';
+  bar.innerHTML = '';
+  [{key:'all', label:L(UI.filterAll)}].concat(groups).forEach(g=>{
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip' + (groupFilter[kind]===g.key ? ' active' : '');
+    b.setAttribute('role','tab'); b.setAttribute('aria-selected', groupFilter[kind]===g.key);
+    b.textContent = g.label;
+    b.onclick = ()=>{ groupFilter[kind] = g.key; rerender(); };
+    bar.appendChild(b);
+  });
+}
+function visibleItems(kind, items){
+  return items.filter(it => groupFilter[kind]==='all' || tagKey(it)===groupFilter[kind]);
+}
+
 function renderConditions(){
   conditionsGrid.innerHTML = '';
-  CONDITIONS.filter(isPublished).forEach(c=>{
+  const pub = CONDITIONS.filter(isPublished);
+  renderChips('conditions', pub, conditionsGrid, renderConditions);
+  visibleItems('conditions', pub).forEach(c=>{
     conditionsGrid.innerHTML += `
-      <div class="info-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
+      <div class="info-card${isUrgent(c)?' urgent':''}" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
         <div class="info-ico" style="background:${c.color};color:#fff;">${svgIcon(c.icon,24)}</div>
-        <span class="pill">${tf(c,'tag')}</span>
+        <span class="pill${isUrgent(c)?' pill-urgent':''}">${tf(c,'tag')}</span>
         <h3>${tf(c,'title')}</h3>
         <p>${tf(c,'desc')}</p>
       </div>`;
@@ -129,7 +163,9 @@ renderConditions();
 const treatmentsGrid = document.getElementById('treatmentsGrid');
 function renderTreatments(){
   treatmentsGrid.innerHTML = '';
-  TREATMENTS.filter(isPublished).forEach(t=>{
+  const pub = TREATMENTS.filter(isPublished);
+  renderChips('treatments', pub, treatmentsGrid, renderTreatments);
+  visibleItems('treatments', pub).forEach(t=>{
     treatmentsGrid.innerHTML += `
       <div class="info-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
         <div class="info-ico" style="background:${t.color};color:#fff;">${svgIcon(t.icon,24)}</div>
@@ -177,6 +213,7 @@ function showConditionDetail(id){
       <div class="detail-ico" style="background:${c.color};">${svgIcon(c.icon,32)}</div>
       <div><div class="detail-tag">${tf(c,'tag')}</div><h1>${tf(c,'title')}</h1></div>
     </div>
+    ${isUrgent(c) ? `<div class="urgent-note" role="alert"><strong>${L(UI.emergencyTitle)}</strong> ${L(UI.emergencyNote)}</div>` : ''}
     <div class="detail-grid">
       <div>
         <div class="detail-card"><h3>${L(UI.overview)}</h3><p>${tf(c,'overview')}</p></div>
@@ -213,6 +250,8 @@ function showTreatmentDetail(id){
       <div class="detail-ico" style="background:${t.color};">${svgIcon(t.icon,32)}</div>
       <div><div class="detail-tag">${tf(t,'tag')}</div><h1>${tf(t,'title')}</h1></div>
     </div>
+    ${tfArr(t,'badges').length ? `<div class="badge-row">${tfArr(t,'badges').map(b=>`<span class="badge">${b}</span>`).join('')}</div>` : ''}
+    ${relConditions.length ? `<div class="suitable-row"><span class="suitable-label">${L(UI.suitableFor)}</span>${relConditions.map(c=>`<button type="button" class="chip chip-sm" onclick="showConditionDetail('${c.id}')">${tf(c,'title')}</button>`).join('')}</div>` : ''}
     <div class="detail-grid">
       <div>
         <div class="detail-card"><h3>${L(UI.overview)}</h3><p>${tf(t,'overview')}</p></div>

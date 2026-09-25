@@ -169,7 +169,7 @@
       related:'',symptoms_en:[],symptoms_bm:[],symptoms_zh:[],causes_en:[],causes_bm:[],causes_zh:[]},
     treatments: {id:'',icon:'syringe',color:'#8b5cf6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',
       desc_en:'',desc_bm:'',desc_zh:'',overview_en:'',overview_bm:'',overview_zh:'',recovery_en:'',recovery_bm:'',recovery_zh:'',
-      related:'',steps_en:[],steps_bm:[],steps_zh:[],benefits_en:[],benefits_bm:[],benefits_zh:[]},
+      related:'',badges_en:[],badges_bm:[],badges_zh:[],steps_en:[],steps_bm:[],steps_zh:[],benefits_en:[],benefits_bm:[],benefits_zh:[]},
     education: {icon:'book',color:'#14b8a6',title_en:'',title_bm:'',title_zh:'',tag_en:'',tag_bm:'',tag_zh:'',desc_en:'',desc_bm:'',desc_zh:''},
     videos: {title_en:'',title_bm:'',title_zh:'',length:'',file:''},
     testimonials: {name:'',color:'#14b8a6',meta_en:'',meta_bm:'',meta_zh:'',quote_en:'',quote_bm:'',quote_zh:''},
@@ -974,6 +974,13 @@
       if(cfg.defaults){
         Object.keys(cfg.defaults).forEach(function(k){
           if(!(k in data)) data[k] = cfg.defaults[k];
+        });
+      }
+      // Older treatments were saved before the "Badges" field existed — add it
+      // so the editor shows it (e.g. "Day-case", "No open surgery").
+      if(key === 'treatments' && Array.isArray(data.items)){
+        data.items.forEach(function(it){
+          ['en','bm','zh'].forEach(function(l){ if(!Array.isArray(it['badges_'+l])) it['badges_'+l] = []; });
         });
       }
       state.data = data;
