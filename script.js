@@ -190,7 +190,9 @@ const conditionsById = Object.fromEntries(CONDITIONS.map(c=>[c.id,c]));
 const treatmentsById = Object.fromEntries(TREATMENTS.map(t=>[t.id,t]));
 
 function tfArr(obj, field){
-  return obj[field + '_' + currentLang] || obj[field + '_en'] || [];
+  const v = obj[field + '_' + currentLang] || obj[field + '_en'] || [];
+  // Lists should be arrays; if one was ever saved as text, split it by line.
+  return Array.isArray(v) ? v : String(v).split(/\n/).map(x=>x.trim()).filter(Boolean);
 }
 function listHtml(arr, iconType){
   // iconType: 'check' for symptom/cause lists, 'num' for step lists

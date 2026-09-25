@@ -390,6 +390,27 @@
     return wrap;
   }
 
+  function makeLangArrayRow(obj, keys){
+    var wrap = document.createElement('div');
+    ['en','bm','zh'].forEach(function(lang){
+      var k = keys[lang];
+      if(!Array.isArray(obj[k])){
+        obj[k] = obj[k] ? String(obj[k]).split('\n').map(function(l){ return l.trim(); }).filter(Boolean) : [];
+      }
+      var row = document.createElement('div'); row.className = 'lang-row';
+      var tag = document.createElement('div'); tag.className = 'lang-tag ' + lang; tag.textContent = lang.toUpperCase();
+      var ta = document.createElement('textarea');
+      ta.placeholder = 'One per line';
+      ta.value = obj[k].join('\n');
+      ta.addEventListener('input', function(){
+        obj[k] = ta.value.split('\n').map(function(l){ return l.trim(); }).filter(function(l){ return l.length; });
+        markDirty();
+      });
+      row.appendChild(tag); row.appendChild(ta); wrap.appendChild(row);
+    });
+    return wrap;
+  }
+
   function makeStringArrayEditor(arr){
     var ta = document.createElement('textarea');
     ta.style.minHeight = '90px';
@@ -638,6 +659,13 @@
         label.className = 'group-label';
         label.textContent = humanize(g.base);
         box.appendChild(label);
+        // List fields (symptoms, causes, steps, benefits, badges) are arrays: edit them
+        // one item per line and keep them as arrays, never as one joined string.
+        if(['en','bm','zh'].some(function(l){ return Array.isArray(obj[g.keys[l]]); })){
+          box.appendChild(makeLangArrayRow(obj, g.keys));
+          container.appendChild(box);
+          return;
+        }
         // Ensure all three keys exist so typing in one doesn't error.
         ['en','bm','zh'].forEach(function(l){ if(!(g.keys[l] in obj)) obj[g.keys[l]] = ''; });
         var proxy = {
