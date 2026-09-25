@@ -1,260 +1,743 @@
-diff --git a/admin/index.html b/admin/index.html
-index a5a15db..8530b58 100644
---- a/admin/index.html
-+++ b/admin/index.html
-@@ -71,6 +71,13 @@
-   .field-group{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:12px;}
-   .field-group > label.group-label{display:block;font-weight:700;font-size:.82rem;color:var(--ink);margin-bottom:8px;}
-   .field-hint{color:var(--sub);font-size:.76rem;font-weight:400;margin-left:6px;}
-+  .rel-picker{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;}
-+  .rel-opt{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:.86rem;cursor:pointer;background:#fff;}
-+  .rel-opt input{width:18px;height:18px;flex:none;}
-+  .rel-opt.on{border-color:#2f6fed;background:#eef4ff;}
-+  .rel-opt.auto{opacity:.75;cursor:default;background:#f3f5f9;}
-+  .rel-opt.missing{border-color:#e0a0a0;background:#fdeeee;color:#a12626;}
-+  .rel-note{font-size:.76rem;color:var(--sub);margin-top:8px;}
-   .lang-row{display:grid;grid-template-columns:36px 1fr;gap:8px;align-items:start;margin-bottom:6px;}
-   .lang-row:last-child{margin-bottom:0;}
-   .lang-tag{font-size:.72rem;font-weight:700;color:#fff;background:#9098ad;border-radius:5px;text-align:center;padding:3px 0;margin-top:4px;}
-@@ -580,8 +587,10 @@
-   }
- 
-   function fieldHintFor(key){
--    if(key === 'id') return '(technical — must stay unique, no spaces; used to link related items)';
--    if(key === 'related') return '(comma-separated IDs of related conditions/treatments)';
-+    if(key === 'id') return '(technical — filled in automatically from the English title when left blank; must stay unique, no spaces)';
-+    if(key === 'related') return (state.section === 'conditions' || state.section === 'treatments')
-+      ? '(tick the ' + (state.section === 'conditions' ? 'treatments' : 'conditions') + ' that go with this one — the link shows on both pages automatically)'
-+      : '(comma-separated IDs of related items)';
-     if(key === 'icon') return '(controls which icon shows on the card)';
-     if(key === 'file') return '(video filename, as uploaded to the site)';
-     if(key === 'enabled') return '(turns the popup on/off on the live site)';
-@@ -698,6 +707,8 @@
-         sub.className = 'nested-group';
-         renderObjectFields(value, sub);
-         box.appendChild(sub);
-+      } else if(key === 'related' && (state.section === 'conditions' || state.section === 'treatments') && ('id' in obj)){
-+        box.appendChild(makeRelatedPicker(obj));
-       } else {
-         box.appendChild(makeSimpleInput(value, function(v){ obj[key] = v; markDirty(); }, key));
-       }
-@@ -705,6 +716,91 @@
-     });
-   }
- 
-+  /* ---- Related picker (conditions <-> treatments) ---- */
-+  var otherCache = {};
-+  function getOtherItems(sec){
-+    if(!otherCache[sec]) otherCache[sec] = apiGet(sec).then(function(d){ return (d && d.items) || []; });
-+    return otherCache[sec];
-+  }
-+  function relList(s){ return String(s || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); }
-+  function slugify(s){
-+    return String(s || '').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-+  }
-+
-+  function makeRelatedPicker(item){
-+    var wrap = document.createElement('div');
-+    wrap.innerHTML = '<p class="rel-note">Loading list…</p>';
-+    var otherSec = state.section === 'conditions' ? 'treatments' : 'conditions';
-+    getOtherItems(otherSec).then(function(others){
-+      wrap.innerHTML = '';
-+      var grid = document.createElement('div'); grid.className = 'rel-picker';
-+      var chosen = relList(item.related);
-+      var known = {};
-+      var choosable = others.filter(function(o){ return o.id && (o.title_en || '').trim(); });
-+      choosable.forEach(function(o){ known[o.id] = true; });
-+
-+      function commit(){ item.related = chosen.join(', '); markDirty(); }
-+
-+      choosable.forEach(function(o){
-+        var lab = document.createElement('label');
-+        var cb = document.createElement('input'); cb.type = 'checkbox';
-+        var linkedFromOther = relList(o.related).indexOf(item.id) !== -1 && item.id;
-+        cb.checked = chosen.indexOf(o.id) !== -1;
-+        lab.className = 'rel-opt' + (cb.checked ? ' on' : '');
-+        lab.appendChild(cb);
-+        var dec = document.createElement('textarea'); dec.innerHTML = o.title_en.trim();  // titles may be stored as "&amp;"
-+        lab.appendChild(document.createTextNode(dec.value));
-+        if(linkedFromOther && !cb.checked){
-+          lab.className = 'rel-opt auto';
-+          lab.title = 'Already linked from the other side — shows on both pages automatically.';
-+          cb.checked = true; cb.disabled = true;
-+          lab.appendChild(document.createTextNode(' (linked from its page)'));
-+        }
-+        cb.addEventListener('change', function(){
-+          var i = chosen.indexOf(o.id);
-+          if(cb.checked && i === -1) chosen.push(o.id);
-+          if(!cb.checked && i !== -1) chosen.splice(i, 1);
-+          lab.className = 'rel-opt' + (cb.checked ? ' on' : '');
-+          commit();
-+        });
-+        grid.appendChild(lab);
-+      });
-+
-+      // IDs that point at something that no longer exists — show them so they can be cleared.
-+      chosen.filter(function(id){ return !known[id]; }).forEach(function(id){
-+        var lab = document.createElement('label'); lab.className = 'rel-opt missing';
-+        var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = true;
-+        lab.appendChild(cb);
-+        lab.appendChild(document.createTextNode('Missing: ' + id + ' (untick to remove)'));
-+        cb.addEventListener('change', function(){
-+          if(!cb.checked){ chosen.splice(chosen.indexOf(id), 1); lab.style.display = 'none'; commit(); }
-+        });
-+        grid.appendChild(lab);
-+      });
-+
-+      wrap.appendChild(grid);
-+      var note = document.createElement('div'); note.className = 'rel-note';
-+      note.textContent = choosable.length ? 'Only finished items with an ID and an English title appear here.' : 'Nothing to choose from yet.';
-+      wrap.appendChild(note);
-+    }).catch(function(){
-+      wrap.innerHTML = '<p class="rel-note">Could not load the list. Refresh and try again.</p>';
-+    });
-+    return wrap;
-+  }
-+
-+  // Fills a blank ID from the English title (unique), so a new item can be linked.
-+  function fillMissingIds(items){
-+    var used = {}, changed = 0;
-+    items.forEach(function(it){ if(it.id) used[it.id] = true; });
-+    items.forEach(function(it){
-+      if(it.id || !(it.title_en || '').trim()) return;
-+      var base = slugify(it.title_en) || 'item', id = base, n = 2;
-+      while(used[id]){ id = base + '-' + n++; }
-+      it.id = id; used[id] = true; changed++;
-+    });
-+    return changed;
-+  }
-+
-   function renderListSection(container, data, sectionCfg){
-     if(!Array.isArray(data.items)) data.items = [];
- 
-@@ -848,6 +944,7 @@
-   function selectSection(key){
-     state.section = key;
-     state.dirty = false;
-+    otherCache = {};
-     renderNav();
-     loadSection(key);
-   }
-@@ -931,10 +1028,16 @@
- 
-   document.getElementById('saveBtn').addEventListener('click', function(){
-     var btn = document.getElementById('saveBtn');
-+    var idsAdded = 0;
-+    if((state.section === 'conditions' || state.section === 'treatments') && state.data && Array.isArray(state.data.items)){
-+      idsAdded = fillMissingIds(state.data.items);
-+    }
-     btn.disabled = true; var original = btn.textContent; btn.textContent = 'Saving…';
-     apiSave(state.section, state.data).then(function(){
-       state.dirty = false;
--      showBanner('Saved — changes are live now.', 'ok');
-+      delete otherCache.conditions; delete otherCache.treatments;
-+      showBanner('Saved — changes are live now.' + (idsAdded ? ' (' + idsAdded + ' new item ID' + (idsAdded > 1 ? 's' : '') + ' created automatically.)' : ''), 'ok');
-+      if(idsAdded){ loadSection(state.section); }
-     }).catch(function(err){
-       showBanner('Could not save: ' + err.message, 'err');
-     }).finally(function(){
-diff --git a/script.js b/script.js
-index 698ad66..94a968e 100644
---- a/script.js
-+++ b/script.js
-@@ -88,11 +88,32 @@ function renderBottomNav(){
- }
- renderBottomNav();
- 
-+/* ---------------- PUBLISHED FILTER + TWO-WAY LINKS ----------------
-+   An item only shows on the site once it has an ID, an English title and
-+   some description text. Half-finished drafts saved in the CMS stay hidden
-+   until they are filled in.
-+
-+   Links between conditions and treatments are two-way automatically: a
-+   condition lists a treatment if EITHER side names the other in "related".
-+   So the CMS only needs to be ticked on one side and both pages agree. */
-+function isPublished(it){
-+  return !!(it && it.id && (it.title_en||'').trim() && ((it.desc_en||'').trim() || (it.overview_en||'').trim()));
-+}
-+function relIds(it){
-+  return (it.related||'').split(',').map(x=>x.trim()).filter(Boolean);
-+}
-+function relatedTreatmentsOf(c){
-+  return TREATMENTS.filter(t => isPublished(t) && (relIds(c).includes(t.id) || relIds(t).includes(c.id)));
-+}
-+function relatedConditionsOf(t){
-+  return CONDITIONS.filter(c => isPublished(c) && (relIds(t).includes(c.id) || relIds(c).includes(t.id)));
-+}
-+
- /* ---------------- CONDITIONS ---------------- */
- const conditionsGrid = document.getElementById('conditionsGrid');
- function renderConditions(){
-   conditionsGrid.innerHTML = '';
--  CONDITIONS.forEach(c=>{
-+  CONDITIONS.filter(isPublished).forEach(c=>{
-     conditionsGrid.innerHTML += `
-       <div class="info-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
-         <div class="info-ico" style="background:${c.color};color:#fff;">${svgIcon(c.icon,24)}</div>
-@@ -108,7 +129,7 @@ renderConditions();
- const treatmentsGrid = document.getElementById('treatmentsGrid');
- function renderTreatments(){
-   treatmentsGrid.innerHTML = '';
--  TREATMENTS.forEach(t=>{
-+  TREATMENTS.filter(isPublished).forEach(t=>{
-     treatmentsGrid.innerHTML += `
-       <div class="info-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
-         <div class="info-ico" style="background:${t.color};color:#fff;">${svgIcon(t.icon,24)}</div>
-@@ -143,9 +164,8 @@ function showConditionDetail(id){
-   const c = conditionsById[id];
-   if(!c) return;
-   lastDetail = {type:'condition', id};
--  const relatedHtml = (c.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(tid=>{
--    const t = treatmentsById[tid];
--    if(!t) return '';
-+  const relTreatments = relatedTreatmentsOf(c);
-+  const relatedHtml = relTreatments.map(t=>{
-     return `<div class="related-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
-       <div class="related-ico" style="background:${t.color};">${svgIcon(t.icon,20)}</div>
-       <div><h4>${tf(t,'title')}</h4><span>${L(UI.treatmentOption)}</span></div>
-@@ -165,7 +185,7 @@ function showConditionDetail(id){
-         <div class="detail-card"><h3>${L(UI.howDiagnosed)}</h3><p>${tf(c,'diagnosis')}</p></div>
-       </div>
-       <div>
--        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L((c.related||'').split(',').filter(Boolean).length>1?UI.relatedTreatments:UI.relatedTreatment)}</h3>
-+        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relTreatments.length>1?UI.relatedTreatments:UI.relatedTreatment)}</h3>
-         ${relatedHtml}
-         <div class="cta-card" style="margin-top:16px;">
-           <p>${L(UI.questionsAboutCondition)}</p>
-@@ -180,9 +200,8 @@ function showTreatmentDetail(id){
-   const t = treatmentsById[id];
-   if(!t) return;
-   lastDetail = {type:'treatment', id};
--  const relatedHtml = (t.related||'').split(',').map(x=>x.trim()).filter(Boolean).map(cid=>{
--    const c = conditionsById[cid];
--    if(!c) return '';
-+  const relConditions = relatedConditionsOf(t);
-+  const relatedHtml = relConditions.map(c=>{
-     return `<div class="related-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
-       <div class="related-ico" style="background:${c.color};">${svgIcon(c.icon,20)}</div>
-       <div><h4>${tf(c,'title')}</h4><span>${L(UI.conditionTreated)}</span></div>
-@@ -202,7 +221,7 @@ function showTreatmentDetail(id){
-         <div class="detail-card"><h3>${L(UI.recovery)}</h3><p>${tf(t,'recovery')||''}</p></div>
-       </div>
-       <div>
--        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L((t.related||'').split(',').filter(Boolean).length>1?UI.conditionsThisTreatsPlural:UI.conditionsThisTreats)}</h3>
-+        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relConditions.length>1?UI.conditionsThisTreatsPlural:UI.conditionsThisTreats)}</h3>
-         ${relatedHtml}
-         <div class="cta-card" style="margin-top:16px;">
-           <p>${L(UI.curiousAboutTreatment)}</p>
-diff --git a/sw.js b/sw.js
-index 397ed13..51afd5f 100644
---- a/sw.js
-+++ b/sw.js
-@@ -1,7 +1,7 @@
- // Minimal service worker — exists mainly so Chrome/Android recognizes this
- // page as an installable app (a real "Install app" prompt instead of a
- // plain bookmark). It caches only the small app-shell files, not the video.
--const CACHE_NAME = 'meditouch-shell-v46';
-+const CACHE_NAME = 'meditouch-shell-v47';
- const SHELL_FILES = [
-   './index.html',
-   './style.css',
+// ============================================================
+// script.js — all rendering logic and interactivity.
+// Reads content from content-data.js (CONDITIONS, TREATMENTS,
+// DOCTOR_BIO, EDUCATION, VIDEOS, TESTIMONIALS, REVIEWS) and
+// interface config from data.js (ICONS, UI, NAV).
+// ============================================================
+
+// tf() reads a flat CMS-style field: obj.field_en / field_bm / field_zh,
+// falling back to English if the current language's value is blank.
+function tf(obj, field){
+  return obj[field + '_' + currentLang] || obj[field + '_en'] || '';
+}
+
+// Cards are rendered as tappable <div role="button" onclick=...> rather than
+// real <button> elements (they hold mixed inline markup), so browsers won't
+// activate them from a keyboard on their own. This makes Enter/Space behave
+// the same as a click for anything marked role="button", covering every
+// info/video/related card in one place instead of a handler per card.
+document.addEventListener('keydown', (e)=>{
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('[role="button"]');
+  if(!el) return;
+  e.preventDefault();
+  el.click();
+});
+
+const navList = document.getElementById('navList');
+// Nav items that can be switched off from the CMS (currently just
+// Testimonials) map their NAV id to the flag content-loader.js sets from
+// the saved CMS data. Checked fresh on every render so a live toggle
+// (Save in the admin panel -> next content refresh here) hides/shows the
+// nav item and bottom-nav item without needing a full page reload.
+function isNavItemEnabled(id){
+  if(id === 'testimonials') return TESTIMONIALS_ENABLED !== false;
+  return true;
+}
+function renderNav(){
+  navList.innerHTML = '';
+  NAV.forEach(item=>{
+    if(!isNavItemEnabled(item.id)) return;
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn' + (item.id==='home' ? ' active' : '');
+    btn.dataset.target = item.id;
+    btn.innerHTML = `<span class="ico">${svgIcon(item.icon,22)}</span><span>${L(item.label)}</span>`;
+    btn.onclick = ()=>showPanel(item.id);
+    navList.appendChild(btn);
+  });
+}
+renderNav();
+
+function showPanel(id, navOverrideId){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.dataset.panel===id));
+  const navId = navOverrideId || id;
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.target===navId));
+  document.querySelectorAll('.bottom-nav-item').forEach(b=>b.classList.toggle('active', b.dataset.bnTarget===navId));
+  document.getElementById('content').scrollTop = 0;
+  closeSidebarDrawer();
+}
+
+/* ---------------- MOBILE SIDEBAR DRAWER ---------------- */
+function openSidebarDrawer(){
+  document.querySelector('.sidebar').classList.add('open');
+  document.getElementById('sidebarBackdrop').classList.add('show');
+}
+function closeSidebarDrawer(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebarBackdrop').classList.remove('show');
+}
+document.getElementById('hamburgerBtn').onclick = ()=>{
+  const sb = document.querySelector('.sidebar');
+  sb.classList.contains('open') ? closeSidebarDrawer() : openSidebarDrawer();
+};
+document.getElementById('sidebarBackdrop').onclick = closeSidebarDrawer;
+
+/* ---------------- BOTTOM NAV BAR (mobile-app style, all sections) ---------------- */
+const bottomNav = document.getElementById('bottomNav');
+function renderBottomNav(){
+  bottomNav.innerHTML = '';
+  NAV.forEach(item=>{
+    if(!isNavItemEnabled(item.id)) return;
+    const btn = document.createElement('button');
+    btn.className = 'bottom-nav-item' + (item.id==='home' ? ' active' : '');
+    btn.dataset.bnTarget = item.id;
+    btn.onclick = ()=>showPanel(item.id);
+    btn.innerHTML = `<span class="bn-ico">${svgIcon(item.icon,20)}</span><span class="bn-label">${L(item.label)}</span>`;
+    bottomNav.appendChild(btn);
+  });
+}
+renderBottomNav();
+
+/* ---------------- PUBLISHED FILTER + TWO-WAY LINKS ----------------
+   An item only shows on the site once it has an ID, an English title and
+   some description text. Half-finished drafts saved in the CMS stay hidden
+   until they are filled in.
+
+   Links between conditions and treatments are two-way automatically: a
+   condition lists a treatment if EITHER side names the other in "related".
+   So the CMS only needs to be ticked on one side and both pages agree. */
+function isPublished(it){
+  return !!(it && it.id && (it.title_en||'').trim() && ((it.desc_en||'').trim() || (it.overview_en||'').trim()));
+}
+function relIds(it){
+  return (it.related||'').split(',').map(x=>x.trim()).filter(Boolean);
+}
+function relatedTreatmentsOf(c){
+  return TREATMENTS.filter(t => isPublished(t) && (relIds(c).includes(t.id) || relIds(t).includes(c.id)));
+}
+function relatedConditionsOf(t){
+  return CONDITIONS.filter(c => isPublished(c) && (relIds(t).includes(c.id) || relIds(c).includes(t.id)));
+}
+
+/* ---------------- CONDITIONS ---------------- */
+const conditionsGrid = document.getElementById('conditionsGrid');
+function renderConditions(){
+  conditionsGrid.innerHTML = '';
+  CONDITIONS.filter(isPublished).forEach(c=>{
+    conditionsGrid.innerHTML += `
+      <div class="info-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
+        <div class="info-ico" style="background:${c.color};color:#fff;">${svgIcon(c.icon,24)}</div>
+        <span class="pill">${tf(c,'tag')}</span>
+        <h3>${tf(c,'title')}</h3>
+        <p>${tf(c,'desc')}</p>
+      </div>`;
+  });
+}
+renderConditions();
+
+/* ---------------- TREATMENTS ---------------- */
+const treatmentsGrid = document.getElementById('treatmentsGrid');
+function renderTreatments(){
+  treatmentsGrid.innerHTML = '';
+  TREATMENTS.filter(isPublished).forEach(t=>{
+    treatmentsGrid.innerHTML += `
+      <div class="info-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
+        <div class="info-ico" style="background:${t.color};color:#fff;">${svgIcon(t.icon,24)}</div>
+        <span class="pill">${tf(t,'tag')}</span>
+        <h3>${tf(t,'title')}</h3>
+        <p>${tf(t,'desc')}</p>
+      </div>`;
+  });
+}
+renderTreatments();
+
+/* ---------------- LOOKUPS + DETAIL PAGE RENDERING ---------------- */
+const conditionsById = Object.fromEntries(CONDITIONS.map(c=>[c.id,c]));
+const treatmentsById = Object.fromEntries(TREATMENTS.map(t=>[t.id,t]));
+
+function tfArr(obj, field){
+  return obj[field + '_' + currentLang] || obj[field + '_en'] || [];
+}
+function listHtml(arr, iconType){
+  // iconType: 'check' for symptom/cause lists, 'num' for step lists
+  return `<ul class="detail-list">${(arr||[]).map((it,i)=>`
+    <li>${iconType==='num'
+        ? `<span class="num">${i+1}</span>`
+        : `<span class="check">${svgIcon('check',16)}</span>`}
+      <span>${it}</span>
+    </li>`).join('')}</ul>`;
+}
+
+let lastDetail = {type:null, id:null};
+
+function showConditionDetail(id){
+  const c = conditionsById[id];
+  if(!c) return;
+  lastDetail = {type:'condition', id};
+  const relTreatments = relatedTreatmentsOf(c);
+  const relatedHtml = relTreatments.map(t=>{
+    return `<div class="related-card" tabindex="0" role="button" onclick="showTreatmentDetail('${t.id}')">
+      <div class="related-ico" style="background:${t.color};">${svgIcon(t.icon,20)}</div>
+      <div><h4>${tf(t,'title')}</h4><span>${L(UI.treatmentOption)}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('conditionDetailBody').innerHTML = `
+    <div class="detail-head">
+      <div class="detail-ico" style="background:${c.color};">${svgIcon(c.icon,32)}</div>
+      <div><div class="detail-tag">${tf(c,'tag')}</div><h1>${tf(c,'title')}</h1></div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-card"><h3>${L(UI.overview)}</h3><p>${tf(c,'overview')}</p></div>
+        <div class="detail-card"><h3>${L(UI.commonSymptoms)}</h3>${listHtml(tfArr(c,'symptoms'))}</div>
+        <div class="detail-card"><h3>${L(UI.commonCauses)}</h3>${listHtml(tfArr(c,'causes'))}</div>
+        <div class="detail-card"><h3>${L(UI.howDiagnosed)}</h3><p>${tf(c,'diagnosis')}</p></div>
+      </div>
+      <div>
+        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relTreatments.length>1?UI.relatedTreatments:UI.relatedTreatment)}</h3>
+        ${relatedHtml}
+        <div class="cta-card" style="margin-top:16px;">
+          <p>${L(UI.questionsAboutCondition)}</p>
+          <button class="submit-btn" onclick="showPanel('appointment')">${L(UI.bookConsultation)}</button>
+        </div>
+      </div>
+    </div>`;
+  showPanel('condition-detail', 'conditions');
+}
+
+function showTreatmentDetail(id){
+  const t = treatmentsById[id];
+  if(!t) return;
+  lastDetail = {type:'treatment', id};
+  const relConditions = relatedConditionsOf(t);
+  const relatedHtml = relConditions.map(c=>{
+    return `<div class="related-card" tabindex="0" role="button" onclick="showConditionDetail('${c.id}')">
+      <div class="related-ico" style="background:${c.color};">${svgIcon(c.icon,20)}</div>
+      <div><h4>${tf(c,'title')}</h4><span>${L(UI.conditionTreated)}</span></div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('treatmentDetailBody').innerHTML = `
+    <div class="detail-head">
+      <div class="detail-ico" style="background:${t.color};">${svgIcon(t.icon,32)}</div>
+      <div><div class="detail-tag">${tf(t,'tag')}</div><h1>${tf(t,'title')}</h1></div>
+    </div>
+    <div class="detail-grid">
+      <div>
+        <div class="detail-card"><h3>${L(UI.overview)}</h3><p>${tf(t,'overview')}</p></div>
+        <div class="detail-card"><h3>${L(UI.howItWorks)}</h3>${listHtml(tfArr(t,'steps'), 'num')}</div>
+        <div class="detail-card"><h3>${L(UI.benefits)}</h3>${listHtml(tfArr(t,'benefits'))}</div>
+        <div class="detail-card"><h3>${L(UI.recovery)}</h3><p>${tf(t,'recovery')||''}</p></div>
+      </div>
+      <div>
+        <h3 style="color:var(--navy-900);font-size:15px;margin:0 0 10px;">${L(relConditions.length>1?UI.conditionsThisTreatsPlural:UI.conditionsThisTreats)}</h3>
+        ${relatedHtml}
+        <div class="cta-card" style="margin-top:16px;">
+          <p>${L(UI.curiousAboutTreatment)}</p>
+          <button class="submit-btn" onclick="showPanel('appointment')">${L(UI.bookConsultation)}</button>
+        </div>
+      </div>
+    </div>`;
+  showPanel('treatment-detail', 'treatments');
+}
+
+/* ---------------- VIDEOS ---------------- */
+const SAMPLE_VIDEO_URL = 'https://www.w3schools.com/html/mov_bbb.mp4';
+const videoGrid = document.getElementById('videoGrid');
+function renderVideos(){
+  videoGrid.innerHTML = '';
+  VIDEOS.forEach(v=>{
+    const title = tf(v,'title');
+    videoGrid.innerHTML += `
+      <div class="video-card" tabindex="0" role="button" onclick="openVideo('${v.file}', '${title.replace(/'/g,"\\'")}')">
+        <div class="video-thumb"><div class="play-circle" style="color:var(--navy-900);">${svgIcon('play',22)}</div><span class="duration">${v.length}</span></div>
+        <div class="video-info"><h4>${title}</h4><span>${L(UI.patientEducationSeries)}</span></div>
+      </div>`;
+  });
+}
+renderVideos();
+
+function getYouTubeId(url){
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{6,})/);
+  return m ? m[1] : null;
+}
+
+function openVideo(url, title){
+  const modal = document.getElementById('videoModal');
+  const wrap = document.getElementById('modalVideoWrap');
+  const fallback = document.getElementById('modalYtFallback');
+  const ytId = getYouTubeId(url);
+
+  if(ytId){
+    const origin = (location.protocol === 'http:' || location.protocol === 'https:') ? `&origin=${encodeURIComponent(location.origin)}` : '';
+    wrap.innerHTML = `<iframe src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0${origin}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    fallback.href = `https://www.youtube.com/watch?v=${ytId}`;
+    fallback.style.display = 'flex';
+  } else {
+    wrap.innerHTML = `<video id="modalVideo" controls playsinline preload="auto" src="${url}"></video>`;
+    fallback.style.display = 'none';
+    const videoEl = document.getElementById('modalVideo');
+    // Try to autoplay (allowed since this runs from a real click); if the
+    // browser blocks it, the video still shows its first frame instead of
+    // staying on a blank black box, and the visible controls let the
+    // person press play themselves.
+    const tryPlay = ()=> videoEl.play().catch(()=>{});
+    videoEl.addEventListener('loadeddata', tryPlay, { once: true });
+    tryPlay();
+  }
+  document.getElementById('modalVideoTitle').textContent = title;
+  modal.classList.add('show');
+}
+function closeVideoModal(){
+  const modal = document.getElementById('videoModal');
+  document.getElementById('modalVideoWrap').innerHTML = '';
+  document.getElementById('modalYtFallback').style.display = 'none';
+  modal.classList.remove('show');
+}
+
+/* ---------------- EDUCATION ---------------- */
+const educationGrid = document.getElementById('educationGrid');
+function renderEducation(){
+  educationGrid.innerHTML = '';
+  EDUCATION.forEach(e=>{
+    educationGrid.innerHTML += `
+      <div class="info-card">
+        <div class="info-ico" style="background:${e.color};color:#fff;">${svgIcon(e.icon,24)}</div>
+        <span class="pill">${tf(e,'tag')}</span>
+        <h3>${tf(e,'title')}</h3>
+        <p>${tf(e,'desc')}</p>
+      </div>`;
+  });
+}
+renderEducation();
+
+/* ---------------- TESTIMONIALS ---------------- */
+const testimonialGrid = document.getElementById('testimonialGrid');
+function renderTestimonials(){
+  testimonialGrid.innerHTML = '';
+  TESTIMONIALS.forEach(t=>{
+    const initials = t.name.split(' ').map(w=>w[0]).join('');
+    testimonialGrid.innerHTML += `
+      <div class="test-card">
+        <div class="avatar" style="background:${t.color}">${initials}</div>
+        <div>
+          <div class="test-name">${t.name}</div>
+          <div class="test-meta">${tf(t,'meta')}</div>
+          <div class="test-quote">"${tf(t,'quote')}"</div>
+        </div>
+      </div>`;
+  });
+}
+renderTestimonials();
+
+/* ---------------- REVIEWS ---------------- */
+const reviewGrid = document.getElementById('reviewGrid');
+function renderReviews(){
+  reviewGrid.innerHTML = '';
+  REVIEWS.forEach(r=>{
+    const initials = r.name.split(' ').map(w=>w[0]).join('');
+    reviewGrid.innerHTML += `
+      <div class="test-card">
+        <div class="avatar" style="background:${r.color}">${initials}</div>
+        <div>
+          <div class="test-name">${r.name}</div>
+          <div class="stars">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+          <div class="test-quote">"${tf(r,'quote')}"</div>
+        </div>
+      </div>`;
+  });
+}
+renderReviews();
+
+/* ---------------- DOCTOR BIO (from content-data.js, CMS-editable) ---------------- */
+function renderDoctorBio(){
+  const b = DOCTOR_BIO;
+  if(!b) return;
+  const credLineEls = document.querySelectorAll('[data-doctor="credLine"]');
+  credLineEls.forEach(el => el.textContent = tf(b,'credLine'));
+
+  const bioEls = document.querySelectorAll('[data-doctor="bio"]');
+  bioEls.forEach(el => el.textContent = tf(b,'bio'));
+
+  const credListEl = document.getElementById('doctorCredList');
+  if(credListEl){
+    credListEl.innerHTML = (b.credentials||[]).map(c => `<div class="cred-item"><span class="cred-dot"></span> <span>${tf(c,'text')}</span></div>`).join('');
+  }
+
+  const specTagsEl = document.getElementById('doctorSpecTags');
+  if(specTagsEl){
+    specTagsEl.innerHTML = (b.specialties||[]).map(s => `<div class="spec-tag">${tf(s,'text')}</div>`).join('');
+  }
+
+  if(b.social){
+    const ig = document.getElementById('socialInstagram');
+    const fb = document.getElementById('socialFacebook');
+    const li = document.getElementById('socialLinkedin');
+    if(ig && b.social.instagram) ig.href = b.social.instagram;
+    if(fb && b.social.facebook) fb.href = b.social.facebook;
+    if(li && b.social.linkedin) li.href = b.social.linkedin;
+  }
+}
+renderDoctorBio();
+
+/* ---------------- WHATSAPP QR (real, scannable) ---------------- */
+const WHATSAPP_NUMBER = '60124775257'; // Dr Chandran Clinic WhatsApp: +60 12-477 5257
+const WHATSAPP_MESSAGE = "Good Day, I would like to book an appointment. Could you please assist me with the available dates and times? Thank you.";
+const WHATSAPP_LINK = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`;
+const WHATSAPP_QR_IMG = `https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=8&data=${encodeURIComponent(WHATSAPP_LINK)}`;
+
+document.getElementById('waQrImg').src = WHATSAPP_QR_IMG;
+document.getElementById('qrPageImg').src = WHATSAPP_QR_IMG;
+document.getElementById('waOpenBtn').href = WHATSAPP_LINK;
+
+/* ---------------- LIVE CLOCK ---------------- */
+function tick(){
+  const now = new Date();
+  const locale = currentLang === 'bm' ? 'ms-MY' : currentLang === 'zh' ? 'zh-CN' : undefined;
+  const time = now.toLocaleTimeString(locale, {hour:'2-digit', minute:'2-digit'});
+  const date = now.toLocaleDateString(locale, {month:'short', day:'numeric', year:'numeric'}) + ' | ' + now.toLocaleDateString(locale, {weekday:'long'});
+  document.getElementById('clockTime').textContent = time;
+  document.getElementById('clockDate').textContent = date;
+}
+tick(); setInterval(tick, 1000*30);
+
+/* ---------------- LANGUAGE SWITCHING ---------------- */
+function setLanguage(lang){
+  if(lang !== 'en' && lang !== 'bm' && lang !== 'zh') return;
+  currentLang = lang;
+
+  document.querySelectorAll('.lang-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.lang === lang);
+  });
+
+  applyUI();
+  renderNav();
+  renderBottomNav();
+  renderConditions();
+  renderTreatments();
+  renderEducation();
+  renderVideos();
+  renderTestimonials();
+  renderReviews();
+  renderDoctorBio();
+  tick();
+  if(document.getElementById('announcementPopup').classList.contains('show')) renderPopupContent();
+
+  // Re-apply the correct active nav highlight + panel after re-rendering nav buttons
+  const activePanel = document.querySelector('.panel.active');
+  const activePanelId = activePanel ? activePanel.dataset.panel : 'home';
+  if(activePanelId === 'condition-detail' && lastDetail.type === 'condition'){
+    showConditionDetail(lastDetail.id);
+  } else if(activePanelId === 'treatment-detail' && lastDetail.type === 'treatment'){
+    showTreatmentDetail(lastDetail.id);
+  } else {
+    showPanel(activePanelId);
+  }
+}
+document.querySelectorAll('.lang-btn').forEach(b=>{
+  b.onclick = ()=> setLanguage(b.dataset.lang);
+});
+/* ---------------- SPLASH SCREEN ---------------- */
+const splash = document.getElementById('splashScreen');
+(function(){
+  const enterBtn = document.getElementById('splashEnterBtn');
+  function dismissSplash(){
+    // The splash is reused as the idle/attract screen (see below), so its
+    // own 'hide' class — not a one-shot flag — has to be the source of
+    // truth for "already dismissed", otherwise it can only ever be
+    // dismissed once per page load and stays stuck after the first
+    // idle-reset brings it back.
+    if(splash.classList.contains('hide')) return;
+    splash.classList.add('hide');
+    armIdleReset();
+  }
+  // Waits for an explicit tap — either the Enter button or anywhere on the splash.
+  enterBtn.addEventListener('click', dismissSplash);
+  splash.addEventListener('click', dismissSplash);
+})();
+
+/* ---------------- IDLE AUTO-RESET (kiosk attract screen) ----------------
+   This runs on a shared clinic touchscreen, not a personal device — if it's
+   left on whatever page the last patient was reading, the next patient
+   walks up to a stranger's browsing instead of a fresh start. After a
+   stretch of no taps, quietly return to Home and bring the splash back as
+   an idle/attract screen, the way kiosk software normally behaves. A video
+   held open in the lightbox postpones the reset instead of cutting it off. */
+const IDLE_RESET_MS = 90 * 1000;
+let idleResetTimer = null;
+function armIdleReset(){
+  clearTimeout(idleResetTimer);
+  if(splash.classList.contains('hide')){
+    idleResetTimer = setTimeout(triggerIdleReset, IDLE_RESET_MS);
+  }
+}
+function triggerIdleReset(){
+  const videoOpen = document.getElementById('videoModal').classList.contains('show');
+  if(videoOpen){ armIdleReset(); return; }
+  closeVideoModal();
+  closeAnnouncementPopup();
+  closeSidebarDrawer();
+  showPanel('home');
+  splash.classList.remove('hide');
+}
+['touchstart','mousedown','keydown'].forEach(evt=>{
+  document.addEventListener(evt, armIdleReset, {passive:true});
+});
+
+/* ---------------- ANNOUNCEMENT POPUP ----------------
+   CMS-editable (Admin → Announcement Popup + Photos & Logo → Popup Image):
+   an image, title, message, and an optional button/link. content-loader.js's
+   loadPopup() fills POPUP from /api/content?section=popup and then calls
+   maybeShowPopup() once every section has loaded. Shown at most once per
+   browser session (sessionStorage), gated by the CMS on/off switch and an
+   optional start/end date window. */
+let POPUP = {
+  enabled:false, startDate:'', endDate:'', position:'center', width:420, height:'',
+  backgroundColor:'#0b1e38', textColor:'',
+  borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none',
+  closeButtonPosition:'outside', closeButtonColor:'#ffffff', closeButtonIconColor:'#0a2647', closeButtonSize:44,
+  animationStyle:'none', animationDuration:300, reappear:'session',
+  showImage:true, imageSize:'medium',
+  showTitle:true, showMessage:true, textSize:'medium',
+  showButtonText:true, showButtonLink:true, buttonLink:''
+};
+const POPUP_SESSION_KEY = 'irsabahPopupShown';
+
+// Local (not UTC) calendar date as 'YYYY-MM-DD', so the start/end date
+// fields match what the clinic actually means by "today" here in Sabah.
+function todayLocalISO(){
+  const d = new Date();
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+}
+function popupWithinDateWindow(){
+  const today = todayLocalISO();
+  if(POPUP.startDate && today < POPUP.startDate) return false;
+  if(POPUP.endDate && today > POPUP.endDate) return false;
+  return true;
+}
+// Applies one of the CMS "Small/Medium/Large(/Extra Large)" size choices as
+// a CSS class (medium = the original default look, so it needs no class of
+// its own).
+function applySizeClass(el, size){
+  el.classList.remove('size-small', 'size-large', 'size-xlarge');
+  if(size === 'small') el.classList.add('size-small');
+  if(size === 'large') el.classList.add('size-large');
+  if(size === 'xlarge') el.classList.add('size-xlarge');
+}
+const POPUP_POSITION_CLASSES = [
+  'pos-top-left', 'pos-top-center', 'pos-top-right',
+  'pos-middle-left', 'pos-center', 'pos-middle-right',
+  'pos-bottom-left', 'pos-bottom-center', 'pos-bottom-right'
+];
+// Moves the popup to one of 9 screen positions (the dimmed background
+// always still covers the whole page). "center" needs no class since
+// that's the overlay's own default alignment.
+function applyPopupPosition(overlay, position){
+  overlay.classList.remove.apply(overlay.classList, POPUP_POSITION_CLASSES);
+  if(position && position !== 'center') overlay.classList.add('pos-' + position);
+}
+// Maps a CMS "Animation Style" choice to its @keyframes name (see style.css)
+// for the given direction. "none" (the default — today's instant, no-motion
+// appearance) intentionally has no entry, since callers check for 'none'
+// themselves before ever asking for a name.
+const POPUP_ANIMATION_NAMES = {
+  fade: {in:'popupFadeIn', out:'popupFadeOut'},
+  'slide-down': {in:'popupSlideDownIn', out:'popupSlideDownOut'},
+  'slide-up': {in:'popupSlideUpIn', out:'popupSlideUpOut'},
+  zoom: {in:'popupZoomIn', out:'popupZoomOut'}
+};
+function popupAnimationName(style, direction){
+  const entry = POPUP_ANIMATION_NAMES[style];
+  return entry ? entry[direction] : '';
+}
+// How often the popup is allowed to reappear to the same visitor.
+// "session" (the default, matching the original behavior) uses
+// sessionStorage — a fresh browser tab always sees it again. "always" skips
+// storage entirely. "daily"/"once" persist across tabs via localStorage.
+const POPUP_LOCAL_KEY = 'irsabahPopupLastShown';
+function popupAlreadyShown(){
+  const mode = POPUP.reappear || 'session';
+  try {
+    if(mode === 'always') return false;
+    if(mode === 'session') return sessionStorage.getItem(POPUP_SESSION_KEY) === '1';
+    if(mode === 'once') return localStorage.getItem(POPUP_LOCAL_KEY) === '1';
+    if(mode === 'daily') return localStorage.getItem(POPUP_LOCAL_KEY) === todayLocalISO();
+  } catch(e){}
+  return false;
+}
+function popupMarkShown(){
+  const mode = POPUP.reappear || 'session';
+  try {
+    if(mode === 'session') sessionStorage.setItem(POPUP_SESSION_KEY, '1');
+    else if(mode === 'once') localStorage.setItem(POPUP_LOCAL_KEY, '1');
+    else if(mode === 'daily') localStorage.setItem(POPUP_LOCAL_KEY, todayLocalISO());
+  } catch(e){}
+}
+function renderPopupContent(){
+  const box = document.querySelector('.popup-box');
+  const titleEl = document.getElementById('popupTitle');
+  const msgEl = document.getElementById('popupMessage');
+  const img = document.getElementById('popupImage');
+  const btn = document.getElementById('popupActionBtn');
+
+  const overlay = document.getElementById('announcementPopup');
+  applyPopupPosition(overlay, POPUP.position);
+
+  // Width is an exact pixel value from the CMS. Height defaults to
+  // "automatic" (blank), following however much content ends up visible
+  // below; the .popup-scroll max-height/overflow rule in style.css keeps
+  // it from ever growing taller than the screen either way, and also caps
+  // a manually-set fixed height on a short screen.
+  box.style.maxWidth = (Number(POPUP.width) || 420) + 'px';
+  const scrollEl = box.querySelector('.popup-scroll');
+  scrollEl.style.height = POPUP.height ? (Number(POPUP.height) + 'px') : '';
+
+  // Colors, border, corner radius and shadow are all applied inline so they
+  // override the CSS defaults only when the CMS actually sets them — a
+  // freshly-added popup with these fields at their defaults looks pixel-
+  // identical to the original hard-coded navy box.
+  box.style.backgroundColor = POPUP.backgroundColor || '#0b1e38';
+  const radius = (POPUP.borderRadius === '' || POPUP.borderRadius == null) ? 18 : Number(POPUP.borderRadius);
+  box.style.setProperty('--popup-radius', radius + 'px');
+  box.style.borderRadius = radius + 'px';
+  if(POPUP.borderStyle && POPUP.borderStyle !== 'none'){
+    box.style.border = (Number(POPUP.borderWidth) || 2) + 'px ' + POPUP.borderStyle + ' ' + (POPUP.borderColor || '#d4a94a');
+  } else {
+    box.style.border = 'none';
+  }
+  if(POPUP.shadowStyle === 'soft'){
+    box.style.boxShadow = '0 10px 40px rgba(0,0,0,0.35)';
+  } else if(POPUP.shadowStyle === 'strong'){
+    box.style.boxShadow = '0 20px 60px rgba(0,0,0,0.55)';
+  } else {
+    box.style.boxShadow = 'none';
+  }
+
+  // Close button: position (outside the box, same look as before this
+  // feature existed; inside the box; or hidden entirely — visitors can
+  // still dismiss a hidden one by clicking the dimmed area around the box,
+  // wired up once below), plus its own color/icon color/size.
+  const closeBtn = overlay.querySelector('.modal-close');
+  if(POPUP.closeButtonPosition === 'hidden'){
+    closeBtn.style.display = 'none';
+  } else {
+    closeBtn.style.display = '';
+    if(POPUP.closeButtonPosition === 'inside'){
+      closeBtn.style.top = '12px';
+      closeBtn.style.right = '12px';
+    } else {
+      closeBtn.style.top = '';
+      closeBtn.style.right = '';
+    }
+  }
+  const closeSize = (POPUP.closeButtonSize === '' || POPUP.closeButtonSize == null) ? 44 : Number(POPUP.closeButtonSize);
+  closeBtn.style.width = closeSize + 'px';
+  closeBtn.style.height = closeSize + 'px';
+  closeBtn.style.fontSize = Math.max(14, Math.round(closeSize * 0.36)) + 'px';
+  closeBtn.style.background = POPUP.closeButtonColor || '#ffffff';
+  closeBtn.style.color = POPUP.closeButtonIconColor || '#0a2647';
+
+  // Entrance animation. "none" (the default) leaves the box with no
+  // animation property at all — the exact original instant appearance —
+  // rather than a 0ms/"none" animation, which some browsers still flash.
+  const animStyle = POPUP.animationStyle || 'none';
+  const animDuration = Number(POPUP.animationDuration) || 300;
+  if(animStyle === 'none'){
+    box.style.animation = '';
+  } else {
+    // Clear first and force a reflow so re-showing the popup with the same
+    // style (e.g. testing it twice in a row) restarts the animation instead
+    // of silently no-op'ing.
+    box.style.animation = 'none';
+    void box.offsetWidth;
+    box.style.animation = popupAnimationName(animStyle, 'in') + ' ' + animDuration + 'ms ease';
+  }
+
+  titleEl.textContent = tf(POPUP, 'title');
+  const wantTitle = (POPUP.showTitle !== false) && titleEl.textContent;
+  titleEl.style.display = wantTitle ? '' : 'none';
+  // Blank Text Color means "use the built-in look" (white title, softer
+  // light-blue message from style.css) — only an explicit color overrides
+  // both, so a popup nobody has touched this field on looks pixel-identical
+  // to before this feature existed.
+  titleEl.style.color = POPUP.textColor || '';
+  applySizeClass(titleEl, POPUP.textSize);
+
+  msgEl.textContent = tf(POPUP, 'message');
+  const wantMessage = (POPUP.showMessage !== false) && msgEl.textContent;
+  msgEl.style.display = wantMessage ? '' : 'none';
+  // The message reuses the same chosen text color but softened (lighter
+  // opacity), rather than exposing a second color picker for one field
+  // that visually only ever wants to read as "less prominent than the title".
+  msgEl.style.color = POPUP.textColor || '';
+  msgEl.style.opacity = POPUP.textColor ? '0.78' : '';
+  applySizeClass(msgEl, POPUP.textSize);
+
+  const wantImage = (POPUP.showImage !== false) && img.getAttribute('src');
+  img.style.display = wantImage ? 'block' : 'none';
+  applySizeClass(img, POPUP.imageSize);
+
+  const btnText = tf(POPUP, 'buttonText');
+  const wantButtonText = (POPUP.showButtonText !== false) && btnText;
+  if(wantButtonText){
+    btn.textContent = btnText;
+    const wantLink = (POPUP.showButtonLink !== false) && POPUP.buttonLink;
+    if(wantLink){
+      btn.href = POPUP.buttonLink;
+      btn.style.pointerEvents = '';
+      btn.style.opacity = '';
+    } else {
+      // Text-only "badge" — visible but not clickable (no link set, or the
+      // link switch is off), e.g. a plain "Limited slots" label.
+      btn.removeAttribute('href');
+      btn.style.pointerEvents = 'none';
+    }
+    btn.style.display = '';
+  } else {
+    btn.style.display = 'none';
+  }
+
+  // If the whole text/button area is empty (image-only popup), collapse
+  // its padding and round the image's bottom corners to match the box,
+  // instead of leaving an empty gap under the photo.
+  const body = document.querySelector('.popup-body');
+  const bodyHasContent = wantTitle || wantMessage || wantButtonText;
+  body.style.display = bodyHasContent ? '' : 'none';
+  img.style.borderRadius = bodyHasContent ? '' : 'var(--popup-radius, 18px)';
+}
+function maybeShowPopup(){
+  if(!POPUP.enabled || !popupWithinDateWindow()) return;
+  if(popupAlreadyShown()) return;
+  // Don't compete with the splash screen — wait until it's dismissed.
+  if(!splash.classList.contains('hide')){
+    splash.addEventListener('click', () => setTimeout(maybeShowPopup, 400), { once:true });
+    return;
+  }
+  renderPopupContent();
+  document.getElementById('announcementPopup').classList.add('show');
+  popupMarkShown();
+}
+function closeAnnouncementPopup(){
+  const overlay = document.getElementById('announcementPopup');
+  const box = overlay.querySelector('.popup-box');
+  const animStyle = POPUP.animationStyle || 'none';
+  if(animStyle === 'none'){
+    overlay.classList.remove('show');
+    return;
+  }
+  // Play the matching exit animation, then actually hide once it finishes —
+  // same duration as the entrance so it feels symmetric.
+  const duration = Number(POPUP.animationDuration) || 300;
+  box.style.animation = 'none';
+  void box.offsetWidth;
+  box.style.animation = popupAnimationName(animStyle, 'out') + ' ' + duration + 'ms ease forwards';
+  setTimeout(() => { overlay.classList.remove('show'); box.style.animation = ''; }, duration);
+}
+// Clicking the dimmed area around the box (not the box itself) also closes
+// it — mainly so "Close Button Position: Hidden" never traps a visitor with
+// no way out. Checking e.target === overlay (not a descendant) means clicks
+// inside the box, including on the image/button, are unaffected.
+document.getElementById('announcementPopup').addEventListener('click', function(e){
+  if(e.target === this) closeAnnouncementPopup();
+});
+
+/* ---------------- PWA SERVICE WORKER REGISTRATION ---------------- */
+/* Only registers over https (or localhost) — browsers block service workers
+   on file:// pages entirely, so this quietly does nothing until the app is
+   actually hosted. That's expected, not an error. */
+if('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
