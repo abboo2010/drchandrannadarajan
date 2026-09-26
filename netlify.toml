@@ -22,3 +22,15 @@
   from = "/api/image"
   to = "/.netlify/functions/image"
   status = 200
+
+# The kiosk (touch-screen) app lives at /kiosk; the public website is the root index.html.
+# A rewrite (not a redirect) keeps the URL as /kiosk so the app's relative asset paths still resolve.
+[[redirects]]
+  from = "/kiosk"
+  to = "/kiosk.html"
+  status = 200
+
+[[redirects]]
+  from = "/kiosk/"
+  to = "/kiosk"
+  status = 301
