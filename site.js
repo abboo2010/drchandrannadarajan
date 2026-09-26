@@ -154,6 +154,34 @@ const X = {
   }
 };
 ['en','bm','zh'].forEach(l => Object.assign(T[l], X[l]));
+const Y = {
+  en:{ nav_doctor:'About the Doctor',
+    b_about:'About the Doctor', bs_about:'Board-certified expertise, patient-first care',
+    b_conditions:'Conditions We Treat', bs_conditions:'Tap a condition to learn about symptoms, causes, diagnosis and treatment options.',
+    b_treatments:'Treatments & Procedures', bs_treatments:'Image-guided procedures that treat the problem directly.',
+    b_videos:'Patient Education Videos', bs_videos:'Short, easy-to-understand explainers.',
+    b_contact:'Contact & Appointments', bs_contact:'Reach the clinic directly on WhatsApp.',
+    ab_more:'Read full profile', hc_more:'View all conditions', ht_more:'View all treatments',
+    cta_title:'Ready to book your consultation?', cta_text:'Message the clinic on WhatsApp — the fastest way to request an appointment.', cta_more:'Contact details' },
+  bm:{ nav_doctor:'Tentang Doktor',
+    b_about:'Tentang Doktor', bs_about:'Kepakaran bertauliah, keutamaan kepada pesakit',
+    b_conditions:'Keadaan Yang Kami Rawat', bs_conditions:'Ketik pada sesuatu keadaan untuk mengetahui gejala, punca, diagnosis dan pilihan rawatan.',
+    b_treatments:'Rawatan & Prosedur', bs_treatments:'Prosedur berpandukan imej yang merawat masalah secara terus.',
+    b_videos:'Video Pendidikan Pesakit', bs_videos:'Penerangan ringkas yang mudah difahami.',
+    b_contact:'Hubungi & Temujanji', bs_contact:'Hubungi klinik terus melalui WhatsApp.',
+    ab_more:'Baca profil penuh', hc_more:'Lihat semua keadaan', ht_more:'Lihat semua rawatan',
+    cta_title:'Bersedia untuk membuat temujanji?', cta_text:'Hantar mesej kepada klinik melalui WhatsApp — cara terpantas untuk memohon temujanji.', cta_more:'Butiran hubungan' },
+  zh:{ nav_doctor:'关于医生',
+    b_about:'关于医生', bs_about:'专业认证，以病患为先',
+    b_conditions:'我们治疗的疾病', bs_conditions:'点击疾病，了解症状、成因、诊断及治疗选择。',
+    b_treatments:'治疗与手术', bs_treatments:'影像引导手术直接针对病灶。',
+    b_videos:'患者教育视频', bs_videos:'简短易懂的讲解视频。',
+    b_contact:'联系与预约', bs_contact:'通过WhatsApp直接联系诊所。',
+    ab_more:'查看完整简介', hc_more:'查看全部疾病', ht_more:'查看全部治疗',
+    cta_title:'准备好预约就诊了吗？', cta_text:'通过WhatsApp向诊所发送信息——这是最快的预约方式。', cta_more:'联系方式' }
+};
+['en','bm','zh'].forEach(l => Object.assign(T[l], Y[l]));
+
 Object.assign(ICONS, {
   search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
   mail:'<rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="M3.5 7l8.5 6 8.5-6"/>'
@@ -185,7 +213,7 @@ function wireWhatsApp(){
 }
 
 /* ---------------- splash ---------------- */
-const splash = $('#splashScreen');
+const splash = $('#splashScreen') || { classList:{ contains:() => true, add(){}, remove(){} }, addEventListener(){} };
 function dismissSplash(){
   if(splash.classList.contains('hide')) return;
   splash.classList.add('hide');
@@ -194,6 +222,7 @@ function dismissSplash(){
   startSlider();
 }
 function initSplash(){
+  if(!$('#splashScreen')) return false;
   if(store.sget('irs_splash_seen') === '1' && !/[?&]splash=1/.test(location.search)){
     splash.classList.add('hide'); document.body.classList.remove('splash-open');
     return false;
@@ -234,9 +263,9 @@ function go(n){
   restart();
 }
 function restart(){ clearTimeout(timer); if(!started || hovering || document.hidden) return; timer = setTimeout(() => go(idx + 1), SLIDE_MS); }
-function startSlider(){ started = true; restart(); }
+function startSlider(){ started = true; if(slides.length) restart(); }
 function initSlider(){
-  const hero = $('#hero');
+  const hero = $('#hero'); if(!hero) return;
   slides = $$('.slide', hero);
   const dotsEl = $('#dots'); hero.style.setProperty('--dur', SLIDE_MS + 'ms');
   slides.forEach((_,i) => {
@@ -268,7 +297,7 @@ function renderHeroConditions(){
   const box = $('#heroConditions'); if(!box || typeof CONDITIONS === 'undefined') return;
   const picks = CONDITIONS.slice(0, 8);
   box.innerHTML = picks.map(c =>
-    `<a class="chip" href="#conditions"><span class="ico" style="background:${c.color || '#2f6fed'}">${svg(c.icon)}</span><span>${pick(c,'title')}</span></a>`
+    `<a class="chip" href="/conditions"><span class="ico" style="background:${c.color || '#2f6fed'}">${svg(c.icon)}</span><span>${pick(c,'title')}</span></a>`
   ).join('');
 }
 
@@ -309,6 +338,7 @@ const state = { condTag:'*', treatTag:'*', q:'' };
 const live = { doctor:null, testimonials:null, reviews:null, testiOn:false };
 
 function renderDoctor(){
+  if(!$('#docBio')) return;
   const bio = $('#docBio'), cred = $('#docCred'), extra = $('#docExtra');
   const d = live.doctor;
   if(d && d['bio_' + lang] && !/dummy/i.test(d['bio_en'] || '')){
@@ -342,7 +372,7 @@ function card(item, type){
     <span class="c-more">${T[lang].more}</span></button>`;
 }
 function renderConditions(){
-  if(typeof CONDITIONS === 'undefined') return;
+  if(typeof CONDITIONS === 'undefined' || !$('#condGrid')) return;
   renderFilters($('#condFilters'), CONDITIONS, 'condTag');
   const q = state.q.trim().toLowerCase();
   const list = CONDITIONS.filter(c => (state.condTag === '*' || c.tag_en === state.condTag) &&
@@ -351,20 +381,20 @@ function renderConditions(){
   $('#condEmpty').hidden = list.length > 0;
 }
 function renderTreatments(){
-  if(typeof TREATMENTS === 'undefined') return;
+  if(typeof TREATMENTS === 'undefined' || !$('#treatGrid')) return;
   renderFilters($('#treatFilters'), TREATMENTS, 'treatTag', 'Featured');
   const list = TREATMENTS.filter(t => state.treatTag === '*' || t.tag_en === state.treatTag);
   $('#treatGrid').innerHTML = list.map(t => card(t, 't')).join('');
 }
 function renderVideos(){
-  const grid = $('#videoGrid'); if(typeof VIDEOS === 'undefined') return;
+  const grid = $('#videoGrid'); if(!grid || typeof VIDEOS === 'undefined') return;
   // The bundled sample list points at "placeholder.mp4" — only real videos are shown.
   const real = VIDEOS.filter(v => v.file && !/placeholder/i.test(v.file));
   grid.innerHTML = real.map(v => `<button class="v-item" data-video="${v.file}"><span class="v-play"><span class="ico">${svg('play')}</span></span><span><b>${pick(v,'title')}</b><small>${v.length || ''}</small></span></button>`).join('');
 }
 const initial = n => (n || '?').trim().charAt(0).toUpperCase();
 function renderStories(){
-  const sec = $('#testimonials');
+  const sec = $('#testimonials'); if(!sec) return;
   const T1 = live.testiOn && live.testimonials && live.testimonials.length ? live.testimonials : [];
   const R1 = live.reviews && live.reviews.length ? live.reviews : [];
   const showRev = R1.length > 0;
@@ -376,7 +406,12 @@ function renderStories(){
   $('#revTrack').innerHTML = R1.map(r => { const n = Math.max(0, Math.min(5, +r.stars || 5));
     return `<figure class="quote" style="margin:0"><div class="stars" aria-label="${n} / 5">${'★'.repeat(n)}<span class="off">${'★'.repeat(5-n)}</span></div><p>${pick(r,'quote')}</p><figcaption class="q-who"><span class="q-av" style="background:${r.color||'#2f6fed'}">${initial(r.name)}</span><span><b>${r.name}</b></span></figcaption></figure>`; }).join('');
 }
-function renderAll(){ renderDoctor(); renderConditions(); renderTreatments(); renderVideos(); renderStories(); }
+function renderHome(){
+  const c = $('#homeConds'), t = $('#homeTreats');
+  if(c && typeof CONDITIONS !== 'undefined') c.innerHTML = CONDITIONS.slice(0, 6).map(x => card(x, 'c')).join('');
+  if(t && typeof TREATMENTS !== 'undefined') t.innerHTML = TREATMENTS.slice(0, 4).map(x => card(x, 't')).join('');
+}
+function renderAll(){ renderDoctor(); renderConditions(); renderTreatments(); renderVideos(); renderStories(); renderHome(); }
 
 /* ---------------- detail modal ---------------- */
 function findItem(type, id){ const arr = type === 'c' ? CONDITIONS : TREATMENTS; return arr.find(i => i.id === id); }
@@ -408,7 +443,7 @@ function initSections(){
       renderConditions(); renderTreatments();
     }
   });
-  $('#condSearch').addEventListener('input', e => { state.q = e.target.value; renderConditions(); });
+  const cs = $('#condSearch'); if(cs) cs.addEventListener('input', e => { state.q = e.target.value; renderConditions(); });
   $('#detailClose').addEventListener('click', closeDetail);
   $('#detailModal').addEventListener('click', e => { if(e.target.id === 'detailModal') closeDetail(); });
   document.addEventListener('keydown', e => { if(e.key === 'Escape' && !$('#detailModal').hidden) closeDetail(); });

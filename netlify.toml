@@ -34,3 +34,29 @@
   from = "/kiosk/"
   to = "/kiosk"
   status = 301
+
+# Clean URLs for the website pages (Netlify also does this automatically; explicit for safety)
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/conditions"
+  to = "/conditions.html"
+  status = 200
+
+[[redirects]]
+  from = "/treatments"
+  to = "/treatments.html"
+  status = 200
+
+[[redirects]]
+  from = "/videos"
+  to = "/videos.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
