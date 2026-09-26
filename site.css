@@ -420,14 +420,14 @@ body.modal-open{ overflow:hidden; }
 .main-nav a.active{ color:var(--gold-soft); background:rgba(255,255,255,.1); }
 
 /* inner-page banner */
-.page-banner{ position:relative; padding:calc(var(--hdr) + 64px) 0 64px; background:linear-gradient(180deg,var(--navy-900),var(--navy-800)); color:#fff; overflow:hidden; }
+.page-banner{ position:relative; padding:calc(var(--hdr) + 30px) 0 34px; background:linear-gradient(180deg,var(--navy-900),var(--navy-800)); color:#fff; overflow:hidden; }
 .banner-bg{ position:absolute; inset:0; background:url(/images/site/hero-bg.jpg) 70% center/cover; opacity:.55; }
 .banner-bg::after{ content:""; position:absolute; inset:0; background:linear-gradient(90deg,rgba(4,14,32,.92),rgba(4,14,32,.45)); }
 .banner-inner{ position:relative; }
-.crumbs{ display:flex; gap:10px; align-items:center; font-size:13.5px; color:#b9c6de; margin-bottom:18px; font-weight:600; }
+.crumbs{ display:flex; gap:10px; align-items:center; font-size:13.5px; color:#b9c6de; margin-bottom:10px; font-weight:600; }
 .crumbs a:hover{ color:var(--gold-soft); } .crumbs span:last-child{ color:var(--gold-soft); }
-.banner-title{ font-family:var(--serif); font-size:clamp(34px,5vw,60px); line-height:1.1; margin:0 0 12px; letter-spacing:-.4px; }
-.banner-sub{ margin:0; color:#c9d5ea; font-size:clamp(15px,1.6vw,19px); max-width:640px; }
+.banner-title{ font-family:var(--serif); font-size:clamp(26px,3vw,36px); line-height:1.15; margin:0 0 8px; letter-spacing:-.4px; }
+.banner-sub{ margin:0; color:#c9d5ea; font-size:clamp(14px,1.3vw,16px); max-width:640px; }
 .banner-inner > *{ animation:rise .8s cubic-bezier(.2,.7,.2,1) both; }
 .banner-inner > *:nth-child(2){ animation-delay:.08s; } .banner-inner > *:nth-child(3){ animation-delay:.16s; }
 .section.page-first{ padding-top:56px; }
@@ -449,4 +449,4 @@ div.page-first{ padding-top:0; } div.page-first > .section{ padding-top:56px; }
 .cta-actions{ display:flex; flex-wrap:wrap; gap:12px; }
 
 @media (max-width:1080px){ .teaser-grid{ grid-template-columns:1fr; gap:46px; } .teaser-photo{ max-width:320px; } }
-@media (max-width:720px){ .page-banner{ padding:calc(var(--hdr) + 40px) 0 44px; } .cta-band{ padding:44px 0; } }
+@media (max-width:720px){ .page-banner{ padding:calc(var(--hdr) + 22px) 0 26px; } .cta-band{ padding:44px 0; } }
