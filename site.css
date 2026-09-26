@@ -238,7 +238,7 @@ button{ font:inherit; cursor:pointer; }
 .section.dark{ background:linear-gradient(180deg,var(--navy-900),var(--navy-950)); color:#fff; overflow:hidden; }
 .dark-bg{ position:absolute; inset:0; background:url(images/site/hero-bg.jpg) center/cover; opacity:.35; }
 .section.dark .wrap{ position:relative; }
-.h2{ font-family:var(--serif); font-size:clamp(30px,4vw,50px); line-height:1.12; margin:0 0 16px; letter-spacing:-.4px; text-wrap:balance; color:var(--navy-800); }
+.h2{ font-family:var(--serif); font-size:clamp(26px,3vw,36px); line-height:1.12; margin:0 0 16px; letter-spacing:-.4px; text-wrap:balance; color:var(--navy-800); }
 .h2 em{ font-style:normal; color:var(--gold-deep); }
 .sec-head.light .h2, .section.dark .h2{ color:#fff; }
 .section.dark .h2 em, .sec-head.light .h2 em{ color:var(--gold-soft); }
