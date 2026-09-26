@@ -21,3 +21,11 @@
 ## Editing
 - Content (conditions, treatments, videos, bio) still comes from /admin.
 - Layout/text of pages: edit `build_site.py` and `src/partials/*.html`, run `python3 build_site.py`, then upload the regenerated .html files. (Or edit the .html files directly.)
+
+## Private preview password (Netlify Edge Function: netlify/edge-functions/gate.js)
+Website pages need a login while the doctor reviews. /kiosk, /admin and /api are NOT locked.
+Netlify -> Site configuration -> Environment variables:
+- SITE_PASSWORD = the password (required; without it the site stays locked)
+- SITE_USER = username (optional, default `preview`)
+- SITE_GATE = `off` to open the site to everyone (then Deploys -> Trigger deploy)
+Changing the password signs everyone out.
