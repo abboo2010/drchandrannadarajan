@@ -279,6 +279,7 @@ button{ font:inherit; cursor:pointer; }
 .tick-list li{ display:flex; gap:10px; align-items:flex-start; }
 .tick-list li::before{ content:"✓"; color:var(--gold-deep); font-weight:800; }
 .tick-list[hidden]{ display:none; }
+.cred + .tick-list{ margin:6px 0 16px; }
 .doc-actions{ display:flex; align-items:center; flex-wrap:wrap; gap:18px; }
 .social{ display:flex; gap:10px; }
 .social a, .foot-social a{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; background:var(--bg); color:var(--navy-800); border:1px solid var(--line); transition:background .2s, color .2s, transform .2s; }
