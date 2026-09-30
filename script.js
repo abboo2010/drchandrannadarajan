@@ -406,7 +406,7 @@ function renderDoctorBio(){
 
   const specTagsEl = document.getElementById('doctorSpecTags');
   if(specTagsEl){
-    specTagsEl.innerHTML = (b.specialties||[]).map(s => `<div class="spec-tag">${tf(s,'text')}</div>`).join('');
+    specTagsEl.innerHTML = (b.specialties||[]).concat(Array.isArray(b.focusExtra) ? b.focusExtra : []).map(s => `<div class="spec-tag">${tf(s,'text')}</div>`).join('');
   }
 
   if(b.social){

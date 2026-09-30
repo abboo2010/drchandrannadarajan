@@ -368,6 +368,7 @@
     display:block;object-fit:cover;object-position:top center;box-shadow:var(--shadow);
   }
   .cred-list{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .cred-under-qual{margin:8px 0 12px;}
   .cred-item{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--ink-600);}
   .cred-dot{width:6px;height:6px;border-radius:50%;background:var(--gold-500);margin-top:6px;flex:0 0 auto;}
   .spec-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}

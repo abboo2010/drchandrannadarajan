@@ -80,7 +80,7 @@ const UI = {
   watchVideoBtn: {en:'Watch Video', bm:'Tonton Video', zh:'观看视频'},
   learnMoreBtn: {en:'Learn More ›', bm:'Ketahui Lebih Lanjut ›', zh:'了解更多 ›'},
   doctorH1: {en:'Meet Your Doctor', bm:'Kenali Doktor Anda', zh:'认识您的医生'},
-  doctorSub: {en:'Board-certified expertise, patient-first care', bm:'Kepakaran bertauliah, keutamaan kepada pesakit', zh:'专业认证，以病患为先'},
+  doctorSub: {en:'Consultant Clinical &amp; Interventional Radiologist', bm:'Perunding Klinikal &amp; Radiologi Intervensi', zh:'临床顾问兼介入放射科医生'},
   doctorCredLine: {en:'Consultant Clinical &amp; Interventional Radiologist, MBBS, FRCR', bm:'Perunding Klinikal &amp; Radiologi Intervensi, MBBS, FRCR', zh:'临床顾问兼介入放射科医生，MBBS，FRCR'},
   doctorBio: {en:"Dr. Nadarajan has spent over two decades pioneering minimally invasive, image-guided treatments for tumors, vascular conditions, and fibroids — helping patients avoid open surgery wherever possible. (Dummy bio text — replace with the real profile.)",
     bm:"Dr. Nadarajan telah menghabiskan lebih dua dekad merintis rawatan invasif minimum berpandukan imej untuk ketumbuhan, keadaan vaskular, dan fibroid — membantu pesakit mengelakkan pembedahan terbuka apabila boleh. (Teks bio contoh — gantikan dengan profil sebenar.)",
