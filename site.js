@@ -156,7 +156,7 @@ const X = {
 ['en','bm','zh'].forEach(l => Object.assign(T[l], X[l]));
 const Y = {
   en:{ nav_doctor:'About the Doctor',
-    b_about:'About the Doctor', bs_about:'Board-certified expertise, patient-first care',
+    b_about:'About the Doctor', bs_about:UI.doctorRole.en,
     b_conditions:'Conditions We Treat', bs_conditions:'Tap a condition to learn about symptoms, causes, diagnosis and treatment options.',
     b_treatments:'Treatments & Procedures', bs_treatments:'Image-guided procedures that treat the problem directly.',
     b_videos:'Patient Education Videos', bs_videos:'Short, easy-to-understand explainers.',
@@ -164,7 +164,7 @@ const Y = {
     ab_more:'Read full profile', hc_more:'View all conditions', ht_more:'View all treatments',
     cta_title:'Ready to book your consultation?', cta_text:'Message the clinic on WhatsApp — the fastest way to request an appointment.', cta_more:'Contact details' },
   bm:{ nav_doctor:'Tentang Doktor',
-    b_about:'Tentang Doktor', bs_about:'Kepakaran bertauliah, keutamaan kepada pesakit',
+    b_about:'Tentang Doktor', bs_about:UI.doctorRole.bm,
     b_conditions:'Keadaan Yang Kami Rawat', bs_conditions:'Ketik pada sesuatu keadaan untuk mengetahui gejala, punca, diagnosis dan pilihan rawatan.',
     b_treatments:'Rawatan & Prosedur', bs_treatments:'Prosedur berpandukan imej yang merawat masalah secara terus.',
     b_videos:'Video Pendidikan Pesakit', bs_videos:'Penerangan ringkas yang mudah difahami.',
@@ -172,7 +172,7 @@ const Y = {
     ab_more:'Baca profil penuh', hc_more:'Lihat semua keadaan', ht_more:'Lihat semua rawatan',
     cta_title:'Bersedia untuk membuat temujanji?', cta_text:'Hantar mesej kepada klinik melalui WhatsApp — cara terpantas untuk memohon temujanji.', cta_more:'Butiran hubungan' },
   zh:{ nav_doctor:'关于医生',
-    b_about:'关于医生', bs_about:'专业认证，以病患为先',
+    b_about:'关于医生', bs_about:UI.doctorRole.zh,
     b_conditions:'我们治疗的疾病', bs_conditions:'点击疾病，了解症状、成因、诊断及治疗选择。',
     b_treatments:'治疗与手术', bs_treatments:'影像引导手术直接针对病灶。',
     b_videos:'患者教育视频', bs_videos:'简短易懂的讲解视频。',
@@ -476,9 +476,10 @@ async function loadLive(){
     getJSON('/api/content?section=doctor-bio').then(d => { live.doctor = d; }),
     getJSON('/api/content?section=testimonials').then(d => { live.testimonials = d.items; live.testiOn = d.enabled !== false; }),
     getJSON('/api/content?section=reviews').then(d => { live.reviews = d.items; }),
+    getJSON('/api/content?section=site-text').then(d => { const b = d && d.aboutBannerSub; if(b) ['en','bm','zh'].forEach(l => { if(b[l]) T[l].bs_about = b[l]; }); }),
     getJSON('/api/content?section=site-images').then(d => Object.keys(d).forEach(k => { if(d[k]) $$(`img[data-img-src="${k}"]`).forEach(i => { i.src = d[k]; }); })),
   ]);
-  renderHeroConditions(); renderAll();
+  renderHeroConditions(); renderAll(); applyLang(lang);
 }
 
 /* ---------------- boot ---------------- */

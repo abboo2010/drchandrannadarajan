@@ -55,7 +55,7 @@ BANNERS = {
     'contact': ('b_contact', 'bs_contact'),
 }
 BANNER_EN = {
-    'b_about': 'About the Doctor', 'bs_about': 'Board-certified expertise, patient-first care',
+    'b_about': 'About the Doctor', 'bs_about': 'Consultant Clinical &amp; Interventional Radiologist',
     'b_conditions': 'Conditions We Treat', 'bs_conditions': 'Tap a condition to learn about symptoms, causes, diagnosis and treatment options.',
     'b_treatments': 'Treatments & Procedures', 'bs_treatments': 'Image-guided procedures that treat the problem directly.',
     'b_videos': 'Patient Education Videos', 'bs_videos': 'Short, easy-to-understand explainers.',
