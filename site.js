@@ -350,7 +350,9 @@ function renderDoctor(){
   const foc = $('#docFocus');
   foc.innerHTML = (typeof TREATMENTS !== 'undefined' ? TREATMENTS.filter(t => t.tag_en !== 'General').slice(0, 6) : [])
     .map(t => `<span class="tag-chip">${pick(t,'title')}</span>`).join('')
-    + `<span class="tag-chip">${({en:'Embolization',bm:'Embolisasi',zh:'栓塞术'})[lang] || 'Embolization'}</span>`;
+    + ((d && Array.isArray(d.focusExtra)) ? d.focusExtra : [])
+      .map(c => c['text_' + lang] || c.text_en).filter(Boolean)
+      .map(t => `<span class="tag-chip">${t}</span>`).join('');
 }
 
 function tagsOf(items, skip){
