@@ -349,7 +349,8 @@ function renderDoctor(){
   // focus areas: real treatment names from the treatments list
   const foc = $('#docFocus');
   foc.innerHTML = (typeof TREATMENTS !== 'undefined' ? TREATMENTS.filter(t => t.tag_en !== 'General').slice(0, 6) : [])
-    .map(t => `<span class="tag-chip">${pick(t,'title')}</span>`).join('');
+    .map(t => `<span class="tag-chip">${pick(t,'title')}</span>`).join('')
+    + `<span class="tag-chip">${({en:'Embolization',bm:'Embolisasi',zh:'栓塞术'})[lang] || 'Embolization'}</span>`;
 }
 
 function tagsOf(items, skip){
