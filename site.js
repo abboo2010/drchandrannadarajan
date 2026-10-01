@@ -476,7 +476,12 @@ async function loadLive(){
     getJSON('/api/content?section=doctor-bio').then(d => { live.doctor = d; }),
     getJSON('/api/content?section=testimonials').then(d => { live.testimonials = d.items; live.testiOn = d.enabled !== false; }),
     getJSON('/api/content?section=reviews').then(d => { live.reviews = d.items; }),
-    getJSON('/api/content?section=site-text').then(d => { const b = d && d.aboutBannerSub; if(b) ['en','bm','zh'].forEach(l => { if(b[l]) T[l].bs_about = b[l]; }); }),
+    getJSON('/api/content?section=site-text').then(d => {
+      // CMS > Site Text: "aboutBannerSub" plus every "web_<key>" entry overrides the built-in website text
+      const b = d && d.aboutBannerSub; if(b) ['en','bm','zh'].forEach(l => { if(b[l]) T[l].bs_about = b[l]; });
+      Object.keys(d || {}).forEach(k => { if(k.indexOf('web_') !== 0 || !d[k] || typeof d[k] !== 'object') return;
+        ['en','bm','zh'].forEach(l => { if(typeof d[k][l] === 'string' && d[k][l].trim()) T[l][k.slice(4)] = d[k][l]; }); });
+    }),
     getJSON('/api/content?section=site-images').then(d => Object.keys(d).forEach(k => { if(d[k]) $$(`img[data-img-src="${k}"]`).forEach(i => { i.src = d[k]; }); })),
   ]);
   renderHeroConditions(); renderAll(); applyLang(lang);
