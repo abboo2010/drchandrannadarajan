@@ -329,7 +329,7 @@
       "icon": "droplet",
       "color": "#0ea5e9",
       "title_en": "Electro-Sclerotherapy",
-      "title_bm": "Elektro-Sklerapi",
+      "title_bm": "Elektro-Skleroterapi",
       "title_zh": "电化学硬化治疗",
       "tag_en": "Vascular",
       "tag_bm": "Vaskular",
@@ -338,7 +338,7 @@
       "desc_bm": "Menggabungkan agen penutup saluran darah dan tenaga elektrik bersasar untuk menutup saluran darah yang tidak normal.",
       "desc_zh": "结合闭合血管的药剂与靶向电能，封闭异常血管。",
       "overview_en": "Electro-sclerotherapy treats vascular malformations by combining a sclerosing (vessel-closing) agent with electrical energy, delivered directly into the abnormal vessels under image guidance.",
-      "overview_bm": "Elektro-sklerapi merawat malformasi vaskular dengan menggabungkan agen sklerosis (penutup saluran darah) dengan tenaga elektrik, disalurkan terus ke dalam saluran darah yang tidak normal di bawah panduan imej.",
+      "overview_bm": "Elektro-skleroterapi merawat malformasi vaskular dengan menggabungkan agen sklerosan (penutup saluran darah) dengan tenaga elektrik, disalurkan terus ke dalam saluran darah yang tidak normal di bawah panduan imej.",
       "overview_zh": "电化学硬化治疗通过在影像引导下，将硬化剂（血管闭合剂）与电能直接注入异常血管，用于治疗血管畸形。",
       "recovery_en": "Most patients go home the same day, with some swelling or bruising expected for a few days.",
       "recovery_bm": "Kebanyakan pesakit pulang pada hari yang sama, dengan sedikit bengkak atau lebam dijangka berlaku selama beberapa hari.",
@@ -353,7 +353,7 @@
       "steps_bm": [
         "Pengimejan digunakan untuk memetakan malformasi",
         "Jarum halus dipandu terus ke dalam saluran darah yang tidak normal",
-        "Agen sklerosis dan tenaga elektrik digunakan untuk menutupnya",
+        "Agen sklerosan dan tenaga elektrik digunakan untuk menutupnya",
         "Rawatan mungkin diulang dalam beberapa sesi bagi malformasi yang lebih besar"
       ],
       "steps_zh": [
