@@ -338,6 +338,12 @@ const state = { condTag:'*', treatTag:'*', q:'' };
 const live = { doctor:null, testimonials:null, reviews:null, testiOn:false };
 
 function renderDoctor(){
+  const home = $('#homeCred');
+  if(home){
+    const hd = live.doctor;
+    const hl = (hd && hd['bio_' + lang] && !/dummy/i.test(hd['bio_en'] || '')) ? asList((hd.credentials || []).map(c => c['text_' + lang] || c.text_en)) : [];
+    home.innerHTML = hl.map(t => `<li>${t}</li>`).join(''); home.hidden = !hl.length;
+  }
   if(!$('#docBio')) return;
   const bio = $('#docBio'), cred = $('#docCred'), extra = $('#docExtra');
   const d = live.doctor;

@@ -203,6 +203,7 @@ HOME_ABOUT = '''<section class="section" id="about-teaser">
       <span class="kicker" data-i18n="d_kicker">Meet Your Doctor</span>
       <h2 class="h2">Dr. Chandran <em>Nadarajan</em></h2>
       <p class="cred">MD (USM) · M.Med (Rad) (USM)</p>
+      <ul class="tick-list" id="homeCred" hidden></ul>
       <p class="prose" data-i18n="d_bio">—</p>
       <a class="btn btn-navy" href="/about" data-i18n="ab_more">Read full profile</a>
     </div>
