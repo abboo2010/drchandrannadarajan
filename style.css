@@ -896,3 +896,6 @@
   .kb-time{ font-size:17px; }
   .kb-date{ font-size:10px; }
 }
+
+/* Header now holds only the language buttons: keep them on the right */
+header.topbar{ justify-content:flex-end; }
