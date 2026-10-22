@@ -954,7 +954,7 @@ header.topbar{ padding-top:calc(6px + env(safe-area-inset-top)); padding-bottom:
   .hero-underline{ margin-left:auto; margin-right:auto; }
   .doc-info{ text-align:center; }
   .stat-row{ width:100%; max-width:560px; margin:0 auto; }
-  .stat-card{ justify-content:center; text-align:left; }
+  .stat-card{ justify-content:flex-start; text-align:left; padding-left:clamp(18px,calc(2.4 * var(--vh)),34px); }
 }
 
 
