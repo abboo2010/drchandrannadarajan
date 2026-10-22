@@ -938,3 +938,21 @@ header.topbar{ padding-top:calc(6px + env(safe-area-inset-top)); padding-bottom:
 @media (min-width:861px) and (max-width:1200px){
   .hero{ grid-template-columns:1fr clamp(150px,34vh,260px) 1fr; }
 }
+
+/* ---- HOME HERO: larger portrait photo, everything centred around it ---- */
+@media (min-width:861px){
+  .hero{
+    grid-template-columns:1fr auto 1fr;
+    gap:clamp(20px,3vw,56px);
+    text-align:center;
+  }
+  .doc-photo{
+    width:auto; height:clamp(220px,58vh,780px);
+    aspect-ratio:395/514;
+    justify-self:center;
+  }
+  .hero-underline{ margin-left:auto; margin-right:auto; }
+  .doc-info{ text-align:center; }
+  .stat-row{ width:100%; max-width:560px; margin:0 auto; }
+  .stat-card{ justify-content:center; text-align:left; }
+}
