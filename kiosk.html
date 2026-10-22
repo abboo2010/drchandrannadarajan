@@ -90,18 +90,26 @@
     <nav id="navList">
       <!-- injected by JS -->
     </nav>
-
-    <div class="sidebar-footer">
-      <span id="clockIco" style="color:#9fb0c8;">SVGICON:clock:18</span>
-      <div>
-        <div id="clockTime" style="font-weight:700;color:#fff;font-size:13px;"></div>
-        <div id="clockDate" style="font-size:11px;"></div>
-      </div>
-    </div>
   </aside>
 
   <!-- ============ MAIN ============ -->
   <main>
+    <div class="kiosk-band">
+      <div class="kb-brand">
+        <div class="kb-badge"><img data-img-src="logo" alt="Dr. Chandran Nadarajan Clinic logo"></div>
+        <div class="kb-text">
+          <div class="kb-name" data-i18n="doctorNameSidebar">DR. CHANDRAN<br><span class="accent">NADARAJAN</span></div>
+          <div class="kb-sub" data-i18n="brandSub">CONSULTANT CLINICAL &amp; INTERVENTIONAL RADIOLOGIST</div>
+        </div>
+      </div>
+      <div class="kb-clock">
+        <span id="clockIco">SVGICON:clock:22</span>
+        <div>
+          <div id="clockTime" class="kb-time"></div>
+          <div id="clockDate" class="kb-date"></div>
+        </div>
+      </div>
+    </div>
     <header class="topbar">
       <button class="hamburger-btn" id="hamburgerBtn" aria-label="Menu">
         <span></span><span></span><span></span>

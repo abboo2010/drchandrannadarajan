@@ -865,3 +865,34 @@
 @media (max-width:860px){
   .content{ padding-bottom:calc(140px + env(safe-area-inset-bottom)); }
 }
+
+
+/* ---- KIOSK TOP BAND: doctor brand + date/clock, above the header ---- */
+.kiosk-band{
+  flex:0 0 auto;
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:12px 30px; padding-top:calc(12px + env(safe-area-inset-top));
+  background:linear-gradient(180deg,var(--navy-900),var(--navy-950));
+  color:#fff;
+}
+.kb-brand{ display:flex; align-items:center; gap:18px; min-width:0; }
+.kb-badge{ width:92px; height:92px; border-radius:50%; overflow:hidden; flex:0 0 auto; }
+.kb-badge img{ width:100%; height:100%; object-fit:contain; display:block; }
+.kb-name{ font-size:19px; font-weight:700; letter-spacing:1px; line-height:1.25; }
+.kb-name .accent{ color:var(--gold-400); }
+.kb-sub{ font-size:11px; letter-spacing:1px; color:var(--gold-500); margin-top:5px; line-height:1.4; }
+.kb-clock{ display:flex; align-items:center; gap:12px; color:#9fb0c8; flex:0 0 auto; text-align:right; }
+.kb-time{ font-size:26px; font-weight:800; color:#fff; line-height:1.1; }
+.kb-date{ font-size:13px; margin-top:2px; }
+
+@media (max-width:860px){
+  .kiosk-band{ padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top)); gap:10px; }
+  .kb-badge{ width:62px; height:62px; }
+  .kb-brand{ gap:12px; }
+  .kb-name{ font-size:14px; letter-spacing:.5px; }
+  .kb-sub{ font-size:8.5px; letter-spacing:.5px; margin-top:3px; }
+  .kb-clock{ gap:6px; }
+  #clockIco{ display:none; }
+  .kb-time{ font-size:17px; }
+  .kb-date{ font-size:10px; }
+}
