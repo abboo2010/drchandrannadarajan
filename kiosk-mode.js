@@ -18,7 +18,7 @@
   /* Inside the Windows kiosk wrapper app (Electron) the app itself handles
      fullscreen and the exit password; the page only keeps the bottom-left
      corner free of menu buttons for the app's hidden exit area. */
-  if(/Electron\//.test(navigator.userAgent)){
+  if(/Electron\/|IRSabahKiosk\//.test(navigator.userAgent)){
     document.documentElement.classList.add('kiosk-app');
     var es = document.createElement('style');
     es.textContent = 'html.kiosk-app .bottom-nav{padding-left:90px;}';
