@@ -5,7 +5,7 @@
   "description": "Interactive Patient Education by Dr. Chandran Nadarajan, Consultant Clinical & Interventional Radiologist",
   "start_url": "/kiosk",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "display_override": [
     "fullscreen",
     "standalone"
