@@ -1,7 +1,7 @@
 // Minimal service worker — exists mainly so Chrome/Android recognizes this
 // page as an installable app (a real "Install app" prompt instead of a
 // plain bookmark). It caches only the small app-shell files, not the video.
-const CACHE_NAME = 'meditouch-shell-v70';
+const CACHE_NAME = 'meditouch-shell-v71';
 const SHELL_FILES = [
   './kiosk.html',
   './style.css',
@@ -9,6 +9,7 @@ const SHELL_FILES = [
   './content-data.js',
   './script.js',
   './content-loader.js',
+  './kiosk-mode.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
