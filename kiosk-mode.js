@@ -2,8 +2,8 @@
    KIOSK MODE (installed-app / touch-screen use)
    - First tap goes fullscreen (hides the title bar and the Windows
      taskbar); if someone bumps out of fullscreen the next tap puts it back.
-   - Hidden exit: tap the top-left corner (over the logo) 3 times quickly,
-     then enter the exit password. Correct password leaves fullscreen and
+   - Hidden exit: tap the bottom-left corner once, then enter the exit
+     password. Correct password leaves fullscreen and
      closes the app window.
    - Only active when running as an installed app (or with ?kiosk=1), so
      ordinary visitors opening /kiosk in a browser tab are never forced
@@ -20,6 +20,7 @@
   if(!active) return;
 
   var de = document.documentElement;
+  de.classList.add('kiosk-app');   // leaves the bottom-left corner free of menu items
   var adminExited = false;
 
   function isFs(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
@@ -37,10 +38,11 @@
   }
   ['click','touchend','keydown'].forEach(function(t){ document.addEventListener(t, goFs, true); });
 
-  /* ---------- hidden hotspot: 3 quick taps in the top-left corner ---------- */
+  /* ---------- hidden hotspot: one tap in the bottom-left corner ---------- */
   var css = document.createElement('style');
   css.textContent =
-    '#kioskExitHotspot{position:fixed;top:0;left:0;width:calc(110px * var(--ui-zoom,1));height:calc(110px * var(--ui-zoom,1));z-index:100000;background:transparent;-webkit-tap-highlight-color:transparent;}' +
+    'html.kiosk-app .bottom-nav{padding-left:90px;}' +
+    '#kioskExitHotspot{position:fixed;bottom:0;left:0;width:calc(90px * var(--ui-zoom,1));height:calc(90px * var(--ui-zoom,1));z-index:100000;background:transparent;-webkit-tap-highlight-color:transparent;}' +
     '#kioskExitOverlay{position:fixed;inset:0;z-index:100001;background:rgba(8,20,40,.78);display:none;align-items:center;justify-content:center;font-family:inherit;}' +
     '#kioskExitOverlay.show{display:flex;}' +
     '#kioskExitBox{zoom:var(--ui-zoom,1);background:#0b1e38;color:#fff;border-radius:18px;padding:26px 28px;width:min(420px,90vw);box-shadow:0 20px 60px rgba(0,0,0,.5);}' +
@@ -72,7 +74,6 @@
   function mount(){ document.body.appendChild(hot); document.body.appendChild(ov); wire(); }
   if(document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
 
-  var taps = [];
   var autoCloseTimer = null, failCount = 0, lockedUntil = 0;
 
   function sha256hex(str){
@@ -115,12 +116,7 @@
     });
   }
   function wire(){
-    hot.addEventListener('pointerup', function(){
-      var t = Date.now();
-      taps = taps.filter(function(x){ return t - x < 1500; });
-      taps.push(t);
-      if(taps.length >= 3){ taps = []; openPrompt(); }
-    });
+    hot.addEventListener('pointerup', openPrompt);   // single tap, like the old Windows kiosk app
     document.getElementById('kioskExitCancel').addEventListener('click', closePrompt);
     document.getElementById('kioskExitOk').addEventListener('click', submit);
     document.getElementById('kioskExitPw').addEventListener('keydown', function(e){
