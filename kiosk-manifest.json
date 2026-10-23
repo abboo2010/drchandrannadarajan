@@ -3,7 +3,7 @@
   "name": "IR@SABAH Kiosk — Dr. Chandran Nadarajan",
   "short_name": "IR@SABAH Kiosk",
   "description": "Interactive Patient Education by Dr. Chandran Nadarajan, Consultant Clinical & Interventional Radiologist",
-  "start_url": "/kiosk",
+  "start_url": "/kiosk?kiosk=1",
   "scope": "/",
   "display": "fullscreen",
   "display_override": [
