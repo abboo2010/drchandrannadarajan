@@ -15,6 +15,16 @@
   var SALT = 'irsabah-kiosk-exit:';
 
   function mq(q){ try{ return window.matchMedia(q).matches; }catch(e){ return false; } }
+  /* Inside the Windows kiosk wrapper app (Electron) the app itself handles
+     fullscreen and the exit password; the page only keeps the bottom-left
+     corner free of menu buttons for the app's hidden exit area. */
+  if(/Electron\//.test(navigator.userAgent)){
+    document.documentElement.classList.add('kiosk-app');
+    var es = document.createElement('style');
+    es.textContent = 'html.kiosk-app .bottom-nav{padding-left:90px;}';
+    document.head.appendChild(es);
+    return;
+  }
   var active = mq('(display-mode: standalone)') || mq('(display-mode: fullscreen)') ||
                !!window.navigator.standalone || /[?&]kiosk=1\b/.test(location.search);
   if(!active) return;
