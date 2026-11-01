@@ -459,3 +459,46 @@ div.page-first{ padding-top:0; } div.page-first > .section{ padding-top:56px; }
 
 @media (max-width:1080px){ .teaser-grid{ grid-template-columns:1fr; gap:46px; } .teaser-photo{ max-width:320px; } }
 @media (max-width:720px){ .page-banner{ padding:calc(var(--hdr) + 22px) 0 26px; } .cta-band{ padding:44px 0; } }
+
+/* =====================================================================
+   Installed-app mode (PWA added to a phone/tablet home screen):
+   the main menu becomes a bottom tab bar instead of the top burger menu.
+   <html> gets class "is-app" from the tiny script in each page's <head>.
+   ===================================================================== */
+@media (max-width: 1180px){
+  html.is-app{ --tabbar:calc(62px + env(safe-area-inset-bottom)); }
+  html.is-app body{ padding-bottom:var(--tabbar); }
+  html.is-app .burger{ display:none; }
+  /* backdrop-filter on the header would trap the fixed bar inside it */
+  html.is-app .site-header, html.is-app .site-header.scrolled, html.is-app .site-header.solid{ backdrop-filter:none; -webkit-backdrop-filter:none; }
+  html.is-app .site-header.scrolled, html.is-app .site-header.solid{ background:rgba(6,22,46,.97); }
+
+  html.is-app .main-nav{
+    position:fixed; inset:auto 0 0 0; z-index:950; margin:0; transform:none; max-height:none; overflow:visible;
+    flex-direction:row; align-items:stretch; justify-content:space-around; gap:0;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    background:rgba(6,22,46,.98); border-top:1px solid rgba(233,185,73,.25); border-bottom:0;
+    box-shadow:0 -6px 22px rgba(0,0,0,.28);
+  }
+  html.is-app .main-nav a{
+    flex:1 1 0; min-width:0; min-height:50px; padding:6px 2px 4px; border-radius:12px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    font-size:10.5px; line-height:1.1; font-weight:700; text-align:center; white-space:normal;
+  }
+  html.is-app .main-nav a:active{ transform:scale(.94); }
+  html.is-app .main-nav a::before{
+    content:""; width:22px; height:22px; background:currentColor; flex-shrink:0;
+    -webkit-mask:var(--ico) center/contain no-repeat; mask:var(--ico) center/contain no-repeat;
+  }
+  html.is-app .main-nav .nav-book{ display:none; } /* booking stays one tap away via the WhatsApp button */
+  html.is-app .main-nav a[href="/"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 11l9-8 9 8M5 10v10h14V10'/%3E%3C/svg%3E"); }
+  html.is-app .main-nav a[href="/about"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 21c0-4 4-6 8-6s8 2 8 6'/%3E%3C/svg%3E"); }
+  html.is-app .main-nav a[href="/conditions"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 12h4l3-8 4 16 3-8h4'/%3E%3C/svg%3E"); }
+  html.is-app .main-nav a[href="/treatments"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 3h6v6h6v6h-6v6H9v-6H3V9h6z'/%3E%3C/svg%3E"); }
+  html.is-app .main-nav a[href="/videos"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='9'/%3E%3Cpath d='M10 8l6 4-6 4z'/%3E%3C/svg%3E"); }
+  html.is-app .main-nav a[href="/contact"]{ --ico:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5h16v11H9l-5 4z'/%3E%3C/svg%3E"); }
+
+  /* keep floating/hero elements clear of the bar */
+  html.is-app .fab-wa{ bottom:calc(var(--tabbar) + 12px); }
+  html.is-app .hero{ height:calc(100vh - var(--tabbar)); height:calc(100svh - var(--tabbar)); }
+}
