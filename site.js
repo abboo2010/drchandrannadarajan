@@ -389,8 +389,29 @@ function renderConditions(){
   const q = state.q.trim().toLowerCase();
   const list = CONDITIONS.filter(c => (state.condTag === '*' || c.tag_en === state.condTag) &&
     (!q || (pick(c,'title') + ' ' + pick(c,'desc') + ' ' + pick(c,'tag')).toLowerCase().includes(q)));
-  $('#condGrid').innerHTML = list.map(c => card(c, 'c')).join('');
+  const grid = $('#condGrid');
+  grid.innerHTML = list.map(c => card(c, 'c')).join('');
+  grid.scrollLeft = 0;
   $('#condEmpty').hidden = list.length > 0;
+  updateCondSwipe();
+}
+/* phones: conditions are a swipe carousel (one card at a time) */
+function condStep(){ const g = $('#condGrid'), c = g && g.querySelector('.card'); return c ? c.offsetWidth + (parseFloat(getComputedStyle(g).columnGap) || 0) : 0; }
+function updateCondSwipe(){
+  const g = $('#condGrid'), box = $('#condSwipe'); if(!g || !box) return;
+  const n = g.querySelectorAll('.card').length, step = condStep();
+  box.hidden = n < 2;
+  if(!step) return;
+  const i = Math.min(n - 1, Math.max(0, Math.round(g.scrollLeft / step)));
+  $('#condCount').textContent = (i + 1) + ' / ' + n;
+  $('#condPrev').disabled = i === 0; $('#condNext').disabled = i === n - 1;
+}
+function initCondSwipe(){
+  const g = $('#condGrid'); if(!g || !$('#condSwipe')) return;
+  g.addEventListener('scroll', () => requestAnimationFrame(updateCondSwipe), { passive:true });
+  window.addEventListener('resize', updateCondSwipe);
+  $('#condPrev').addEventListener('click', () => g.scrollBy({ left:-condStep(), behavior:'smooth' }));
+  $('#condNext').addEventListener('click', () => g.scrollBy({ left: condStep(), behavior:'smooth' }));
 }
 function renderTreatments(){
   if(typeof TREATMENTS === 'undefined' || !$('#treatGrid')) return;
@@ -500,7 +521,7 @@ async function loadLive(){
 function boot(){
   paintIcons();
   wireWhatsApp();
-  initHeader();
+  initHeader(); initCondSwipe();
   initSlider();
   initVideo();
   initCounters();
