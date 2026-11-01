@@ -113,6 +113,7 @@ const X = {
     k_text:'Scan the QR code with your phone camera, or tap the button, to message the clinic and request your appointment — the fastest way to reach us.',
     k_email:'Email',
     disclaimer:'The information on this website is for general education only and does not replace advice from a qualified doctor. Please consult a doctor about your own health.',
+    credit_prefix:'Developed and maintained by',
     tagline: UI.tagline.en,
     h_overview:'Overview', h_symptoms:'Common symptoms', h_causes:'Common causes', h_diag:'How it is diagnosed', h_steps:'How it works', h_benefits:'Benefits', h_recovery:'Recovery', h_rel_t:'Treatments that may help', h_rel_c:'Conditions treated with this',
   },
@@ -131,6 +132,7 @@ const X = {
     k_text:'Imbas kod QR dengan kamera telefon anda, atau tekan butang, untuk menghantar mesej kepada klinik dan memohon temujanji — cara terpantas untuk menghubungi kami.',
     k_email:'Emel',
     disclaimer:'Maklumat di laman web ini hanyalah untuk pendidikan umum dan tidak menggantikan nasihat doktor yang bertauliah. Sila rujuk doktor mengenai kesihatan anda sendiri.',
+    credit_prefix:'Dibangunkan dan diselenggara oleh',
     tagline: UI.tagline.bm,
     h_overview:'Gambaran keseluruhan', h_symptoms:'Gejala biasa', h_causes:'Punca biasa', h_diag:'Cara diagnosis', h_steps:'Cara ia berfungsi', h_benefits:'Kelebihan', h_recovery:'Pemulihan', h_rel_t:'Rawatan yang mungkin membantu', h_rel_c:'Keadaan yang dirawat dengan ini',
   },
@@ -149,6 +151,7 @@ const X = {
     k_text:'用手机相机扫描二维码，或点击按钮，向诊所发送信息预约——这是最快的联系方式。',
     k_email:'电子邮件',
     disclaimer:'本网站的资讯仅供一般教育用途，不能取代合格医生的建议。有关您自身的健康问题，请咨询医生。',
+    credit_prefix:'开发与维护：',
     tagline: UI.tagline.zh,
     h_overview:'概述', h_symptoms:'常见症状', h_causes:'常见成因', h_diag:'诊断方式', h_steps:'治疗原理', h_benefits:'优点', h_recovery:'恢复', h_rel_t:'可能有帮助的治疗', h_rel_c:'适用此治疗的疾病',
   }
