@@ -343,7 +343,8 @@ button{ font:inherit; cursor:pointer; }
 .car-track::-webkit-scrollbar{ display:none; }
 .quote{ flex:0 0 min(400px, 86%); scroll-snap-align:start; background:#fff; border:1px solid var(--line); border-radius:var(--r-lg); padding:28px; display:flex; flex-direction:column; gap:16px; box-shadow:0 4px 16px rgba(6,22,46,.05); position:relative; }
 .quote::before{ content:"“"; position:absolute; right:22px; top:0; font-family:var(--serif); font-size:90px; line-height:1; color:var(--gold); opacity:.35; }
-.quote p{ padding-right:22px; margin:0; font-size:16.5px; color:var(--ink); flex:1; }
+.quote p{ padding-right:22px; margin:0; font-size:16.5px; color:var(--ink); flex:none; }
+.quote .q-who{ margin-top:2px; }
 .q-who{ display:flex; align-items:center; gap:12px; }
 .q-av{ width:44px; height:44px; border-radius:50%; display:grid; place-items:center; color:#fff; font-weight:800; }
 .q-who b{ display:block; color:var(--navy-800); } .q-who small{ color:var(--ink-400); }
