@@ -194,7 +194,7 @@ button{ font:inherit; cursor:pointer; }
   .brand-sub{ display:none; }
 }
 @media (max-width: 900px){
-  .hero{ height:100vh; height:100svh; min-height:640px; }
+  .hero{ height:auto; min-height:640px; min-height:max(640px,100svh); }
   .slide{ padding:calc(var(--hdr) + 14px) 0 84px; align-items:center; }
   .float-chip{ display:none; }
   .slide-grid{ grid-template-columns:1fr; gap:30px; text-align:left; }
@@ -500,5 +500,5 @@ div.page-first{ padding-top:0; } div.page-first > .section{ padding-top:56px; }
 
   /* keep floating/hero elements clear of the bar */
   html.is-app .fab-wa{ bottom:calc(var(--tabbar) + 12px); }
-  html.is-app .hero{ height:calc(100vh - var(--tabbar)); height:calc(100svh - var(--tabbar)); }
+  html.is-app .hero{ height:auto; min-height:max(560px, calc(100svh - var(--tabbar))); }
 }
