@@ -393,31 +393,34 @@ function renderConditions(){
   grid.innerHTML = list.map(c => card(c, 'c')).join('');
   grid.scrollLeft = 0;
   $('#condEmpty').hidden = list.length > 0;
-  updateCondSwipe();
+  updateSwipe('cond');
 }
-/* phones: conditions are a swipe carousel (one card at a time) */
-function condStep(){ const g = $('#condGrid'), c = g && g.querySelector('.card'); return c ? c.offsetWidth + (parseFloat(getComputedStyle(g).columnGap) || 0) : 0; }
-function updateCondSwipe(){
-  const g = $('#condGrid'), box = $('#condSwipe'); if(!g || !box) return;
-  const n = g.querySelectorAll('.card').length, step = condStep();
+/* phones: Conditions and Treatments are swipe carousels (one card at a time) */
+function swipeStep(g){ const c = g && g.querySelector('.card'); return c ? c.offsetWidth + (parseFloat(getComputedStyle(g).columnGap) || 0) : 0; }
+function updateSwipe(p){
+  const g = $('#'+p+'Grid'), box = $('#'+p+'Swipe'); if(!g || !box) return;
+  const n = g.querySelectorAll('.card').length, step = swipeStep(g);
   box.hidden = n < 2;
   if(!step) return;
   const i = Math.min(n - 1, Math.max(0, Math.round(g.scrollLeft / step)));
-  $('#condCount').textContent = (i + 1) + ' / ' + n;
-  $('#condPrev').disabled = i === 0; $('#condNext').disabled = i === n - 1;
+  $('#'+p+'Count').textContent = (i + 1) + ' / ' + n;
+  $('#'+p+'Prev').disabled = i === 0; $('#'+p+'Next').disabled = i === n - 1;
 }
-function initCondSwipe(){
-  const g = $('#condGrid'); if(!g || !$('#condSwipe')) return;
-  g.addEventListener('scroll', () => requestAnimationFrame(updateCondSwipe), { passive:true });
-  window.addEventListener('resize', updateCondSwipe);
-  $('#condPrev').addEventListener('click', () => g.scrollBy({ left:-condStep(), behavior:'smooth' }));
-  $('#condNext').addEventListener('click', () => g.scrollBy({ left: condStep(), behavior:'smooth' }));
+function initSwipe(p){
+  const g = $('#'+p+'Grid'); if(!g || !$('#'+p+'Swipe')) return;
+  g.addEventListener('scroll', () => requestAnimationFrame(() => updateSwipe(p)), { passive:true });
+  window.addEventListener('resize', () => updateSwipe(p));
+  $('#'+p+'Prev').addEventListener('click', () => g.scrollBy({ left:-swipeStep(g), behavior:'smooth' }));
+  $('#'+p+'Next').addEventListener('click', () => g.scrollBy({ left: swipeStep(g), behavior:'smooth' }));
 }
 function renderTreatments(){
   if(typeof TREATMENTS === 'undefined' || !$('#treatGrid')) return;
   renderFilters($('#treatFilters'), TREATMENTS, 'treatTag', 'Featured');
   const list = TREATMENTS.filter(t => state.treatTag === '*' || t.tag_en === state.treatTag);
-  $('#treatGrid').innerHTML = list.map(t => card(t, 't')).join('');
+  const tg = $('#treatGrid');
+  tg.innerHTML = list.map(t => card(t, 't')).join('');
+  tg.scrollLeft = 0;
+  updateSwipe('treat');
 }
 function renderVideos(){
   const grid = $('#videoGrid'); if(!grid || typeof VIDEOS === 'undefined') return;
@@ -521,7 +524,7 @@ async function loadLive(){
 function boot(){
   paintIcons();
   wireWhatsApp();
-  initHeader(); initCondSwipe();
+  initHeader(); initSwipe('cond'); initSwipe('treat');
   initSlider();
   initVideo();
   initCounters();
