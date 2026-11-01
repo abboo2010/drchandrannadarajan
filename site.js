@@ -393,25 +393,32 @@ function renderConditions(){
   grid.innerHTML = list.map(c => card(c, 'c')).join('');
   grid.scrollLeft = 0;
   $('#condEmpty').hidden = list.length > 0;
-  updateSwipe('cond');
+  $('#condGrid').scrollLeft = 0; updateSwipe('#condGrid');
 }
-/* phones: Conditions and Treatments are swipe carousels (one card at a time) */
+/* phones: card lists are swipe carousels (one card at a time) — see "Phones" block in site.css */
 function swipeStep(g){ const c = g && g.querySelector('.card'); return c ? c.offsetWidth + (parseFloat(getComputedStyle(g).columnGap) || 0) : 0; }
-function updateSwipe(p){
-  const g = $('#'+p+'Grid'), box = $('#'+p+'Swipe'); if(!g || !box) return;
-  const n = g.querySelectorAll('.card').length, step = swipeStep(g);
+function swipeBox(g){
+  let box = g.nextElementSibling;
+  if(!box || !box.classList.contains('swipe-meta')){
+    box = document.createElement('div'); box.className = 'swipe-meta'; box.hidden = true;
+    box.innerHTML = '<button type="button" class="sw-btn sw-prev" aria-label="Previous">&#8249;</button><span class="sw-count" aria-live="polite"></span><button type="button" class="sw-btn sw-next" aria-label="Next">&#8250;</button>';
+    g.after(box);
+    g.addEventListener('scroll', () => requestAnimationFrame(() => updateSwipe(g)), { passive:true });
+    window.addEventListener('resize', () => updateSwipe(g));
+    $('.sw-prev', box).addEventListener('click', () => g.scrollBy({ left:-swipeStep(g), behavior:'smooth' }));
+    $('.sw-next', box).addEventListener('click', () => g.scrollBy({ left: swipeStep(g), behavior:'smooth' }));
+  }
+  return box;
+}
+function updateSwipe(g){
+  if(typeof g === 'string') g = $(g);
+  if(!g) return;
+  const box = swipeBox(g), n = g.querySelectorAll('.card').length, step = swipeStep(g);
   box.hidden = n < 2;
   if(!step) return;
   const i = Math.min(n - 1, Math.max(0, Math.round(g.scrollLeft / step)));
-  $('#'+p+'Count').textContent = (i + 1) + ' / ' + n;
-  $('#'+p+'Prev').disabled = i === 0; $('#'+p+'Next').disabled = i === n - 1;
-}
-function initSwipe(p){
-  const g = $('#'+p+'Grid'); if(!g || !$('#'+p+'Swipe')) return;
-  g.addEventListener('scroll', () => requestAnimationFrame(() => updateSwipe(p)), { passive:true });
-  window.addEventListener('resize', () => updateSwipe(p));
-  $('#'+p+'Prev').addEventListener('click', () => g.scrollBy({ left:-swipeStep(g), behavior:'smooth' }));
-  $('#'+p+'Next').addEventListener('click', () => g.scrollBy({ left: swipeStep(g), behavior:'smooth' }));
+  $('.sw-count', box).textContent = (i + 1) + ' / ' + n;
+  $('.sw-prev', box).disabled = i === 0; $('.sw-next', box).disabled = i === n - 1;
 }
 function renderTreatments(){
   if(typeof TREATMENTS === 'undefined' || !$('#treatGrid')) return;
@@ -420,7 +427,7 @@ function renderTreatments(){
   const tg = $('#treatGrid');
   tg.innerHTML = list.map(t => card(t, 't')).join('');
   tg.scrollLeft = 0;
-  updateSwipe('treat');
+  updateSwipe('#treatGrid');
 }
 function renderVideos(){
   const grid = $('#videoGrid'); if(!grid || typeof VIDEOS === 'undefined') return;
@@ -446,6 +453,7 @@ function renderHome(){
   const c = $('#homeConds'), t = $('#homeTreats');
   if(c && typeof CONDITIONS !== 'undefined') c.innerHTML = CONDITIONS.slice(0, 6).map(x => card(x, 'c')).join('');
   if(t && typeof TREATMENTS !== 'undefined') t.innerHTML = TREATMENTS.slice(0, 4).map(x => card(x, 't')).join('');
+  if(c) updateSwipe(c); if(t) updateSwipe(t);
 }
 function renderAll(){ renderDoctor(); renderConditions(); renderTreatments(); renderVideos(); renderStories(); renderHome(); }
 
@@ -524,7 +532,7 @@ async function loadLive(){
 function boot(){
   paintIcons();
   wireWhatsApp();
-  initHeader(); initSwipe('cond'); initSwipe('treat');
+  initHeader();
   initSlider();
   initVideo();
   initCounters();
