@@ -29,18 +29,18 @@
   ],
   "screenshots": [
     {
-      "src": "screenshot-wide.png",
+      "src": "screenshot-wide-v2.png",
       "sizes": "1280x800",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "IR@SABAH home screen on a tablet"
+      "label": "IR@SABAH website home page on a computer or tablet"
     },
     {
-      "src": "screenshot-narrow.png",
+      "src": "screenshot-narrow-v2.png",
       "sizes": "750x1334",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "IR@SABAH home screen on a phone"
+      "label": "IR@SABAH website home page on a phone"
     }
   ]
 }
