@@ -13,7 +13,7 @@
   var DISMISS_KEY = 'irs_install_dismissed';   // timestamp (ms) of last dismissal
   var INSTALLED_KEY = 'irs_install_done';      // set once the app is installed
   var SNOOZE_DAYS = 14;
-  var DELAY_MS = 4000;                         // wait after page/splash is ready
+  var DELAY_MS = 1200;                         // wait after page/splash is ready
 
   /* ---- 1. Should we ever show it? ---- */
   function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
@@ -172,9 +172,14 @@
   }
 
   /* ---- 4. When to show ---- */
+  var ready = false;             // page is ready and the splash is gone
+  function maybeShow(){
+    if(ready && (isIOS || deferredPrompt)) show();
+  }
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();          // we show our own button instead of Chrome's mini-bar
     deferredPrompt = e;
+    maybeShow();                 // the browser can fire this late; show as soon as it does
   });
   window.addEventListener('appinstalled', function(){
     lsSet(INSTALLED_KEY, '1');
@@ -184,20 +189,18 @@
 
   function splashGone(){
     var s = document.getElementById('splashScreen');
-    return !s || s.classList.contains('hide') || document.body.className.indexOf('splash-open') === -1;
+    return !s || s.classList.contains('hide');
   }
 
-  function schedule(){
+  function start(){
+    var tries = 0;
     (function wait(){
-      if(!splashGone()){ setTimeout(wait, 500); return; }
-      setTimeout(function(){
-        /* iOS never fires beforeinstallprompt; Android needs it (otherwise it is
-           already installed or the browser can't install, so say nothing). */
-        if(isIOS || deferredPrompt) show();
-      }, DELAY_MS);
+      if(!splashGone() && tries++ < 2400){ setTimeout(wait, 250); return; }
+      setTimeout(function(){ ready = true; maybeShow(); }, DELAY_MS);
     })();
   }
 
-  if(document.readyState === 'complete') schedule();
-  else window.addEventListener('load', schedule);
+  /* don't wait for the full page load (big images/videos) */
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();
