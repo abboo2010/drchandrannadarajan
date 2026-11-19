@@ -186,6 +186,7 @@
     {key:'reviews', label:'Reviews', shape:'list', hint:'Star reviews shown on the site.', itemLabel:function(it){return it.name || 'Untitled review';}},
     {key:'site-text', label:'Site Text', shape:'object', flatSearch:true, hint:'Every label, heading, and button caption on the site, in all three languages. Use the search box to find one quickly.'},
     {key:'site-images', label:'Photos & Logo', shape:'images', hint:'Doctor photo, clinic logo, and splash screen backgrounds.'},
+    {key:'push', label:'Send Notification', shape:'push', hint:'Send a push notification to everyone who has installed the app on their phone and tapped “Allow updates”. Keep it short and useful (health tips, new services, clinic news) — people can switch notifications off if they get too many.'},
     {key:'popup', label:'Announcement Popup', shape:'object',
       defaults:{position:'center', width:420, height:'', backgroundColor:'#0b1e38', textColor:'', borderStyle:'none', borderColor:'#d4a94a', borderWidth:2, borderRadius:18, shadowStyle:'none', closeButtonPosition:'outside', closeButtonColor:'#ffffff', closeButtonIconColor:'#0a2647', closeButtonSize:44, animationStyle:'none', animationDuration:300, reappear:'session', showImage:true, imageSize:'medium', showTitle:true, showMessage:true, textSize:'medium', showButtonText:true, showButtonLink:true},
       hint:'A one-time popup shown to visitors (image + title + message + optional button). Turn it on/off overall, optionally set a start/end date, choose where on the screen it appears and how wide it is, style its colors/border/corners/shadow/close button/entrance animation, choose how often it’s allowed to reappear, and use the "Show…" switches below to mix and match — image only, text only, with or without a clickable button — plus size controls for the image and text. The image itself is uploaded under Photos & Logo → Popup Image.'}
@@ -902,6 +903,67 @@
     container.appendChild(addBtn);
   }
 
+  function renderPushSection(container){
+    container.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'field-group';
+    box.innerHTML =
+      '<p class="helptext" id="pushCount">Checking how many phones are subscribed…</p>' +
+      '<label class="group-label" for="pushTitle">Title (max 80 characters)</label>' +
+      '<input type="text" id="pushTitle" maxlength="80" placeholder="e.g. New: Microwave ablation for thyroid nodules">' +
+      '<label class="group-label" for="pushMsg" style="margin-top:14px;display:block">Message (max 200 characters)</label>' +
+      '<textarea id="pushMsg" maxlength="200" rows="3" placeholder="Short and useful — this appears on the patient’s lock screen."></textarea>' +
+      '<label class="group-label" for="pushUrl" style="margin-top:14px;display:block">Opens this page when tapped</label>' +
+      '<select id="pushUrl">' +
+        '<option value="/">Home</option><option value="/conditions">Conditions</option>' +
+        '<option value="/treatments">Treatments</option><option value="/videos">Videos</option>' +
+        '<option value="/about">About the doctor</option><option value="/contact">Contact</option>' +
+      '</select>' +
+      '<p class="helptext" style="margin-top:14px">The text is sent exactly as typed, in one language — write it in the language most of your patients read.</p>' +
+      '<button type="button" id="pushSendBtn" class="btn btn-primary" style="margin-top:6px">Send to all subscribed phones</button>' +
+      '<p class="helptext" id="pushResult" style="margin-top:12px"></p>';
+    container.appendChild(box);
+
+    var countEl = box.querySelector('#pushCount');
+    var count = null;
+    fetch('/api/push-send', { headers:{'Authorization':'Bearer ' + state.token}, cache:'no-store' })
+      .then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.error || 'Could not load'); return b; }); })
+      .then(function(b){
+        count = b.count;
+        countEl.textContent = b.count + (b.count === 1 ? ' phone is' : ' phones are') + ' subscribed.';
+      })
+      .catch(function(e){ countEl.textContent = 'Could not check subscribers: ' + e.message; });
+
+    var btn = box.querySelector('#pushSendBtn');
+    btn.addEventListener('click', function(){
+      var title = box.querySelector('#pushTitle').value.trim();
+      var msg = box.querySelector('#pushMsg').value.trim();
+      var url = box.querySelector('#pushUrl').value;
+      var resultEl = box.querySelector('#pushResult');
+      if(!title || !msg){ showBanner('Please enter both a title and a message.', 'err'); return; }
+      if(count === 0){ showBanner('Nobody has subscribed yet, so there is no one to send to.', 'err'); return; }
+      if(!confirm('Send this notification to ' + (count === null ? 'all subscribed' : count) + ' phone(s)?\n\n' + title + '\n' + msg)) return;
+      btn.disabled = true; resultEl.textContent = 'Sending…';
+      fetch('/api/push-send', {
+        method:'POST',
+        headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
+        body: JSON.stringify({title:title, message:msg, url:url})
+      }).then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.error || 'Send failed'); return b; }); })
+        .then(function(b){
+          var line = 'Sent to ' + b.sent + ' of ' + b.total + ' phone(s).';
+          if(b.removed) line += ' ' + b.removed + ' inactive phone(s) were removed from the list.';
+          if(b.failed) line += ' ' + b.failed + ' could not be reached.';
+          if(b.skipped) line += ' ' + b.skipped + ' were not reached because the list is large — press Send again to reach the rest.';
+          resultEl.textContent = line;
+          showBanner('Notification sent.', 'ok');
+          count = b.total - b.removed;
+          countEl.textContent = count + (count === 1 ? ' phone is' : ' phones are') + ' subscribed.';
+        })
+        .catch(function(e){ resultEl.textContent = ''; showBanner(e.message, 'err'); })
+        .then(function(){ btn.disabled = false; });
+    });
+  }
+
   function renderImagesSection(container, data){
     var grid = document.createElement('div');
     grid.className = 'images-grid';
@@ -984,6 +1046,8 @@
     var content = document.getElementById('sectionContent');
     content.innerHTML = '<p class="helptext">Loading…</p>';
     document.getElementById('saveBtn').disabled = true;
+
+    if(cfg.shape === 'push'){ renderPushSection(content); return; }
 
     apiGet(key).then(function(data){
       // One-time migration: the popup's old "Popup Width" preset

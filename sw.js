@@ -1,7 +1,7 @@
 // Minimal service worker — exists mainly so Chrome/Android recognizes this
 // page as an installable app (a real "Install app" prompt instead of a
 // plain bookmark). It caches only the small app-shell files, not the video.
-const CACHE_NAME = 'meditouch-shell-v77';
+const CACHE_NAME = 'meditouch-shell-v78';
 const SHELL_FILES = [
   './kiosk.html',
   './style.css',
@@ -40,5 +40,35 @@ self.addEventListener('fetch', (event) => {
   // fall back to cache if offline.
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
+  );
+});
+
+// ---- Push notifications (sent from /admin -> Send Notification) ----
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
+  const title = data.title || 'IR@SABAH';
+  event.waitUntil(
+    self.registration.showNotification(title, {
+      body: data.body || '',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      data: { url: data.url || '/' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = new URL((event.notification.data && event.notification.data.url) || '/', self.location.origin).href;
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      for (const w of wins) {
+        if (w.url.startsWith(self.location.origin) && 'focus' in w) {
+          return w.focus().then((c) => (c && 'navigate' in c ? c.navigate(target) : c));
+        }
+      }
+      return self.clients.openWindow(target);
+    })
   );
 });
