@@ -919,13 +919,6 @@
         '<option value="/treatments">Treatments</option><option value="/videos">Videos</option>' +
         '<option value="/about">About the doctor</option><option value="/contact">Contact</option>' +
       '</select>' +
-      '<label class="group-label" for="pushIcon" style="margin-top:14px;display:block">Picture shown with the message</label>' +
-      '<select id="pushIcon">' +
-        '<option value="logo">Dr. Chandran’s official logo (full colour)</option>' +
-        '<option value="bell">Bell icon</option>' +
-        '<option value="none">No picture</option>' +
-      '</select>' +
-      '<p class="helptext" style="margin-top:4px">Each phone decides where the picture sits (left or right of the message). The small white logo at the top is fixed by Android.</p>' +
       '<p class="helptext" style="margin-top:14px">The text is sent exactly as typed, in one language — write it in the language most of your patients read.</p>' +
       '<button type="button" id="pushSendBtn" class="btn btn-primary" style="margin-top:6px">Send to all subscribed phones</button>' +
       '<p class="helptext" id="pushResult" style="margin-top:12px"></p>';
@@ -954,7 +947,7 @@
       fetch('/api/push-send', {
         method:'POST',
         headers:{'Content-Type':'application/json', 'Authorization':'Bearer ' + state.token},
-        body: JSON.stringify({title:title, message:msg, url:url, icon:box.querySelector('#pushIcon').value})
+        body: JSON.stringify({title:title, message:msg, url:url})
       }).then(function(r){ return r.json().then(function(b){ if(!r.ok) throw new Error(b.error || 'Send failed'); return b; }); })
         .then(function(b){
           var line = 'Sent to ' + b.sent + ' of ' + b.total + ' phone(s).';

@@ -85,9 +85,7 @@ exports.handler = async (event) => {
     return json(400, { error: 'Both a title and a message are required.' });
   }
 
-  const ICONS = ['logo', 'bell', 'none'];
-  const icon = ICONS.includes(body && body.icon) ? body.icon : 'logo';
-  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url), icon });
+  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url) });
   webpush.setVapidDetails(subject, pub, priv);
 
   let keys;
@@ -114,7 +112,7 @@ exports.handler = async (event) => {
       } catch (e) { failed++; return; }
       if (!sub) return;
       try {
-        await webpush.sendNotification(sub, payload, { TTL: 86400 });
+        await webpush.sendNotification(sub, payload, { TTL: 86400, urgency: 'high' });
         sent++;
       } catch (err) {
         if (err && (err.statusCode === 404 || err.statusCode === 410)) {
