@@ -1,7 +1,7 @@
 // Minimal service worker — exists mainly so Chrome/Android recognizes this
 // page as an installable app (a real "Install app" prompt instead of a
 // plain bookmark). It caches only the small app-shell files, not the video.
-const CACHE_NAME = 'meditouch-shell-v84';
+const CACHE_NAME = 'meditouch-shell-v85';
 const SHELL_FILES = [
   './kiosk.html',
   './style.css',
@@ -48,18 +48,20 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
   const title = data.title || 'IR@SABAH';
-  event.waitUntil(
-    self.registration.showNotification(title, {
-      body: data.body || '',
-      icon: '/icon-bell-192.png',
-      badge: '/badge-96.png',
-      vibrate: [200, 100, 200],
-      requireInteraction: true,
-      silent: false,
-      timestamp: Date.now(),
-      data: { url: data.url || '/' },
-    })
-  );
+  const ICONS = { logo: '/images/logo.png', bell: '/icon-bell-192.png' };
+  const opts = {
+    body: data.body || '',
+    badge: '/badge-96.png',
+    vibrate: [200, 100, 200],
+    requireInteraction: true,
+    silent: false,
+    timestamp: Date.now(),
+    data: { url: data.url || '/' },
+  };
+  const iconKey = data.icon || 'logo';
+  if (ICONS[iconKey]) opts.icon = ICONS[iconKey];
+  if (data.banner) opts.image = '/images/notification-banner.jpg';
+  event.waitUntil(self.registration.showNotification(title, opts));
 });
 
 self.addEventListener('notificationclick', (event) => {

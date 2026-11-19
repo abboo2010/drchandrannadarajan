@@ -85,7 +85,10 @@ exports.handler = async (event) => {
     return json(400, { error: 'Both a title and a message are required.' });
   }
 
-  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url) });
+  const ICONS = ['logo', 'bell', 'none'];
+  const icon = ICONS.includes(body && body.icon) ? body.icon : 'logo';
+  const banner = !!(body && body.banner);
+  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url), icon, banner });
   webpush.setVapidDetails(subject, pub, priv);
 
   let keys;
