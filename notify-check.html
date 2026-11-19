@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Notification check — IR@SABAH</title>
+<style>
+ body{margin:0;font-family:system-ui,sans-serif;background:#06162e;color:#fff;padding:22px;line-height:1.5}
+ h1{font-size:1.25rem;color:#f3d387;margin:0 0 4px} p{color:#cdd8ee;margin:6px 0 16px}
+ .row{display:flex;justify-content:space-between;gap:12px;padding:11px 14px;background:rgba(255,255,255,.07);border-radius:12px;margin-bottom:8px;font-size:.95rem}
+ .row b{color:#fff} .ok{color:#6ee7a0}.bad{color:#ff9a9a}.warn{color:#f3d387}
+ button{width:100%;margin-top:14px;padding:15px;border:0;border-radius:999px;font:inherit;font-weight:800;font-size:1rem;background:linear-gradient(135deg,#f3d387,#e9b949);color:#1a1204}
+ button[disabled]{opacity:.5} #msg{margin-top:14px;min-height:1.4em}
+</style></head><body>
+<h1>Notification check</h1>
+<p>Open this page <b>inside the installed IR@SABAH app</b> (or in Chrome) and tap the button.</p>
+<div id="rows"></div>
+<button id="go">Turn on notifications</button>
+<button id="off" style="background:rgba(255,255,255,.12);color:#fff;font-weight:700">Turn off notifications</button>
+<div id="msg"></div>
+<script>
+(function(){
+  var KEY='BJ0pJEj5YiSFtK6pLE9uTfkhbnZn46OF2Qf2Vo0va6YNHnHHqYk66WnSaQJWRUVc8od7k8yg-LVzUBnen3zSPFw';
+  var rows=document.getElementById('rows'), msg=document.getElementById('msg');
+  function u8(b){var p='='.repeat((4-b.length%4)%4),r=atob((b+p).replace(/-/g,'+').replace(/_/g,'/')),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o;}
+  function row(l,v,c){return '<div class="row"><span>'+l+'</span><b class="'+(c||'')+'">'+v+'</b></div>';}
+  var supported='serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  var standalone=(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+  function show(sub,reg){
+    var perm=supported?Notification.permission:'n/a';
+    rows.innerHTML=
+      row('Phone supports notifications',supported?'Yes':'No',supported?'ok':'bad')+
+      row('Opened as installed app',standalone?'Yes':'No (browser tab)',standalone?'ok':'warn')+
+      row('Permission',perm,perm==='granted'?'ok':(perm==='denied'?'bad':'warn'))+
+      row('App version (service worker)',reg&&reg.active?'running':'not ready',reg&&reg.active?'ok':'warn')+
+      row('This phone is subscribed',sub?'Yes':'No',sub?'ok':'bad');
+    document.getElementById('go').disabled=!supported||perm==='denied';
+    document.getElementById('off').style.display=sub?'block':'none';
+    if(perm==='denied') msg.innerHTML='<span class="bad">Notifications are blocked. In Chrome: ⋮ → Settings → Site settings → Notifications → drchandranir.info → Allow. Then come back here.</span>';
+  }
+  function refresh(){
+    if(!supported){show(null,null);return;}
+    navigator.serviceWorker.getRegistration().then(function(reg){
+      if(!reg){return navigator.serviceWorker.register('/sw.js').then(function(){return navigator.serviceWorker.ready;}).then(function(r){return r.pushManager.getSubscription().then(function(s){show(s,r);});});}
+      return reg.pushManager.getSubscription().then(function(s){show(s,reg);});
+    }).catch(function(e){msg.innerHTML='<span class="bad">'+e.message+'</span>';});
+  }
+  document.getElementById('go').onclick=function(){
+    msg.textContent='Working…';
+    Notification.requestPermission().then(function(p){
+      if(p!=='granted'){msg.innerHTML='<span class="bad">Permission was not given ('+p+').</span>';refresh();return;}
+      return navigator.serviceWorker.ready.then(function(reg){
+        var o={userVisibleOnly:true,applicationServerKey:u8(KEY)};
+        return reg.pushManager.subscribe(o).catch(function(){return reg.pushManager.getSubscription().then(function(old){return (old?old.unsubscribe():Promise.resolve()).then(function(){return reg.pushManager.subscribe(o);});});});
+      }).then(function(sub){
+        return fetch('/api/push-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'subscribe',subscription:sub.toJSON(),lang:'en'})}).then(function(r){if(!r.ok)throw new Error('The server did not save it (code '+r.status+').');});
+      }).then(function(){msg.innerHTML='<span class="ok">Done. This phone is now subscribed.</span>';refresh();});
+    }).catch(function(e){msg.innerHTML='<span class="bad">'+e.message+'</span>';refresh();});
+  };
+  document.getElementById('off').onclick=function(){
+    navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription();}).then(function(s){
+      if(!s)return; var ep=s.endpoint; return s.unsubscribe().then(function(){return fetch('/api/push-subscribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'unsubscribe',endpoint:ep})});});
+    }).then(function(){msg.textContent='Turned off.';refresh();}).catch(function(e){msg.innerHTML='<span class="bad">'+e.message+'</span>';});
+  };
+  refresh();
+})();
+</script></body></html>
