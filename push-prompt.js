@@ -66,14 +66,15 @@
 
   /* ---- Already allowed earlier: quietly keep the server copy fresh ---- */
   if(Notification.permission === 'granted'){
-    var last = parseInt(lsGet(SYNC_KEY) || '0', 10);
-    if(!last || Date.now() - last > 864e5){
-      navigator.serviceWorker.ready.then(function(reg){
-        return reg.pushManager.getSubscription().then(function(s){ return s || subscribe(reg); });
-      }).then(function(s){ return sendToServer(s); })
-        .then(function(){ lsSet(SYNC_KEY, String(Date.now())); })
-        .catch(function(){});
-    }
+    // Always check the phone's real subscription (an app update/reinstall can lose it).
+    // Missing -> create it and save it now. Present -> just re-send it to the server once a day.
+    navigator.serviceWorker.ready.then(function(reg){
+      return reg.pushManager.getSubscription().then(function(existing){
+        if(!existing) return subscribe(reg).then(function(s){ return sendToServer(s); }).then(function(){ lsSet(SYNC_KEY, String(Date.now())); });
+        var last = parseInt(lsGet(SYNC_KEY) || '0', 10);
+        if(!last || Date.now() - last > 864e5) return sendToServer(existing).then(function(){ lsSet(SYNC_KEY, String(Date.now())); });
+      });
+    }).catch(function(){});
     return;
   }
 
