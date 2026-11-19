@@ -953,6 +953,7 @@
           var line = 'Sent to ' + b.sent + ' of ' + b.total + ' phone(s).';
           if(b.removed) line += ' ' + b.removed + ' inactive phone(s) were removed from the list.';
           if(b.failed) line += ' ' + b.failed + ' could not be reached.';
+          if(b.errors && b.errors.length) line += ' Details: ' + b.errors.map(function(e){ return (e.host || 'push service') + ' replied ' + (e.status || '?') + (e.detail ? ' — ' + e.detail : ''); }).join(' | ');
           if(b.skipped) line += ' ' + b.skipped + ' were not reached because the list is large — press Send again to reach the rest.';
           resultEl.textContent = line;
           showBanner('Notification sent.', 'ok');

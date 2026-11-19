@@ -97,6 +97,7 @@ exports.handler = async (event) => {
 
   const started = Date.now();
   let sent = 0, removed = 0, failed = 0, skipped = 0;
+  const errors = [];
 
   for (let i = 0; i < keys.length; i += BATCH_SIZE) {
     if (Date.now() - started > TIME_BUDGET_MS) {
@@ -119,10 +120,17 @@ exports.handler = async (event) => {
           removed++;
         } else {
           failed++;
+          if (errors.length < 3) {
+            errors.push({
+              status: err && err.statusCode,
+              host: (function () { try { return new URL(sub.endpoint).host; } catch (e) { return ''; } })(),
+              detail: String((err && (err.body || err.message)) || '').slice(0, 200),
+            });
+          }
         }
       }
     }));
   }
 
-  return json(200, { ok: true, total: keys.length, sent, removed, failed, skipped });
+  return json(200, { ok: true, total: keys.length, sent, removed, failed, skipped, errors });
 };
