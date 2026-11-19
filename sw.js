@@ -1,7 +1,9 @@
 // Minimal service worker — exists mainly so Chrome/Android recognizes this
 // page as an installable app (a real "Install app" prompt instead of a
 // plain bookmark). It caches only the small app-shell files, not the video.
-const CACHE_NAME = 'meditouch-shell-v87';
+try { importScripts('/sw-push-icons.js'); } catch (e) { /* falls back to normal image URLs below */ }
+
+const CACHE_NAME = 'meditouch-shell-v88';
 const SHELL_FILES = [
   './kiosk.html',
   './style.css',
@@ -48,10 +50,11 @@ self.addEventListener('push', (event) => {
   let data = {};
   try { data = event.data ? event.data.json() : {}; } catch (e) { data = {}; }
   const title = data.title || 'IR@SABAH';
-  const ICONS = { logo: '/images/logo.png', bell: '/icon-bell-192.png' };
+  const E = self.PUSH_ICONS || {};
+  const ICONS = { logo: E.logo || '/images/logo.png', bell: E.bell || '/icon-bell-192.png' };
   const opts = {
     body: data.body || '',
-    badge: '/badge-96.png',
+    badge: E.badge || '/badge-96.png',
     data: { url: data.url || '/' },
   };
   const iconKey = data.icon || 'logo';
