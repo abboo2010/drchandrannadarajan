@@ -112,7 +112,7 @@ exports.handler = async (event) => {
       } catch (e) { failed++; return; }
       if (!sub) return;
       try {
-        await webpush.sendNotification(sub, payload, { TTL: 86400 });
+        await webpush.sendNotification(sub, payload, { TTL: 86400, urgency: 'high' });
         sent++;
       } catch (err) {
         if (err && (err.statusCode === 404 || err.statusCode === 410)) {
