@@ -87,8 +87,7 @@ exports.handler = async (event) => {
 
   const ICONS = ['logo', 'bell', 'none'];
   const icon = ICONS.includes(body && body.icon) ? body.icon : 'logo';
-  const banner = !!(body && body.banner);
-  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url), icon, banner });
+  const payload = JSON.stringify({ title, body: message, url: safeUrl(body && body.url), icon });
   webpush.setVapidDetails(subject, pub, priv);
 
   let keys;
@@ -115,7 +114,7 @@ exports.handler = async (event) => {
       } catch (e) { failed++; return; }
       if (!sub) return;
       try {
-        await webpush.sendNotification(sub, payload, { TTL: 86400, urgency: 'high' });
+        await webpush.sendNotification(sub, payload, { TTL: 86400 });
         sent++;
       } catch (err) {
         if (err && (err.statusCode === 404 || err.statusCode === 410)) {
