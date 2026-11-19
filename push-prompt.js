@@ -36,6 +36,13 @@
   if(!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) return;
   if(Notification.permission === 'denied') return;
 
+  /* Make sure the phone always runs the newest service worker (this controls the notification pictures). */
+  function checkForUpdate(){
+    navigator.serviceWorker.getRegistration().then(function(r){ if(r) return r.update(); }).catch(function(){});
+  }
+  checkForUpdate();
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') checkForUpdate(); });
+
   function urlBase64ToUint8Array(b64){
     var pad = '='.repeat((4 - b64.length % 4) % 4);
     var raw = atob((b64 + pad).replace(/-/g, '+').replace(/_/g, '/'));
